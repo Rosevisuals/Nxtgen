@@ -1,0 +1,16 @@
+# .gitignore - This file tells Git which files and folders to ignore
+# Git is a version control system that tracks changes to your code
+# Files listed here will NOT be tracked by Git (won't be saved to the repository)
+
+# ===== NODE.JS FILES =====
+node_modules/          # This folder contains all the installed packages
+                       # It's very large and can be recreated with "npm install"
+                       # So we don't need to save it in Git
+
+# ===== ENVIRONMENT VARIABLES =====
+.env                   # This file contains sensitive information like:
+                       # - Database passwords
+                       # - API keys
+                       # - JWT secrets
+                       # NEVER commit this file to Git for security reasons!
+node_modules
