@@ -7,20 +7,80 @@
 // This is fake data that simulates what would be in a real database
 // In a real database, this data would be stored in tables
 const mockData = {
+  // Fake roles table
+  roles: [
+    { role_id: 1, role_name: 'Admin', description: 'System Administrator' },
+    { role_id: 2, role_name: 'Doctor', description: 'Medical practitioner' },
+    { role_id: 3, role_name: 'Nurse', description: 'Assists doctors and cares for patients' }
+  ],
   // Fake users table
   users: [
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'doctor' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'nurse' }
+    {
+      user_id: 1,
+      full_name: 'John Doe',
+      username: 'johndoe',
+      email: 'john@example.com',
+      phone: '1234567890',
+      password_hash: 'hashed_password123',
+      role_id: 2,
+      profile_picture: null,
+      status: 'active',
+      created_at: '2024-01-01T00:00:00Z'
+    },
+    {
+      user_id: 2,
+      full_name: 'Jane Smith',
+      username: 'janesmith',
+      email: 'jane@example.com',
+      phone: '0987654321',
+      password_hash: 'hashed_password456',
+      role_id: 3,
+      profile_picture: null,
+      status: 'active',
+      created_at: '2024-01-01T00:00:00Z'
+    }
   ],
   // Fake patients table
   patients: [
-    { id: 1, name: 'Patient A', age: 30, condition: 'stable' },
-    { id: 2, name: 'Patient B', age: 45, condition: 'critical' }
+    {
+      patient_id: 1,
+      full_name: 'Patient A',
+      date_of_birth: '1990-01-01',
+      gender: 'Male',
+      phone_number: '1234567890',
+      address: '123 Main St',
+      doctor_id: 1
+    },
+    {
+      patient_id: 2,
+      full_name: 'Patient B',
+      date_of_birth: '1985-05-15',
+      gender: 'Female',
+      phone_number: '0987654321',
+      address: '456 Elm St',
+      doctor_id: 1
+    }
   ],
   // Fake appointments table
   appointments: [
-    { id: 1, patientId: 1, doctorId: 1, date: '2024-01-15', time: '10:00' },
-    { id: 2, patientId: 2, doctorId: 1, date: '2024-01-15', time: '14:00' }
+    {
+      appointment_id: 1,
+      patient_id: 1,
+      doctor_id: 1,
+      appointment_date: '2024-01-15',
+      appointment_time: '10:00',
+      status: 'scheduled',
+      notes: 'Initial consultation'
+    },
+    {
+      appointment_id: 2,
+      patient_id: 2,
+      doctor_id: 1,
+      appointment_date: '2024-01-15',
+      appointment_time: '14:00',
+      status: 'scheduled',
+      notes: 'Follow-up visit'
+    }
   ]
 };
 
@@ -33,6 +93,12 @@ class MockDatabase {
     this.data = JSON.parse(JSON.stringify(mockData));
   }
 
+  // Simulate a join with roles when returning users
+  _withRoleName(user) {
+    const role = this.data.roles.find(r => r.role_id === user.role_id);
+    return { ...user, role_name: role ? role.role_name : null };
+  }
+
   // ===== GENERIC QUERY METHOD =====
   // This simulates running SQL queries on the database
   async query(sql, params = []) {
@@ -41,10 +107,15 @@ class MockDatabase {
     
     // Simple mock implementation - you can expand this based on your actual DB queries
     // This checks what type of query it is and returns appropriate data
+    if (sql.includes('SELECT') && sql.includes('users')) {
+      // Simulate join with roles
+      return { rows: this.data.users.map(u => this._withRoleName(u)) };
+    }
+    if (sql.includes('SELECT') && sql.includes('roles')) {
+      return { rows: this.data.roles };
+    }
     if (sql.includes('SELECT')) {
-      if (sql.includes('users')) {
-        return { rows: this.data.users };
-      } else if (sql.includes('patients')) {
+      if (sql.includes('patients')) {
         return { rows: this.data.patients };
       } else if (sql.includes('appointments')) {
         return { rows: this.data.appointments };
@@ -60,10 +131,14 @@ class MockDatabase {
   // Example: findOne('users', { email: 'john@example.com' })
   async findOne(table, conditions) {
     const items = this.data[table] || [];
-    return items.find(item => 
+    const found = items.find(item => 
       // Check if ALL the conditions match
       Object.keys(conditions).every(key => item[key] === conditions[key])
     );
+    if (table === 'users' && found) {
+      return this._withRoleName(found);
+    }
+    return found;
   }
 
   // ===== FIND ALL RECORDS =====
@@ -71,19 +146,29 @@ class MockDatabase {
   // If no conditions are provided, it returns all records
   async findAll(table, conditions = {}) {
     const items = this.data[table] || [];
-    if (Object.keys(conditions).length === 0) {
-      return items;  // Return all items if no conditions
+    let results = items;
+    if (Object.keys(conditions).length > 0) {
+      results = items.filter(item => 
+        // Check if ALL the conditions match
+        Object.keys(conditions).every(key => item[key] === conditions[key])
+      );
     }
-    return items.filter(item => 
-      // Check if ALL the conditions match
-      Object.keys(conditions).every(key => item[key] === conditions[key])
-    );
+    if (table === 'users') {
+      return results.map(u => this._withRoleName(u));
+    }
+    return results;
   }
 
   // ===== INSERT NEW RECORD =====
   // This method adds a new record to the specified table
   async insert(table, data) {
     // Generate a new ID (find the highest existing ID and add 1)
+    if (table === 'users') {
+      const newId = Math.max(...this.data.users.map(item => item.user_id)) + 1;
+      const newItem = { user_id: newId, ...data };
+      this.data.users.push(newItem);
+      return this._withRoleName(newItem);
+    }
     const newId = Math.max(...this.data[table].map(item => item.id)) + 1;
     const newItem = { id: newId, ...data };
     this.data[table].push(newItem);
@@ -93,6 +178,15 @@ class MockDatabase {
   // ===== UPDATE EXISTING RECORD =====
   // This method updates an existing record by ID
   async update(table, id, data) {
+    if (table === 'users') {
+      const index = this.data.users.findIndex(item => item.user_id === id);
+      if (index !== -1) {
+        // Merge the existing data with the new data
+        this.data.users[index] = { ...this.data.users[index], ...data };
+        return this._withRoleName(this.data.users[index]);
+      }
+      return null;  // Return null if record not found
+    }
     const index = this.data[table].findIndex(item => item.id === id);
     if (index !== -1) {
       // Merge the existing data with the new data
@@ -105,6 +199,15 @@ class MockDatabase {
   // ===== DELETE RECORD =====
   // This method removes a record from the specified table
   async delete(table, id) {
+    if (table === 'users') {
+      const index = this.data.users.findIndex(item => item.user_id === id);
+      if (index !== -1) {
+        // Remove the item and return it
+        const deleted = this.data.users.splice(index, 1)[0];
+        return this._withRoleName(deleted);
+      }
+      return null;  // Return null if record not found
+    }
     const index = this.data[table].findIndex(item => item.id === id);
     if (index !== -1) {
       // Remove the item and return it

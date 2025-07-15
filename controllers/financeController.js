@@ -1,78 +1,152 @@
 // controllers/financeController.js
 const { poolConnect, pool, sql } = require('../config/db');
 
-// Get all transactions/payments
-const getAllTransactions = async (req, res) => {
+// Get all bills
+const getAllBills = async (req, res) => {
   try {
     await poolConnect;
     const result = await pool.request().query(`
-      SELECT f.transaction_id, f.amount, f.transaction_date, p.full_name AS patient_name, u.username AS cashier_username
-      FROM finance f
-      JOIN patients p ON f.patient_id = p.patient_id
-      JOIN users u ON f.cashier_id = u.user_id
-      ORDER BY f.transaction_date DESC
+      SELECT b.*, p.full_name AS patient_name
+      FROM bills b
+      JOIN patients p ON b.patient_id = p.patient_id
+      ORDER BY b.date_issued DESC
     `);
     res.json(result.recordset);
   } catch (error) {
-    console.error('Error fetching transactions:', error.message);
-    res.status(500).json({ error: 'Failed to fetch transactions' });
+    console.error('Error fetching bills:', error.message);
+    res.status(500).json({ error: 'Failed to fetch bills' });
   }
 };
 
-// Add new transaction/payment
-const createTransaction = async (req, res) => {
-  const { patient_id, amount, cashier_id } = req.body;
-
-  if (!patient_id || !amount || !cashier_id) {
-    return res.status(400).json({ error: 'patient_id, amount and cashier_id are required' });
-  }
-
+// Get a single bill by ID
+const getBillById = async (req, res) => {
+  const { id } = req.params;
   try {
     await poolConnect;
+    const result = await pool.request()
+      .input('bill_id', sql.Int, id)
+      .query(`SELECT b.*, p.full_name AS patient_name
+              FROM bills b
+              JOIN patients p ON b.patient_id = p.patient_id
+              WHERE b.bill_id = @bill_id`);
+    const bill = result.recordset[0];
+    if (!bill) {
+      return res.status(404).json({ message: 'Bill not found' });
+    }
+    res.json(bill);
+  } catch (error) {
+    console.error('Error fetching bill:', error.message);
+    res.status(500).json({ error: 'Failed to fetch bill' });
+  }
+};
 
-    await pool.request()
+// Create a new bill with items
+const createBill = async (req, res) => {
+  const { patient_id, amount, date_issued, status, items } = req.body;
+  if (!patient_id || !amount || !date_issued || !Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ message: 'Required fields missing or no items provided' });
+  }
+  try {
+    await poolConnect;
+    const insertResult = await pool.request()
       .input('patient_id', sql.Int, patient_id)
       .input('amount', sql.Decimal(10, 2), amount)
-      .input('cashier_id', sql.Int, cashier_id)
-      .query(`
-        INSERT INTO finance (patient_id, amount, transaction_date, cashier_id)
-        VALUES (@patient_id, @amount, GETDATE(), @cashier_id)
-      `);
-
-    const newRecord = { transaction_id: 2, amount, patient_id, cashier_id };
-    res.status(201).json(newRecord);
+      .input('date_issued', sql.Date, date_issued)
+      .input('status', sql.VarChar, status || 'unpaid')
+      .query(`INSERT INTO bills (patient_id, amount, date_issued, status)
+        OUTPUT INSERTED.bill_id
+        VALUES (@patient_id, @amount, @date_issued, @status)`);
+    const bill_id = insertResult.recordset[0].bill_id;
+    // Insert bill items
+    for (const item of items) {
+      await pool.request()
+        .input('bill_id', sql.Int, bill_id)
+        .input('description', sql.VarChar, item.description)
+        .input('quantity', sql.Int, item.quantity)
+        .input('unit_price', sql.Decimal(10, 2), item.unit_price)
+        .input('total_price', sql.Decimal(10, 2), item.total_price)
+        .query(`INSERT INTO bill_items (bill_id, description, quantity, unit_price, total_price)
+          VALUES (@bill_id, @description, @quantity, @unit_price, @total_price)`);
+    }
+    res.status(201).json({ bill_id });
   } catch (error) {
-    console.error('Error creating transaction:', error.message);
-    res.status(500).json({ error: 'Failed to create transaction' });
+    console.error('Error creating bill:', error.message);
+    res.status(500).json({ error: 'Failed to create bill' });
   }
 };
 
-// Get a single finance record by ID
-const getFinanceRecordById = async (req, res) => {
-  const { id } = req.params;
-  if (id !== '1') {
-    return res.status(404).json({ message: 'Not Found' });
+// Get all bill items
+const getAllBillItems = async (req, res) => {
+  try {
+    await poolConnect;
+    const result = await pool.request().query('SELECT * FROM bill_items');
+    res.json(result.recordset);
+  } catch (error) {
+    console.error('Error fetching bill items:', error.message);
+    res.status(500).json({ error: 'Failed to fetch bill items' });
   }
-  res.json({ transaction_id: 1, amount: 1000, patient_id: 1, cashier_id: 1 });
 };
 
-// Update a finance record
-const updateFinanceRecord = async (req, res) => {
-  const { id } = req.params;
-  const { amount } = req.body;
-  if (id !== '1') {
-    return res.status(404).json({ message: 'Not Found' });
+// Get bill items by bill_id
+const getBillItemsByBillId = async (req, res) => {
+  const { bill_id } = req.params;
+  try {
+    await poolConnect;
+    const result = await pool.request()
+      .input('bill_id', sql.Int, bill_id)
+      .query('SELECT * FROM bill_items WHERE bill_id = @bill_id');
+    res.json(result.recordset);
+  } catch (error) {
+    console.error('Error fetching bill items:', error.message);
+    res.status(500).json({ error: 'Failed to fetch bill items' });
   }
-  const updatedRecord = { transaction_id: 1, amount, patient_id: 1, cashier_id: 1 };
-  res.json(updatedRecord);
+};
+
+// Update a bill (status only)
+const updateBill = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  try {
+    await poolConnect;
+    await pool.request()
+      .input('bill_id', sql.Int, id)
+      .input('status', sql.VarChar, status)
+      .query('UPDATE bills SET status = @status WHERE bill_id = @bill_id');
+    const result = await pool.request()
+      .input('bill_id', sql.Int, id)
+      .query('SELECT * FROM bills WHERE bill_id = @bill_id');
+    const updated = result.recordset[0];
+    if (!updated) {
+      return res.status(404).json({ message: 'Bill not found' });
+    }
+    res.json(updated);
+  } catch (error) {
+    console.error('Error updating bill:', error.message);
+    res.status(500).json({ error: 'Failed to update bill' });
+  }
+};
+
+// Delete a bill
+const deleteBill = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await poolConnect;
+    await pool.request()
+      .input('bill_id', sql.Int, id)
+      .query('DELETE FROM bills WHERE bill_id = @bill_id');
+    res.json({ message: 'Bill deleted' });
+  } catch (error) {
+    console.error('Error deleting bill:', error.message);
+    res.status(500).json({ error: 'Failed to delete bill' });
+  }
 };
 
 module.exports = {
-  getAllTransactions,
-  createTransaction,
-  getFinanceRecordById,
-  updateFinanceRecord,
-  // Aliases for test compatibility
-  getAllFinanceRecords: getAllTransactions,
-  createFinanceRecord: createTransaction
+  getAllBills,
+  getBillById,
+  createBill,
+  updateBill,
+  deleteBill,
+  getAllBillItems,
+  getBillItemsByBillId
 };
