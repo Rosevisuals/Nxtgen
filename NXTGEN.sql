@@ -1,6 +1,5 @@
--- Create the Database
-CREATE DATABASE ERP1;
-USE ERP1;
+CREATE DATABASE ERP4;
+USE ERP4;
 
 -- Roles Table
 CREATE TABLE roles (
@@ -12,316 +11,283 @@ CREATE TABLE roles (
 -- Users Table
 CREATE TABLE users (
     user_id INT  PRIMARY KEY identity,
-    full_name VARCHAR(100),
-    username VARCHAR(50),
+    full_Name VARCHAR(50) not null,
     email VARCHAR(100) UNIQUE,
     phone VARCHAR(20),
     password_hash VARCHAR(255),
-    role_id INT,
-    profile_picture VARCHAR(255),
-    status varchar(20),
-    created_at TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(role_id)
+	gender varchar(5) check(gender in ('M','F')),
+	DOB date,
+	marital_status varchar(25),
+	Address varchar(50),
+    status varchar(20) CHECK(status in ('active','inactive')),
+    created_at datetime,
 );
+
 
 -- Departments Table
 CREATE TABLE departments (
     department_id INT  PRIMARY KEY identity,
     name VARCHAR(100) UNIQUE NOT NULL,
-    description TEXT,
-    head_doctor_id INT
+    description TEXT
 );
 
--- Doctors Table
-CREATE TABLE doctors (
-    doctor_id INT  PRIMARY KEY identity,
-    user_id INT,
-    specialization VARCHAR(100),
-    license_number VARCHAR(50),
-    department_id INT,
-    availability_status varchar(30),
-    bio TEXT,
-    created_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (department_id) REFERENCES departments(department_id)
-);
 
 -- Staff Table
 CREATE TABLE staff (
     staff_id INT  PRIMARY KEY identity,
     user_id INT,
-    designation VARCHAR(100),
+	specialization varchar(30),
+	biodata varchar(20),
+	head_department varchar(15) default ('false') check(head_department in('true','false')),
+	license_number varchar(20)not null,
+    role_id INT,
     department_id INT,
-    salary DECIMAL(10,2),
-    created_at TIMESTAMP,
+    created_at datetime,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (department_id) REFERENCES departments(department_id)
+    FOREIGN KEY (department_id) REFERENCES departments(department_id),
+	FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
+
 
 -- Patients Table
 CREATE TABLE patients (
     patient_id INT  PRIMARY KEY identity,
-    full_name VARCHAR(100),
-    gender varchar(30) check(gender in ('M','F')),
-    dob DATE,
-    email VARCHAR(100),
-    phone VARCHAR(20),
-    address TEXT,
-    blood_type VARCHAR(5),
+	user_id int,
+    blood_group VARCHAR(5),
+	BMI VARCHAR(25),
+	NOTES VARCHAR(50),
     emergency_contact VARCHAR(100),
-    created_at TIMESTAMP
+    created_at datetime
+	FOREIGN KEY (user_id) REFERENCES users(user_id),
 );
 
--- Patient Medical Records
-CREATE TABLE patient_records (
-    record_id INT  PRIMARY KEY identity,
-    patient_id INT,
-    allergies TEXT,
-    past_medical_history TEXT,
-    current_medications TEXT,
-    notes TEXT,
-    created_at TIMESTAMP,
-    FOREIGN KEY (patient_id) REFERENCES patients(patient_id)
-);
+
 
 -- Appointments
 CREATE TABLE appointments (
     appointment_id INT  PRIMARY KEY identity,
     patient_id INT,
-    doctor_id INT,
-    appointment_date DATE,
-    appointment_time TIME,
-    status varchar(40) ,
+    appointment_date DATEtime,
+    status varchar(40) check(status in ('Approved','Pending','Declined')),
     notes TEXT,
+	department_id INT,
+	staff_id INT,
     FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
-    FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id)
+	FOREIGN KEY (department_id) REFERENCES departments(department_id),
+	FOREIGN KEY (staff_id) REFERENCES staff(staff_id)
 );
+
+CREATE TABLE Conditions (
+    ConditionID INT  PRIMARY KEY identity,
+    Name VARCHAR(100) NOT NULL UNIQUE,
+    Description TEXT,
+    Status VARCHAR(50) check(status in ('permanent','temporary')),
+);
+
+CREATE TABLE Diagnosis (
+    DiagnosisID INT  PRIMARY KEY identity,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    ConditionID INT,
+    Symptoms TEXT,
+    DiagnosisNote TEXT,
+    DiagnosisDate DATETIME,
+	requestdate datetime,
+    FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
+	FOREIGN KEY (doctor_id) REFERENCES staff(staff_id),
+    FOREIGN KEY (ConditionID) REFERENCES Conditions(ConditionID)
+);
+
+
 
 -- Prescriptions
 CREATE TABLE prescriptions (
     prescription_id INT  PRIMARY KEY identity,
-    appointment_id INT,
-    doctor_id INT,
+    staff_id INT,
+	DiagnosisID INT,
     patient_id INT,
-    date_issued DATE,
+	Medication varchar(30) NOT NULL,
+    date_issued DATEtime,
+	dosage varchar(25) NOT NULL,
     notes TEXT,
-    FOREIGN KEY (appointment_id) REFERENCES appointments(appointment_id),
-    FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id),
-    FOREIGN KEY (patient_id) REFERENCES patients(patient_id)
-);
-
--- Prescription Items
-CREATE TABLE prescription_items (
-    item_id INT  PRIMARY KEY identity,
-    prescription_id INT,
-    medicine_name VARCHAR(100),
-    dosage VARCHAR(100),
-    duration VARCHAR(50),
-    instructions TEXT,
-    FOREIGN KEY (prescription_id) REFERENCES prescriptions(prescription_id)
-);
-
--- Inventory Items (Medical Supplies & Pharmacy Stock)
-CREATE TABLE inventory_items (
-    item_id INT  PRIMARY KEY identity,
-    item_name VARCHAR(100),
-    category VARCHAR(100),
-    quantity_in_stock INT,
-    unit_price DECIMAL(10,2),
-    supplier VARCHAR(100),
-    last_updated TIMESTAMP 
-);
-
--- Ambulances
-CREATE TABLE ambulances (
-    ambulance_id INT  PRIMARY KEY identity,
-    vehicle_number VARCHAR(50),
-    driver_name VARCHAR(100),
-    status varchar(30) ,
-);
-
--- Ambulance Calls
-CREATE TABLE ambulance_calls (
-    call_id INT  PRIMARY KEY identity,
-    ambulance_id INT,
-    patient_id INT,
-    pickup_location TEXT,
-    drop_location TEXT,
-    call_time DATETIME,
-    status varchar(40) ,
-    FOREIGN KEY (ambulance_id) REFERENCES ambulances(ambulance_id),
-    FOREIGN KEY (patient_id) REFERENCES patients(patient_id)
-);
-
--- Blood Donors
-CREATE TABLE blood_donors (
-    donor_id INT  PRIMARY KEY identity,
-    name VARCHAR(100),
-    blood_type VARCHAR(5),
-    last_donation_date DATE,
-    contact_info VARCHAR(100)
-);
-
--- Blood Stock
-CREATE TABLE blood_stock (
-    stock_id INT  PRIMARY KEY identity,
-    blood_type VARCHAR(5),
-    units_available INT,
-    last_updated TIMESTAMP 
-);
-
--- Blood Issued
-CREATE TABLE blood_issued (
-    issue_id INT  PRIMARY KEY identity,
-    patient_id INT,
-    blood_type VARCHAR(5),
-    units_issued INT,
-    issue_date DATE,
-    doctor_id INT,
+    FOREIGN KEY (staff_id) REFERENCES staff(staff_id),
     FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
-    FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id)
+	FOREIGN KEY (DiagnosisID) REFERENCES Diagnosis(DiagnosisID)
 );
 
--- Rooms
-CREATE TABLE rooms (
-    room_id INT  PRIMARY KEY identity,
-    room_number VARCHAR(20),
-    type varchar(40),
-    status varchar(50) 
+--Test type
+create table testtype (
+test_id int primary key identity,
+Name_of_test varchar(25) UNIQUE NOT NULL
 );
 
--- Room Allotments
-CREATE TABLE room_allotments (
-    allotment_id INT  PRIMARY KEY identity,
-    patient_id INT,
-    room_id INT,
-    admit_date DATE,
-    discharge_date DATE,
-    FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
-    FOREIGN KEY (room_id) REFERENCES rooms(room_id)
+--lab tests
+create table labrequests(
+patient_id INT primary key identity,
+doctor_id int,
+test_id int,
+technician_id int,
+date_conducted datetime,
+notes varchar(25),
+results varchar(100),
+FOREIGN KEY (doctor_id) REFERENCES staff(staff_id),
+FOREIGN KEY (technician_id) REFERENCES staff(staff_id),
+FOREIGN KEY (test_id) REFERENCES testtype(test_id),
+FOREIGN KEY (patient_id) REFERENCES patients(patient_id)
 );
+
 
 -- Billing
-CREATE TABLE bills (
+CREATE TABLE billing (
     bill_id INT  PRIMARY KEY identity,
     patient_id INT,
-    amount DECIMAL(10,2),
-    date_issued DATE,
-    status varchar(30),
+    amount DECIMAL(10,2) not null,
+    date_issued DATEtime,
+	method_of_payment varchar(20) not null,
+	service_name varchar(35) not null,
+	service_id int not null,
+	received_by varchar(25) not null,
+	paid_by varchar(30) not null,
+    status varchar(30) check(status in ('paid','unpaid','partial')),
     FOREIGN KEY (patient_id) REFERENCES patients(patient_id)
 );
 
--- Bill Items
-CREATE TABLE bill_items (
-    item_id INT  PRIMARY KEY identity,
-    bill_id INT,
-    description VARCHAR(255),
-    quantity INT,
-    unit_price DECIMAL(10,2),
-    total_price DECIMAL(10,2),
-    FOREIGN KEY (bill_id) REFERENCES bills(bill_id)
-);
+--wards table
 
--- Reports
-CREATE TABLE reports (
-    report_id INT  PRIMARY KEY identity,
-    report_type VARCHAR(100),
-    generated_by INT,
-    generated_at TIMESTAMP,
-    file_path VARCHAR(255),
-    FOREIGN KEY (generated_by) REFERENCES users(user_id)
-);
+    create table wards(
+	ward_id int primary key identity,
+	Department_id int,
+	ward_number varchar(25) not null,
+	ward_type varchar(25) check(ward_type in ('private','public'))
+	FOREIGN KEY (Department_id) REFERENCES departments(Department_id)
+	);
 
--- Notifications
-CREATE TABLE notifications (
-    notification_id INT  PRIMARY KEY identity,
-    user_id INT,
-    title VARCHAR(100),
-    message TEXT,
-    status varchar(30),
-    created_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
+-- beds table
+	create table beds(
+	bed_id int  primary key identity,
+	patient_id int,
+	bed_number int,
+	status varchar(15) check(status in ('Available','unaviable')),
+	ward_id int,
+	FOREIGN KEY (ward_id) REFERENCES wards(ward_id),
+	FOREIGN KEY (patient_id) REFERENCES patients(patient_id)
+	);
 
--- Settings
-CREATE TABLE settings (
-    setting_id INT  PRIMARY KEY identity,
-    setting_key VARCHAR(100),
-    setting_value TEXT
-);
+	
 
--- Working Hours
-CREATE TABLE working_hours (
-    working_hours_id INT  PRIMARY KEY identity,
-    user_id INT,
-    day VARCHAR(20),
-    start_time TIME,
-    end_time TIME,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
+	-- Insert Roles
+INSERT INTO roles (role_name, description)
+VALUES 
+('Admin', 'System administrator'),
+('Doctor', 'Medical doctor'),
+('Nurse', 'Registered nurse'),
+('LabTech', 'Laboratory technician'),
+('Receptionist', 'Front desk staff');
 
--- Support Tickets
-CREATE TABLE support_tickets (
-    ticket_id INT  PRIMARY KEY identity,
-    user_id INT,
-    subject VARCHAR(100),
-    description TEXT,
-    status varchar(30) ,
-    created_at TIMESTAMP ,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
 
--- Chats
-CREATE TABLE chats (
-    chat_id INT  PRIMARY KEY identity,
-    sender_id INT,
-    receiver_id INT,
-    message TEXT,
-    timestamp TIMESTAMP,
-    FOREIGN KEY (sender_id) REFERENCES users(user_id),
-    FOREIGN KEY (receiver_id) REFERENCES users(user_id)
-);
+select*from roles;
+-- Insert Departments
+INSERT INTO departments (name, description)
+VALUES 
+('Cardiology', 'Heart related department'),
+('Pediatrics', 'Child care department'),
+('Neurology', 'Nervous system related department');
 
--- Emails
-CREATE TABLE emails (
-    email_id INT  PRIMARY KEY identity,
-    from_user_id INT,
-    to_user_id INT,
-    subject VARCHAR(100),
-    message TEXT,
-    timestamp TIMESTAMP,
-    FOREIGN KEY (from_user_id) REFERENCES users(user_id),
-    FOREIGN KEY (to_user_id) REFERENCES users(user_id)
-);
+select*from departments;
+-- Insert Users
+INSERT INTO users (full_Name, email, phone, password_hash,gender, DOB, marital_status, Address, status,created_at)
+VALUES 
+('Mudisha Micheal', 'hospital@gmail.com', '1234567890', 'password','M', '1980-05-01', 'Married', '123 Main St', 'active',GETDATE()),
+('Jane Smith', 'janesmith@example.com', '0987654321', 'hashed_pw_2','F', '1985-08-15', 'Single', '456 Park Ave', 'active',GETDATE()),
+('Mark Lee', 'marklee@example.com', '5554443333', 'hashed_pw_3','M', '1990-10-10', 'Single', '789 Elm St', 'active',GETDATE()),
+('Alice White', 'alicewhite@example.com', '2223334444', 'hashed_pw_4','F', '1992-07-07', 'Single', '101 Maple Rd', 'active',GETDATE()),
+('Tom Hardy', 'tomhardy@example.com', '3334445555', 'hashed_pw_5','M', '1975-12-12', 'Married', '12 Oak St', 'active',GETDATE());
 
--- Contacts
-CREATE TABLE contacts (
-    contact_id INT  PRIMARY KEY identity,
-    name VARCHAR(100),
-    email VARCHAR(100),
-    subject VARCHAR(100),
-    message TEXT,
-    created_at TIMESTAMP 
-);
+INSERT INTO users (full_Name, email, phone, password_hash,gender, DOB, marital_status, Address, status,created_at)
+VALUES 
+('Mark Leewe', 'wara@example.com', '5554443333', 'hashed_pw_3','M', '1990-10-10', 'Single', '789 Elm St', 'active',GETDATE()),
+('Tom Cruse', 'cruies@example.com', '3334445555', 'hashed_pw_5','M', '1975-12-12', 'Married', '12 Oak St', 'active',GETDATE());
 
--- Insert Default Roles
-INSERT INTO roles (role_name, description) VALUES 
-('Admin', 'System Administrator with full access'),
-('Doctor', 'Medical practitioner'),
-('Nurse', 'Assists doctors and cares for patients'),
-('Receptionist', 'Manages front desk operations'),
-('Pharmacist', 'Handles prescription fulfillment'),
-('Cashier', 'Manages patient billing'),
-('Lab Technician', 'Handles diagnostics and test results');
 
--- Insert Default Admin User
-INSERT INTO users (full_name, username, email, phone, password_hash, role_id, status)
-VALUES (
-  'System Administrator',
-  'admin',
-  'admin@erp.com',
-  '0700000000',
-  'admin123',
-  1,
-  'active'
-);
+select*from users;
+
+-- Insert Staff
+INSERT INTO staff (user_id, specialization, biodata, head_department, license_number, role_id, department_id,created_at)
+VALUES 
+(2, 'Cardiologist', 'Bio1', 'true', 'LIC12345', 2, 1,GETDATE()),
+(3, 'Pediatric Nurse', 'Bio2', 'false', 'LIC23456', 3, 2,GETDATE()),
+(4, 'Lab Testing', 'Bio3', 'false', 'LIC34567', 4, 1,GETDATE());
+
+select*from staff;
+
+-- Insert Patients
+INSERT INTO patients (user_id, blood_group, BMI, NOTES, emergency_contact,created_at)
+VALUES 
+(6, 'A+', '22.5', 'No allergies', '9998887777',getdate()),
+(7, 'B-', '25.1', 'Diabetic', '1112223333',getdate());
+
+select*from patients;
+
+
+-- Insert Conditions
+INSERT INTO Conditions (Name, Description, Status)
+VALUES 
+('Hypertension', 'High blood pressure', 'permanent'),
+('Flu', 'Seasonal influenza', 'temporary');
+
+select*from Conditions;
+
+-- Insert Diagnosis
+INSERT INTO Diagnosis (patient_id, doctor_id, ConditionID, Symptoms, DiagnosisNote, DiagnosisDate, requestdate)
+VALUES 
+(1, 3, 1, 'Headache, fatigue', 'Monitor BP regularly', GETDATE(), GETDATE()),
+(2, 2, 2, 'Cough, fever', 'Prescribed flu meds', GETDATE(), GETDATE());
+
+
+select*from Diagnosis;
+
+-- Insert Prescriptions
+INSERT INTO prescriptions (staff_id, DiagnosisID, patient_id, Medication, date_issued, dosage, notes)
+VALUES 
+(3, 1, 1, 'Atenolol', GETDATE(), '50mg daily', 'Take with food'),
+(2, 2, 2, 'Paracetamol', GETDATE(), '500mg twice a day', 'Drink plenty of fluids');
+
+select*from prescriptions;
+
+
+-- Insert Test Types
+INSERT INTO testtype (Name_of_test)
+VALUES ('Blood Test'), ('X-Ray'), ('ECG');
+
+select*from testtype;
+
+--lab request
+
+INSERT INTO labrequests (doctor_id, test_id, technician_id, date_conducted, notes, results)
+VALUES 
+(3, 1, 3, GETDATE(), 'Routine check', 'Normal'),
+(2, 3, 3, GETDATE(), 'Heart issue', 'Irregular rhythm');
+
+select*from labrequests;
+
+-- Insert Billing
+INSERT INTO billing (patient_id, amount, date_issued, method_of_payment, service_name, service_id, received_by, paid_by, status)
+VALUES 
+(1, 150.00, GETDATE(), 'Cash', 'Consultation', 101, 'Receptionist1', 'John Doe', 'paid'),
+(2, 300.00, GETDATE(), 'Card', 'X-Ray', 102, 'Receptionist1', 'Jane Smith', 'partial');
+
+select*from billing;
+
+-- Insert Wards
+INSERT INTO wards (Department_id, ward_number, ward_type)
+VALUES 
+(1, 'W001', 'private'),
+(2, 'W002', 'public');
+
+-- Insert Beds
+INSERT INTO beds (patient_id, bed_number, status, ward_id)
+VALUES 
+(1, 101, 'unaviable', 1),
+(2, 102, 'Available', 2);
+
+select*from wards;
