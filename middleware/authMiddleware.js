@@ -51,6 +51,7 @@ const authenticateToken = (req, res, next) => {
 // ===== AUTHORIZE ROLES FUNCTION =====
 // This function checks if a user has the right role/permission to access a specific feature
 // For example, only doctors can access patient medical records, only admins can delete users, etc.
+// Only staff users have a 'role' property in the JWT
 const authorizeRoles = (roles) => {
   // This returns a middleware function that can be used in routes
   return (req, res, next) => {
@@ -59,6 +60,11 @@ const authorizeRoles = (roles) => {
       return res.status(401).json({ message: 'Authentication required' });
     }
     
+    // Only staff users have a role in the JWT
+    if (!req.user.role) {
+      return res.status(403).json({ message: 'Insufficient permissions (not staff)'});
+    }
+
     // Check if the user's role is in the list of allowed roles
     // Example: if roles = ['doctor', 'admin'] and user.role = 'nurse', access is denied
     if (!roles.includes(req.user.role)) {

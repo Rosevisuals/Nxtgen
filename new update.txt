@@ -1,0 +1,102 @@
+changes to work on the backend
+1) What Needs to Be Adjusted in the Backend
+A. User & Role Logic
+User registration: Remove role_id from user creation; assign roles via staff creation.
+Authentication/authorization: Update logic to check user roles via the staff table, not directly on users.
+Profile endpoints: Adjust to fetch role and department info via staff, not users.
+B. Staff/Doctor/Department Logic
+Doctor and staff endpoints: Refactor to use the new staff table, including department and role assignment.
+Department management: Add endpoints for CRUD on departments if not already present.
+C. Appointments
+Appointment creation: Update to use staff_id and department_id instead of doctor_id.
+Appointment time: If you need time granularity, you may need to split appointment_date into date and time, or adjust your logic.
+D. Patients
+Patient creation: Now requires a user_id (must create user first).
+Patient info: Update to include new fields (blood group, BMI, notes, emergency contact).
+E. Diagnosis, Conditions, Prescriptions
+Diagnosis endpoints: Add/adjust endpoints for diagnosis and conditions.
+Prescription logic: Update to use new relationships (staff, diagnosis, patient).
+F. Lab Requests
+Lab test endpoints: Add endpoints for test types and lab requests, with correct relationships.
+G. Billing
+Billing endpoints: Update to use new fields and relationships.
+H. Wards & Beds
+Ward/bed management: Add endpoints for wards and beds, with correct relationships.
+I. Tests
+Test files: Update all test mocks and test cases to match the new schema, especially for users, staff, appointments, patients, and all new tables.
+
+2) What Remains the Same
+Core entities: Users, roles, patients, appointments, staff, and billing still exist.
+General relationships: Most entities are still linked via foreign keys.
+Authentication: Still based on users, but role checks now go through staff.
+CRUD operations: Still required for all main entities.
+
+3) Action Plan
+Update all models and migrations to match the new schema.
+Refactor controllers and routes for users, staff, appointments, patients, billing, etc.
+Add new controllers/routes for departments, diagnosis, conditions, lab requests, wards, beds.
+Update all test files and mocks to match the new schema and relationships.
+Review all foreign key logic in your backend for compliance with the new schema.
+
+file by file breakdown
+1. Models/Database Layer
+Update or create models for:
+users
+roles
+staff
+departments
+patients
+appointments
+conditions
+diagnosis
+prescriptions
+testtype
+labrequests
+billing
+wards
+beds
+2. Controllers
+Update logic and relationships in:
+usersController.js
+authController.js
+patientsController.js
+appointmentsController.js
+pharmacyController.js (prescriptions)
+financeController.js (billing)
+storeController.js (if handling inventory/meds)
+wardController.js (wards, beds)
+Create new controllers for:
+departments
+staff
+conditions
+diagnosis
+testtype/labrequests
+3. Routes
+Update or create routes for:
+users.js
+auth.js
+patients.js
+appointments.js
+pharmacy.js
+finance.js
+store.js
+wards.js
+Add new route files for:
+departments.js
+staff.js
+conditions.js
+diagnosis.js
+testtype.js
+labrequests.js
+beds.js
+4. Middleware
+Update authMiddleware.js to check roles via staff, not users.
+5. Tests
+Update or create test files for all affected modules:
+controllers/tests for all above modules
+integration tests for new/changed endpoints
+update test mocks to match new schema
+6. Mocks/Seed Data
+Update mocks/db.js and tests/helpers to match new schema.
+7. Config
+Update config/db.js if any connection or migration logic needs to change.

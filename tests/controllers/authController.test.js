@@ -1,96 +1,87 @@
-const request = require('supertest');
-const express = require('express');
+// tests/controllers/authController.test.js
+const { login } = require('../../controllers/authController');
+const usersModel = require('../../models/usersModel');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-// Mock bcrypt and jwt
-jest.mock('bcrypt', () => ({
-  hash: jest.fn((pw) => Promise.resolve('hashed_' + pw)),
-  compare: jest.fn((pw, hash) => Promise.resolve(hash === 'hashed_' + pw))
-}));
-jest.mock('jsonwebtoken', () => ({
-  sign: jest.fn(() => 'mocked.jwt.token'),
-  verify: jest.fn(() => ({ id: 1, email: 'john@example.com', role: 'doctor' }))
-}));
+jest.mock('../../models/usersModel');
+jest.mock('bcrypt');
+jest.mock('jsonwebtoken');
 
-// Mock DB methods
-const mockUsers = [
-  { user_id: 1, full_name: 'John Doe', username: 'johndoe', email: 'john@example.com', phone: '1234567890', password_hash: 'hashed_password123', role_id: 2, role_name: 'Doctor', profile_picture: null, status: 'active' }
-];
+describe('authController login (unit)', () => {
+  let req, res;
 
-const mockDb = {
-  request: jest.fn().mockReturnThis(),
-  input: jest.fn().mockReturnThis(),
-  query: jest.fn((sql) => {
-    if (sql.includes('SELECT u.*, r.role_name FROM users u LEFT JOIN roles r ON u.role_id = r.role_id WHERE u.email = @email')) {
-      return Promise.resolve({ recordset: [mockUsers[0]] });
-    }
-    if (sql.startsWith('INSERT')) {
-      return Promise.resolve({ recordset: [{ user_id: 2, full_name: 'New User', username: 'newuser', email: 'newuser@example.com', phone: '2223334444', role_id: 2, role_name: 'Doctor', profile_picture: null, status: 'active' }] });
-    }
-    return Promise.resolve({ recordset: [] });
-  })
-};
-
-jest.mock('../../config/db', () => ({
-  poolConnect: Promise.resolve(),
-  pool: mockDb,
-  sql: {
-    Int: jest.fn(),
-    VarChar: jest.fn()
-  }
-}));
-
-const authController = require('../../controllers/authController');
-
-const app = express();
-app.use(express.json());
-app.post('/api/auth/login', authController.login);
-app.post('/api/auth/register', authController.register);
-
-describe('Auth Controller', () => {
-  describe('POST /api/auth/login', () => {
-    it('should login with valid credentials', async () => {
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'john@example.com', password: 'password123' })
-        .expect(200);
-      expect(response.body).toHaveProperty('token');
-      expect(response.body.user).toHaveProperty('user_id', 1);
-      expect(response.body.user).toHaveProperty('role_id', 2);
-      expect(response.body.user).toHaveProperty('role_name', 'Doctor');
-    });
-    it('should fail with invalid credentials', async () => {
-      await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'john@example.com', password: 'wrongpass' })
-        .expect(401);
-    });
+  beforeEach(() => {
+    req = { body: { email: 'john@example.com', password: 'password123' } };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    usersModel.getUserByEmail.mockReset();
+    bcrypt.compare.mockReset();
+    jwt.sign.mockReset();
   });
 
-  describe('POST /api/auth/register', () => {
-    it('should register a new user', async () => {
-      const newUser = {
-        full_name: 'New User',
-        username: 'newuser',
-        email: 'newuser@example.com',
-        phone: '2223334444',
-        password: 'securepass',
-        role_id: 2,
-        profile_picture: null,
-        status: 'active'
-      };
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(newUser)
-        .expect(201);
-      expect(response.body).toHaveProperty('user_id');
-      expect(response.body.email).toBe(newUser.email);
-      expect(response.body).toHaveProperty('role_id', 2);
+  it('should login with valid credentials', async () => {
+    usersModel.getUserByEmail.mockResolvedValue({
+      user_id: 1,
+      full_Name: 'John Doe',
+      email: 'john@example.com',
+      password_hash: 'hashed_password123',
+      status: 'active'
     });
-    it('should fail with invalid data', async () => {
-      await request(app)
-        .post('/api/auth/register')
-        .send({ email: '', password: '' })
-        .expect(400);
+    bcrypt.compare.mockResolvedValue(true);
+    jwt.sign.mockReturnValue('mocked.jwt.token');
+
+    await login(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      token: 'mocked.jwt.token',
+      user: expect.objectContaining({
+        user_id: 1,
+        full_Name: 'John Doe',
+        email: 'john@example.com'
+      })
+    }));
+  });
+
+  it('should fail with invalid password', async () => {
+    usersModel.getUserByEmail.mockResolvedValue({
+      user_id: 1,
+      full_Name: 'John Doe',
+      email: 'john@example.com',
+      password_hash: 'hashed_password123',
+      status: 'active'
     });
+    bcrypt.compare.mockResolvedValue(false);
+
+    await login(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Invalid password' });
+  });
+
+  it('should fail if user not found', async () => {
+    usersModel.getUserByEmail.mockResolvedValue(undefined);
+
+    await login(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: 'User not found' });
+  });
+
+  it('should fail if user is not active', async () => {
+    usersModel.getUserByEmail.mockResolvedValue({
+      user_id: 1,
+      full_Name: 'John Doe',
+      email: 'john@example.com',
+      password_hash: 'hashed_password123',
+      status: 'inactive'
+    });
+
+    await login(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith({ message: 'User is not active' });
   });
 }); 

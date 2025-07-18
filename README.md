@@ -1,4 +1,85 @@
-# Hospital ERP Backend
+# ERP Backend
+
+## Recent Refactor: Users Module
+
+### What Changed
+- **User Model Added:**
+  - A new `models/usersModel.js` was created to encapsulate all user-related database logic, matching the new ERP4 schema.
+- **User Controller Modified:**
+  - `controllers/usersController.js` was updated to use the new model, handle new fields, and return full user objects after creation and update.
+- **User Route Modified:**
+  - The users route was updated to match the new controller and model, supporting the new schema and removing deprecated fields.
+
+### Testing Approach
+- **Mock Database:**
+  - A Jest mock (`__mocks__/db.js`) simulates SQL Server behavior for all user operations, supporting multi-statement queries and CRUD logic.
+- **Unit Tests:**
+  - Model and controller tests are provided for the users module.
+  - The mock ensures tests run without a real database.
+
+### How to Run the New Tests
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+2. **Run model unit tests:**
+   ```bash
+   npx jest tests/models/usersModel.test.js
+   ```
+3. **Run controller tests:**
+   ```bash
+   npx jest tests/controllers/usersController.test.js
+   ```
+
+All tests should pass if the mock and code are in sync. For other modules, follow a similar pattern: create a model, update the controller and route, and add/modify tests and mocks as needed.
+
+---
+
+## Recent Refactor: Roles Model
+
+### What Changed
+- **Roles Model Added:**
+  - A new `models/rolesModel.js` was created to encapsulate all role-related database logic for the ERP4 schema.
+  - The model provides functions to fetch all roles or a single role by id.
+  - This is useful for populating dropdowns, assigning roles to staff, or referencing roles in other modules.
+  - No controller or route is provided by default, as roles are typically static reference data, but you can add one if you want to expose roles via the API.
+
+### Testing Approach
+- **Unit Tests:**
+  - Direct unit tests for the login logic are provided (see `tests/controllers/authController.test.js`).
+  - All dependencies (`usersModel`, `bcrypt`, `jsonwebtoken`) are mocked for fast, isolated tests.
+- **Mock Database:**
+  - The same Jest mock DB is used for user lookups.
+
+### How to Run the Auth Tests
+
+```bash
+npx jest tests/controllers/authController.test.js
+```
+
+All tests should pass if the code and mocks are in sync. You can add more unit tests for registration or other auth logic as needed.
+
+---
+
+## New: Auth Integration Tests
+
+### What Changed
+- **Integration tests now cover the full authentication and authorization flow:**
+  - Test the interaction between middleware, routes, and controllers.
+  - Verify that staff users with the correct role can access protected routes.
+  - Ensure non-staff and unauthenticated users are denied access.
+  - JWTs for staff include their role; non-staff JWTs do not.
+
+### How to Run the Integration Tests
+
+```bash
+npx jest tests/integration/auth.integration.test.js
+```
+
+These tests give you confidence that your authentication and authorization system works end-to-end, enforcing staff role-based access as intended.
+
+---
 
 ## Overview
 
@@ -193,3 +274,31 @@ If you have any questions or need help integrating with your backend/database, p
 ---
 
 **Happy coding!**
+
+---
+
+## Important: Explicit Jest Mocking for Database Modules
+
+When writing Jest tests for any model or controller that imports the database module (e.g., config/db.js), you must explicitly force Jest to use your mock. This is especially important for models like rolesModel that interact with the database directly.
+
+**How to do it:**
+At the very top of your test file (before any imports), add:
+
+```js
+jest.mock('../../config/db', () => require('../../__mocks__/db.js'));
+```
+
+This ensures that all imports of '../../config/db' in your code and its dependencies will use the mock, not the real database connection. This prevents errors like:
+
+    TypeError: The "config.server" property is required and must be of type string
+
+and ensures your tests run in isolation without requiring a real database.
+
+**Example:**
+```js
+jest.mock('../../config/db', () => require('../../__mocks__/db.js'));
+const rolesModel = require('../../models/rolesModel');
+// ... rest of your tests ...
+```
+
+This pattern should be used for all Jest tests that depend on the database module and require isolation from the real DB.

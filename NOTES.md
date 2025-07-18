@@ -42,6 +42,18 @@
 - **Error:** JWT authentication failed or was unclear to backend devs.
 - **Fix:** Added clear README instructions on how to generate a secure JWT secret and what JWT is.
 
+### 11. Jest Database Mock Not Used (TypeError: The "config.server" property is required and must be of type string)
+- **Error:**
+  TypeError: The "config.server" property is required and must be of type string
+- **Cause:**
+  Jest was not using the mock for config/db.js, so the real database connection was attempted during tests. This happened even though __mocks__/db.js existed and jest.mock('../../config/db') was present, because the import order or Jest's automocking was insufficient.
+- **Fix:**
+  Use an explicit mock override at the very top of the test file:
+  ```js
+  jest.mock('../../config/db', () => require('../../__mocks__/db.js'));
+  ```
+  This guarantees the mock is used for all imports of the database module, preventing real DB connections and ensuring isolated, reliable tests.
+
 ---
 
 **For any new errors, check the logs, review the README, and ensure all environment variables and dependencies are set up correctly.** 
