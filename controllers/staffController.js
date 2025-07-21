@@ -3,8 +3,7 @@ const staffModel = require("../models/staffModel");
 // Get all staff
 const getAllStaff = async (req, res) => {
   try {
-    // return res.json(await staffModel.getAllStaff());
-    return res.status(200).json([{}]);
+    return res.json(await staffModel.getAllStaff());
   } catch (error) {
     console.error('Error fetching staff:', error.message);
     res.status(500).json({ error: 'Failed to fetch staff' });
