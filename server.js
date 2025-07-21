@@ -42,6 +42,7 @@ app.use('/api/support_tickets', require('./routes/support_tickets'));
 app.use('/api/chats', require('./routes/chats'));
 app.use('/api/emails', require('./routes/emails'));
 app.use('/api/reports', require('./routes/reports'));
+app.use('/api/staff', require('./routes/staff'));
 
 // ===== ROOT ROUTE =====
 // This is what people see when they visit the main URL (like http://localhost:5000/)

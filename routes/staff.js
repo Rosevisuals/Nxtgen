@@ -9,10 +9,10 @@ const {
 } = require('../controllers/staffController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
-router.get('/', authenticateToken, getAllStaff);
-router.get('/:id', authenticateToken, getStaffById);
-router.post('/', authenticateToken, createStaff);
-router.put('/:id', authenticateToken, updateStaff);
-router.delete('/:id', authenticateToken, deleteStaff);
+router.get('/', getAllStaff);
+router.get('/:id', getStaffById);
+router.post('/', createStaff);
+router.put('/:id', updateStaff);
+router.delete('/:id', deleteStaff);
 
 module.exports = router; 

@@ -3,7 +3,8 @@
 // Think of this as the "test mode settings" that tell the app how to behave during testing
 
 // Import the mock database class
-const MockDatabase = require('../__mocks__/db');
+// const MockDatabase = require('../__mocks__/db');
+const MockDatabase = require('../__mocks__/mock-staff-db');
 
 // ===== TEST CONFIGURATION OBJECT =====
 // This object contains all the settings needed for testing
