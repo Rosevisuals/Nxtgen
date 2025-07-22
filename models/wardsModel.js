@@ -43,21 +43,21 @@ const getWardById = async (ward_id) => {
   return result.recordset[0];
 };
 
-const updateWard = async (ward_id, updates) => {
+const updateWard = async (ward_id, { Department_id, ward_number, ward_type }) => {
   await poolConnect;
   const fields = [];
 
   const request = pool.request();
-  if (updates.Department_id) {
-    request.input('Department_id', sql.Int, ward.Department_id);
+  if (Department_id) {
+    request.input('Department_id', sql.Int, Department_id);
     fields.push('Department_id = @Department_id');
   }
-  if (updates.ward_number) {
-    request.input('ward_number', sql.VarChar(25), ward.ward_number);
+  if (ward_number) {
+    request.input('ward_number', sql.VarChar(25), ward_number);
     fields.push('ward_number = @ward_number');
   }
-  if (updates.ward_type) {
-    request.input('ward_type', sql.VarChar(25), ward.ward_type);
+  if (ward_type) {
+    request.input('ward_type', sql.VarChar(25), ward_type);
     fields.push('ward_type = @ward_type');
   }
   if (fields.length === 0) return null;
