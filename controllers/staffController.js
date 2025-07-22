@@ -1,6 +1,5 @@
 const { poolConnect, pool, sql } = require('../config/db');
 
-// Get all staff
 const getAllStaff = async (req, res) => {
   try {
     await poolConnect;
@@ -17,7 +16,6 @@ const getAllStaff = async (req, res) => {
   }
 };
 
-// Get a single staff member by ID
 const getStaffById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -40,10 +38,18 @@ const getStaffById = async (req, res) => {
   }
 };
 
-// Create a new staff member
 const createStaff = async (req, res) => {
-  const { user_id, designation, department_id, salary } = req.body;
-  if (!user_id || !designation || !department_id || salary == null) {
+  const {
+    user_id,
+    specialization,
+    biodata,
+    head_department,
+    license_number,
+    role_id,
+    department_id,
+    created_at
+  } = req.body;
+  if (!user_id || !role_id || !license_number) {
     return res.status(400).json({ message: 'Required fields missing' });
   }
   try {
@@ -51,13 +57,31 @@ const createStaff = async (req, res) => {
     const now = new Date();
     const insertResult = await pool.request()
       .input('user_id', sql.Int, user_id)
-      .input('designation', sql.VarChar, designation)
+      .input('specialization', sql.VarChar(30), specialization)
+      .input('biodata', sql.VarChar(20), biodata)
+      .input('head_department', sql.VarChar(15), head_department)
+      .input('license_number', sql.VarChar(20), license_number)
+      .input('role_id', sql.Int, role_id)
       .input('department_id', sql.Int, department_id)
-      .input('salary', sql.Decimal(10, 2), salary)
-      .input('created_at', sql.DateTime, now)
-      .query(`INSERT INTO staff (user_id, designation, department_id, salary, created_at)
-        OUTPUT INSERTED.*
-        VALUES (@user_id, @designation, @department_id, @salary, @created_at)`);
+      .input('created_at', sql.DateTime, created_at ?? now)
+      .query(`INSERT INTO staff (
+        user_id, 
+        specialization, 
+        biodata, 
+        head_department, 
+        license_number, 
+        role_id,
+        department_id,
+        created_at)
+        OUTPUT INSERTED.* VALUES (
+        @user_id, 
+        @specialization, 
+        @biodata, 
+        @head_department, 
+        @license_number, 
+        @role_id, 
+        @department_id, 
+        @created_at)`);
     const newStaff = insertResult.recordset[0];
     res.status(201).json(newStaff);
   } catch (error) {
@@ -66,27 +90,32 @@ const createStaff = async (req, res) => {
   }
 };
 
-// Update a staff member
 const updateStaff = async (req, res) => {
   const { id } = req.params;
-  const { designation, department_id, salary } = req.body;
+  const { specialization, biodata, head_department, license_number, role_id, department_id } = req.body;
   try {
     await poolConnect;
     // Only update provided fields
     const fields = [];
-    if (designation) fields.push('designation = @designation');
+
+    if (specialization) fields.push('specialization = @specialization');
+    if (biodata) fields.push('biodata = @biodata');
+    if (head_department) fields.push('head_department = @head_department');
+    if (license_number) fields.push('license_number = @license_number');
+    if (role_id) fields.push('role_id = @role_id');
     if (department_id) fields.push('department_id = @department_id');
-    if (salary != null) fields.push('salary = @salary');
-    if (fields.length === 0) {
-      return res.status(400).json({ message: 'No fields to update' });
-    }
+    if (fields.length === 0) return res.status(400).json({ message: 'No fields to update' });
     const updateQuery = `UPDATE staff SET ${fields.join(', ')} WHERE staff_id = @staff_id`;
+
     const request = pool.request().input('staff_id', sql.Int, id);
-    if (designation) request.input('designation', sql.VarChar, designation);
-    if (department_id) request.input('department_id', sql.Int, department_id);
-    if (salary != null) request.input('salary', sql.Decimal(10, 2), salary);
+    if (specialization) request.input('specialization', sql.VarChar(30), specialization);
+    if (biodata) request.input('biodata', sql.VarChar(20), biodata)
+    if (head_department) request.input('head_department', sql.VarChar(15), head_department)
+    if (license_number) request.input('license_number', sql.VarChar(20), license_number)
+    if (role_id) request.input('role_id', sql.Int, role_id)
+    if (department_id) request.input('department_id', sql.Int, department_id)
     await request.query(updateQuery);
-    // Return the updated staff member
+
     const result = await pool.request()
       .input('staff_id', sql.Int, id)
       .query(`SELECT s.*, u.full_name AS user_name, u.email, u.phone, dept.name AS department_name
@@ -105,7 +134,6 @@ const updateStaff = async (req, res) => {
   }
 };
 
-// Delete a staff member
 const deleteStaff = async (req, res) => {
   const { id } = req.params;
   try {
