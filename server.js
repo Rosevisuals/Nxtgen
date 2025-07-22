@@ -44,6 +44,7 @@ app.use('/api/users', require('./routes/users'));         // User management rou
 app.use('/api/test-types', require('./routes/test-types'));
 app.use('/api/conditions', require('./routes/conditions'));
 app.use('/api/wards', require('./routes/wards'));
+app.use('/api/lab-requests', require('./routes/lab-requests'));
 app.use('/api/staff', require('./routes/staff'));
 
 // ===== ROOT ROUTE =====
