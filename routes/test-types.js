@@ -6,7 +6,7 @@ const {
   createTestType,
   updateTestType,
   deleteTestType
-} = require('../controllers/TestTypesController');
+} = require('../controllers/testTypesController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
 router.get('/', getAllTestType);
