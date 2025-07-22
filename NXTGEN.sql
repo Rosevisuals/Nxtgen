@@ -123,7 +123,8 @@ Name_of_test varchar(25) UNIQUE NOT NULL
 
 --lab tests
 create table labrequests(
-patient_id INT primary key identity,
+labrequest_id INT primary key identity,
+patient_id INT ,
 doctor_id int,
 test_id int,
 technician_id int,
