@@ -32,7 +32,7 @@ const createLabRequest = async (req, res) => {
     notes,
     results
   } = req.body;
-  if (!patient_id || !doctor_id || test_id) {
+  if (!patient_id || !doctor_id || !test_id) {
     return res.status(400).json({ message: 'Required fields missing' });
   }
   try {
