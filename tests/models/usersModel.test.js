@@ -1,3 +1,4 @@
+jest.mock('../../config/db', () => require('../../__mocks__/db.js'));
 const usersModel = require('../../models/usersModel');
 
 describe('usersModel direct unit tests', () => {

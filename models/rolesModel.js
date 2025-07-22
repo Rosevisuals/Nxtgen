@@ -1,4 +1,5 @@
-const { sql, poolConnect, pool } = require('../config/db');
+// models/rolesModel.js
+const { sql, pool, poolConnect } = require('../config/db');
 
 // Get all roles
 const getAllRoles = async () => {
@@ -7,7 +8,7 @@ const getAllRoles = async () => {
   return result.recordset;
 };
 
-// Get a role by id
+// Get a single role by ID
 const getRoleById = async (role_id) => {
   await poolConnect;
   const request = pool.request();
@@ -19,4 +20,4 @@ const getRoleById = async (role_id) => {
 module.exports = {
   getAllRoles,
   getRoleById,
-}; 
+};

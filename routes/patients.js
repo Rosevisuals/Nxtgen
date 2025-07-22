@@ -8,9 +8,11 @@ const router = express.Router();           // Create a new router for patient ro
 
 // Import the controller functions that handle the actual business logic
 const {
-  getAllPatients,    // Function to get all patients
-  getPatientById,    // Function to get a specific patient
-  createPatient      // Function to create a new patient
+  getAllPatients,
+  getPatientById,
+  createPatient,
+  updatePatient,
+  deletePatient
 } = require('../controllers/patientsController');
 
 // Import the authentication middleware
@@ -42,6 +44,14 @@ router.get('/:id', authenticateToken, getPatientById);
 router.post('/', authenticateToken, createPatient);
 // - authenticateToken: First check if the user is logged in
 // - createPatient: If logged in, run this function to create a new patient
+
+// PUT /api/patients/:id
+// This route is for updating an existing patient's information
+router.put('/:id', authenticateToken, updatePatient);
+
+// DELETE /api/patients/:id
+// This route is for deleting a patient
+router.delete('/:id', authenticateToken, deletePatient);
 
 // ===== HOW ROUTES WORK =====
 // 1. Someone makes a request to a URL (like /api/patients)

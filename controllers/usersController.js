@@ -96,17 +96,6 @@ const updateUser = async (req, res) => {
 };
 
 // Fetch all roles (unchanged)
-const { poolConnect, pool } = require('../config/db');
-const getAllRoles = async (req, res) => {
-  try {
-    await poolConnect;
-    const result = await pool.request().query('SELECT * FROM roles');
-    res.json(result.recordset);
-  } catch (error) {
-    console.error('Error in getAllRoles:', error, error && error.stack);
-    res.status(500).json({ error: 'Failed to fetch roles' });
-  }
-};
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection:', reason);
@@ -120,6 +109,5 @@ module.exports = {
   createUser,
   deleteUser,
   getUserById,
-  updateUser,
-  getAllRoles
+  updateUser
 };

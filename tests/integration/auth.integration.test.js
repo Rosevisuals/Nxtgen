@@ -1,3 +1,4 @@
+jest.mock('../../config/db', () => require('../../__mocks__/db.js'));
 const request = require('supertest');
 const express = require('express');
 const authRoutes = require('../../routes/auth');

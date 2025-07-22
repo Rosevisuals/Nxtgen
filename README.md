@@ -1,5 +1,86 @@
 # ERP Backend
 
+---
+
+## Production Readiness Features (July 2024)
+
+The application has been enhanced with several key features to ensure it is secure, stable, and ready for a production environment.
+
+### What Was Added
+
+-   **Security Headers (`helmet`):**
+    -   Automatically sets important HTTP security headers to protect against common web vulnerabilities like Cross-Site Scripting (XSS), clickjacking, and content sniffing.
+-   **Rate Limiting (`express-rate-limit`):**
+    -   Protects the API from brute-force and denial-of-service attacks by limiting the number of requests an IP address can make in a given time frame (currently 100 requests per 15 minutes).
+-   **Centralized Error Handling:**
+    -   A new global error handling middleware has been added to `server.js`.
+    -   It catches all unhandled errors, logs them, and sends a generic, user-friendly error message to the client in production, preventing sensitive stack traces from being exposed.
+-   **Production-Grade Logging (`winston` & `morgan`):**
+    -   Replaced `console.log` with a robust logging system.
+    -   **`winston`**: Manages log levels and outputs. It creates two log files:
+        -   `error.log`: Contains only critical errors.
+        -   `combined.log`: Contains all log messages (including HTTP requests).
+    -   **`morgan`**: Acts as an HTTP request logger, capturing details about every incoming request and feeding it into `winston`.
+-   **Process Management:**
+    -   The server now gracefully handles `uncaughtException` and `unhandledRejection` events. Instead of crashing, it will log the fatal error and exit cleanly.
+
+These features make the application more resilient and provide better diagnostics for monitoring and troubleshooting in a live environment.
+
+---
+
+## Module Change Log
+
+This section tracks the addition of new modules to the ERP system.
+
+-   **Users Module:**
+    -   **Model:** `models/usersModel.js`
+    -   **Controller:** `controllers/usersController.js`
+    -   **Route:** `routes/users.js`
+    -   **Tests:** `tests/controllers/usersController.test.js`, `tests/models/usersModel.test.js`
+-   **Roles Module:**
+    -   **Model:** `models/rolesModel.js`
+    -   **Tests:** `tests/models/rolesModel.test.js`
+-   **Authentication:**
+    -   **Controller:** `controllers/authController.js`
+    -   **Route:** `routes/auth.js`
+    -   **Middleware:** `middleware/authMiddleware.js`
+    -   **Tests:** `tests/controllers/authController.test.js`, `tests/integration/auth.integration.test.js`, `tests/middleware/authMiddleware.test.js`
+-   **Patients Module:**
+    -   **Model:** `models/patientModel.js`
+    -   **Controller:** `controllers/patientsController.js`
+    -   **Route:** `routes/patients.js`
+-   **Appointments Module:**
+    -   **Model:** `models/appointmentsModel.js`
+    -   **Controller:** `controllers/appointmentsController.js`
+    -   **Route:** `routes/appointments.js`
+    -   **Tests:** `tests/integration/appointments.test.js`
+-   **Departments Module:**
+    -   **Model:** `models/departmentModel.js`
+    -   **Controller:** `controllers/departmentController.js`
+    -   **Route:** `routes/departments.js`
+    -   **Tests:** `tests/integration/departments.test.js`
+-   **Billing Module:**
+    -   **Model:** `models/billingModel.js`
+    -   **Controller:** `controllers/billingController.js`
+    -   **Route:** `routes/billing.js`
+    -   **Tests:** `tests/integration/billing.test.js`
+-   **Prescriptions Module:**
+    -   **Model:** `models/prescriptionsModel.js`
+    -   **Controller:** `controllers/prescriptionsController.js`
+    -   **Route:** `routes/prescriptions.js`
+    -   **Tests:** `tests/integration/prescriptions.test.js`
+-   **Consultation Module:**
+    -   **Controller:** `controllers/consultationController.js`
+    -   **Route:** `routes/consultation.js`
+-   **Pharmacy Module:**
+    -   **Route:** `routes/pharmacy.js`
+-   **Staff Module:**
+    -   **Model:** `models/staffModel.js`
+    -   **Controller:** `controllers/staffController.js`
+    -   **Route:** `routes/staff.js`
+
+---
+
 ## Recent Refactor: Users Module
 
 ### What Changed
