@@ -30,7 +30,6 @@ app.use('/api/users', require('./routes/users'));         // User management rou
 // app.use('/api/pharmacy', require('./routes/pharmacy'));   // Pharmacy management routes
 // app.use('/api/finance', require('./routes/finance'));     // Financial management routes
 // app.use('/api/store', require('./routes/store'));         // Store/inventory routes
-// app.use('/api/wards', require('./routes/wards'));         // Ward management routes
 // app.use('/api/doctors', require('./routes/doctors'));
 // app.use('/api/patient_records', require('./routes/patient_records'));
 // app.use('/api/ambulances', require('./routes/ambulances'));
@@ -44,6 +43,7 @@ app.use('/api/users', require('./routes/users'));         // User management rou
 // app.use('/api/reports', require('./routes/reports'));
 app.use('/api/test-types', require('./routes/test-types'));
 app.use('/api/conditions', require('./routes/conditions'));
+app.use('/api/wards', require('./routes/wards'));
 app.use('/api/staff', require('./routes/staff'));
 
 // ===== ROOT ROUTE =====
