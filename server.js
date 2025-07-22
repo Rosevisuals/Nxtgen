@@ -24,24 +24,24 @@ app.use(express.json());                   // Parse JSON data from incoming requ
 
 app.use('/api/auth', require('./routes/auth'));           // Authentication routes (login, register)
 app.use('/api/users', require('./routes/users'));         // User management routes
-app.use('/api/patients', require('./routes/patients'));   // Patient management routes
-app.use('/api/appointments', require('./routes/appointments')); // Appointment scheduling routes
-app.use('/api/consultation', require('./routes/consultation')); // Medical consultation routes
-app.use('/api/pharmacy', require('./routes/pharmacy'));   // Pharmacy management routes
-app.use('/api/finance', require('./routes/finance'));     // Financial management routes
-app.use('/api/store', require('./routes/store'));         // Store/inventory routes
-app.use('/api/wards', require('./routes/wards'));         // Ward management routes
-app.use('/api/doctors', require('./routes/doctors'));
-app.use('/api/patient_records', require('./routes/patient_records'));
-app.use('/api/ambulances', require('./routes/ambulances'));
-app.use('/api/blood', require('./routes/blood'));
-app.use('/api/rooms', require('./routes/rooms'));
-app.use('/api/notifications', require('./routes/notifications'));
-app.use('/api/working_hours', require('./routes/working_hours'));
-app.use('/api/support_tickets', require('./routes/support_tickets'));
-app.use('/api/chats', require('./routes/chats'));
-app.use('/api/emails', require('./routes/emails'));
-app.use('/api/reports', require('./routes/reports'));
+// app.use('/api/patients', require('./routes/patients'));   // Patient management routes
+// app.use('/api/appointments', require('./routes/appointments')); // Appointment scheduling routes
+// app.use('/api/consultation', require('./routes/consultation')); // Medical consultation routes
+// app.use('/api/pharmacy', require('./routes/pharmacy'));   // Pharmacy management routes
+// app.use('/api/finance', require('./routes/finance'));     // Financial management routes
+// app.use('/api/store', require('./routes/store'));         // Store/inventory routes
+// app.use('/api/wards', require('./routes/wards'));         // Ward management routes
+// app.use('/api/doctors', require('./routes/doctors'));
+// app.use('/api/patient_records', require('./routes/patient_records'));
+// app.use('/api/ambulances', require('./routes/ambulances'));
+// app.use('/api/blood', require('./routes/blood'));
+// app.use('/api/rooms', require('./routes/rooms'));
+// app.use('/api/notifications', require('./routes/notifications'));
+// app.use('/api/working_hours', require('./routes/working_hours'));
+// app.use('/api/support_tickets', require('./routes/support_tickets'));
+// app.use('/api/chats', require('./routes/chats'));
+// app.use('/api/emails', require('./routes/emails'));
+// app.use('/api/reports', require('./routes/reports'));
 app.use('/api/staff', require('./routes/staff'));
 
 // ===== ROOT ROUTE =====

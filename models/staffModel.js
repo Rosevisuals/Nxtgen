@@ -1,4 +1,5 @@
-const { sql, pool, poolConnect } = require('../__mocks__/mock-staff-db');
+// const { sql, pool, poolConnect } = require('../__mocks__/mock-staff-db');
+const { sql, poolConnect } = require('../config/db');
 
 const createStaff = async (staff) => {
   await poolConnect;

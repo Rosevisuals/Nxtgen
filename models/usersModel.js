@@ -1,5 +1,5 @@
-//const { sql, poolConnect } = require('../config/db');
-const { sql, pool, poolConnect } = require('../__mocks__/db');// for testing so remember to change it back to the original file
+const { sql, poolConnect } = require('../config/db');
+// const { sql, pool, poolConnect } = require('../__mocks__/db');// for testing so remember to change it back to the original file
 
 // USERS MODEL: ERP4 SCHEMA
 // Fields: user_id, full_Name, email, phone, password_hash, gender, DOB, marital_status, Address, status, created_at
