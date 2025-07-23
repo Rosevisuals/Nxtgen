@@ -46,6 +46,7 @@ app.use('/api/conditions', require('./routes/conditions'));
 app.use('/api/wards', require('./routes/wards'));
 app.use('/api/diagnoses', require('./routes/diagnoses'));
 app.use('/api/lab-requests', require('./routes/lab-requests'));
+app.use('/api/beds', require('./routes/beds'));
 app.use('/api/staff', require('./routes/staff'));
 
 // ===== ROOT ROUTE =====
