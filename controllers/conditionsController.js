@@ -1,3 +1,4 @@
+const { validationResult } = require("express-validator");
 const conditionsModel = require("../models/conditionsModel");
 
 const getAllConditions = async (req, res) => {
@@ -11,6 +12,10 @@ const getAllConditions = async (req, res) => {
 };
 
 const getConditionById = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     const condition = await conditionsModel.getConditionById(parseInt(id));
@@ -23,6 +28,10 @@ const getConditionById = async (req, res) => {
 };
 
 const createCondition = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { Name, Description, Status } = req.body;
   if (!Name) {
     return res.status(400).json({ message: 'Required fields missing' });
@@ -37,6 +46,10 @@ const createCondition = async (req, res) => {
 };
 
 const updateCondition = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   const { Name, Description, Status } = req.body;
   try {
@@ -52,6 +65,10 @@ const updateCondition = async (req, res) => {
 };
 
 const deleteCondition = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     await conditionsModel.deleteCondition(parseInt(id));

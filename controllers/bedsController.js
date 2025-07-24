@@ -1,3 +1,4 @@
+const { validationResult } = require("express-validator");
 const bedsModel = require("../models/bedsModel");
 
 const getAllBeds = async (req, res) => {
@@ -11,6 +12,10 @@ const getAllBeds = async (req, res) => {
 };
 
 const getBedById = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     const bed = await bedsModel.getBedById(parseInt(id));
@@ -23,6 +28,10 @@ const getBedById = async (req, res) => {
 };
 
 const createBed = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const {
     patient_id,
     bed_number,
@@ -46,6 +55,10 @@ const createBed = async (req, res) => {
 };
 
 const updateBed = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   const {
     patient_id,
@@ -70,6 +83,10 @@ const updateBed = async (req, res) => {
 };
 
 const deleteBed = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     await bedsModel.deleteBed(parseInt(id));

@@ -1,3 +1,4 @@
+const { validationResult } = require("express-validator");
 const staffModel = require("../models/staffModel");
 
 const getAllStaff = async (req, res) => {
@@ -11,6 +12,10 @@ const getAllStaff = async (req, res) => {
 };
 
 const getStaffById = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     const staff = await staffModel.getStaffById(parseInt(id));
@@ -23,6 +28,10 @@ const getStaffById = async (req, res) => {
 };
 
 const createStaff = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const {
     user_id,
     specialization,
@@ -33,9 +42,6 @@ const createStaff = async (req, res) => {
     department_id,
     created_at
   } = req.body;
-  if (!user_id || !role_id || !license_number) {
-    return res.status(400).json({ message: 'Required fields missing' });
-  }
   try {
     const newStaff = await staffModel.createStaff({
       user_id,
@@ -45,7 +51,7 @@ const createStaff = async (req, res) => {
       license_number,
       role_id,
       department_id,
-      created_at
+      created_at: created_at ?? new Date().toISOString()
     });
     res.status(201).json(newStaff);
   } catch (error) {
@@ -55,6 +61,10 @@ const createStaff = async (req, res) => {
 };
 
 const updateStaff = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   const { specialization, biodata, head_department, license_number, role_id, department_id } = req.body;
   try {
@@ -70,6 +80,10 @@ const updateStaff = async (req, res) => {
 };
 
 const deleteStaff = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     await staffModel.deleteStaff(parseInt(id));

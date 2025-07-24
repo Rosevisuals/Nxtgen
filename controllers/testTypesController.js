@@ -1,3 +1,4 @@
+const { validationResult } = require("express-validator");
 const testTypeModel = require("../models/testTypesModel");
 
 const getAllTestType = async (req, res) => {
@@ -11,6 +12,10 @@ const getAllTestType = async (req, res) => {
 };
 
 const getTestTypeById = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     const testType = await testTypeModel.getTestTypeById(parseInt(id));
@@ -23,10 +28,11 @@ const getTestTypeById = async (req, res) => {
 };
 
 const createTestType = async (req, res) => {
-  const { Name_of_test } = req.body;
-  if (!Name_of_test) {
-    return res.status(400).json({ message: 'Required fields missing' });
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
   }
+  const { Name_of_test } = req.body;
   try {
     const newTestType = await testTypeModel.createTestType({ Name_of_test });
     res.status(201).json(newTestType);
@@ -37,6 +43,10 @@ const createTestType = async (req, res) => {
 };
 
 const updateTestType = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   const { Name_of_test } = req.body;
   try {
@@ -52,6 +62,10 @@ const updateTestType = async (req, res) => {
 };
 
 const deleteTestType = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     await testTypeModel.deleteTestType(parseInt(id));

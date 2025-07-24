@@ -8,11 +8,41 @@ const {
   deleteTestType
 } = require('../controllers/testTypesController');
 const { authenticateToken } = require('../middleware/authMiddleware');
+const { checkSchema } = require('express-validator');
 
 router.get('/', getAllTestType);
-router.get('/:id', getTestTypeById);
-router.post('/', createTestType);
-router.put('/:id', updateTestType);
-router.delete('/:id', deleteTestType);
+router.get('/:id', checkSchema({
+  id: {
+    isInt: true,
+    optional: false,
+    isEmpty: false
+  }
+}), getTestTypeById);
+router.post('/', checkSchema({
+  "Name_of_test": {
+    isString: true,
+    isLength: { options: { max: 25 } }
+  },
+}), createTestType);
+router.put('/:id', checkSchema({
+  id: {
+    isInt: true,
+    optional: false,
+    isEmpty: false
+  },
+  Name_of_test: {
+    isString: true,
+    isLength: { options: { max: 25 } },
+    optional: false,
+    isEmpty: false
+  },
+}), updateTestType);
+router.delete('/:id', checkSchema({
+  id: {
+    isInt: true,
+    optional: false,
+    isEmpty: false
+  }
+}), deleteTestType);
 
 module.exports = router; 

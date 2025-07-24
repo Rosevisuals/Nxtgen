@@ -1,6 +1,11 @@
+const { validationResult } = require("express-validator");
 const wardsModel = require("../models/wardsModel");
 
 const createWard = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { Department_id, ward_number, ward_type } = req.body;
   if (!ward_number) {
     return res.status(400).json({ message: 'Required fields missing' });
@@ -15,6 +20,10 @@ const createWard = async (req, res) => {
 };
 
 const deleteWard = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     if (await wardsModel.deleteWard(id)) return res.json({ message: 'Ward deleted' });
@@ -35,6 +44,10 @@ const getAllWards = async (req, res) => {
 };
 
 const getWardById = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     const ward = await wardsModel.getWardById(parseInt(id));
@@ -47,6 +60,10 @@ const getWardById = async (req, res) => {
 };
 
 const updateWard = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   const { Department_id, ward_number, ward_type } = req.body;
   try {

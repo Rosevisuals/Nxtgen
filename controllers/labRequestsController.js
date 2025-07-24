@@ -1,3 +1,4 @@
+const { validationResult } = require("express-validator");
 const labRequestModel = require("../models/labRequestsModel");
 
 const getAllLabRequests = async (req, res) => {
@@ -11,6 +12,10 @@ const getAllLabRequests = async (req, res) => {
 };
 
 const getLabRequestById = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     const labRequest = await labRequestModel.getLabRequestById(parseInt(id));
@@ -23,6 +28,10 @@ const getLabRequestById = async (req, res) => {
 };
 
 const createLabRequest = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const {
     patient_id,
     doctor_id,
@@ -53,6 +62,10 @@ const createLabRequest = async (req, res) => {
 };
 
 const updateLabRequest = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   const {
     patient_id,
@@ -84,6 +97,10 @@ const updateLabRequest = async (req, res) => {
 };
 
 const deleteLabRequest = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     await labRequestModel.deleteLabRequest(parseInt(id));

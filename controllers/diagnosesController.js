@@ -1,3 +1,4 @@
+const { validationResult } = require("express-validator");
 const diagnosesModel = require("../models/diagnosesModel");
 
 const getAllDiagnoses = async (req, res) => {
@@ -11,6 +12,10 @@ const getAllDiagnoses = async (req, res) => {
 };
 
 const getDiagnosisById = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     const diagnosis = await diagnosesModel.getDiagnosisById(parseInt(id));
@@ -23,6 +28,10 @@ const getDiagnosisById = async (req, res) => {
 };
 
 const createDiagnosis = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const {
     patient_id,
     doctor_id,
@@ -53,6 +62,10 @@ const createDiagnosis = async (req, res) => {
 };
 
 const updateDiagnosis = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   const {
     patient_id,
@@ -84,6 +97,10 @@ const updateDiagnosis = async (req, res) => {
 };
 
 const deleteDiagnosis = async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ error: result.array() });
+  }
   const { id } = req.params;
   try {
     await diagnosesModel.deleteDiagnosis(parseInt(id));
