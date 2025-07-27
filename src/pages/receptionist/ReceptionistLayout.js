@@ -1,40 +1,40 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { FaHome, FaCalendarAlt, FaHistory, FaUserMd, FaFileMedical } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserPlus, FaSearch, FaFileInvoiceDollar, FaSignOutAlt } from 'react-icons/fa';
 import Sidebar from '../../components/ui/Sidebar';
 import Navbar from '../../components/ui/Navbar';
 import { useNavigate } from 'react-router-dom';
 
 /**
- * PatientLayout Component
+ * ReceptionistLayout Component
  * 
- * Main layout for the patient dashboard.
+ * Main layout for the receptionist dashboard.
  */
-const PatientLayout = () => {
+const ReceptionistLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
   
   // Mock user data (replace with actual user data from authentication)
   const user = {
-    name: 'John Doe',
-    role: 'Patient',
+    name: 'Sarah Wilson',
+    role: 'Receptionist',
     avatar: '/images/images.jpg',
   };
   
   // Sidebar navigation items
   const sidebarItems = [
-    { path: '/patient/dashboard', label: 'Dashboard', icon: <FaHome /> },
-    { path: '/patient/appointments', label: 'My Appointments', icon: <FaCalendarAlt /> },
-    { path: '/patient/history', label: 'Medical History', icon: <FaHistory /> },
-    { path: '/patient/doctors', label: 'My Doctors', icon: <FaUserMd /> },
-    { path: '/patient/prescriptions', label: 'Prescriptions', icon: <FaFileMedical /> },
+    { path: '/receptionist/dashboard', label: 'Dashboard', icon: <FaCalendarAlt /> },
+    { path: '/receptionist/patients/register', label: 'Patient Registration', icon: <FaUserPlus /> },
+    { path: '/receptionist/patients', label: 'Patient Search', icon: <FaSearch /> },
+    { path: '/receptionist/appointments', label: 'Appointments', icon: <FaCalendarAlt /> },
+    { path: '/receptionist/billing', label: 'Billing', icon: <FaFileInvoiceDollar /> },
   ];
   
   // Navbar navigation links
   const navbarLinks = [
-    { path: '/patient/dashboard', label: 'Dashboard' },
-    { path: '/patient/settings', label: 'Settings' },
-    { path: '/patient/help', label: 'Help' },
+    { path: '/receptionist/dashboard', label: 'Dashboard' },
+    { path: '/receptionist/settings', label: 'Settings' },
+    { path: '/receptionist/help', label: 'Help' },
   ];
   
   // Handle sidebar toggle
@@ -52,15 +52,15 @@ const PatientLayout = () => {
   };
   
   return (
-    <div className="patient-layout">
+    <div className="receptionist-layout">
       <Sidebar
         items={sidebarItems}
-        title="Patient Portal"
+        title="Receptionist Dashboard"
         collapsed={sidebarCollapsed}
         onToggleCollapse={handleToggleSidebar}
       />
       
-      <div className="patient-content">
+      <div className="receptionist-content">
         <Navbar
           title="NxtGen Hospital ERP"
           links={navbarLinks}
@@ -72,7 +72,7 @@ const PatientLayout = () => {
           }
         />
         
-        <main className="patient-main">
+        <main className="receptionist-main">
           <Outlet />
         </main>
       </div>
@@ -80,4 +80,4 @@ const PatientLayout = () => {
   );
 };
 
-export default PatientLayout;
+export default ReceptionistLayout;

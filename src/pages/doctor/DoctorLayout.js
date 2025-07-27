@@ -1,40 +1,39 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { FaHome, FaCalendarAlt, FaHistory, FaUserMd, FaFileMedical } from 'react-icons/fa';
+import { FaCalendarAlt, FaSearch, FaUserInjured, FaNotesMedical, FaPrescriptionBottleAlt, FaSignOutAlt } from 'react-icons/fa';
 import Sidebar from '../../components/ui/Sidebar';
 import Navbar from '../../components/ui/Navbar';
 import { useNavigate } from 'react-router-dom';
 
 /**
- * PatientLayout Component
+ * DoctorLayout Component
  * 
- * Main layout for the patient dashboard.
+ * Main layout for the doctor dashboard.
  */
-const PatientLayout = () => {
+const DoctorLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
   
   // Mock user data (replace with actual user data from authentication)
   const user = {
-    name: 'John Doe',
-    role: 'Patient',
+    name: 'Dr. John Smith',
+    role: 'Cardiologist',
     avatar: '/images/images.jpg',
   };
   
   // Sidebar navigation items
   const sidebarItems = [
-    { path: '/patient/dashboard', label: 'Dashboard', icon: <FaHome /> },
-    { path: '/patient/appointments', label: 'My Appointments', icon: <FaCalendarAlt /> },
-    { path: '/patient/history', label: 'Medical History', icon: <FaHistory /> },
-    { path: '/patient/doctors', label: 'My Doctors', icon: <FaUserMd /> },
-    { path: '/patient/prescriptions', label: 'Prescriptions', icon: <FaFileMedical /> },
+    { path: '/doctor/dashboard', label: 'Dashboard', icon: <FaCalendarAlt /> },
+    { path: '/doctor/patients', label: 'Patient Lookup', icon: <FaSearch /> },
+    { path: '/doctor/consultations', label: 'Consultations', icon: <FaNotesMedical /> },
+    { path: '/doctor/prescriptions', label: 'Prescriptions', icon: <FaPrescriptionBottleAlt /> },
   ];
   
   // Navbar navigation links
   const navbarLinks = [
-    { path: '/patient/dashboard', label: 'Dashboard' },
-    { path: '/patient/settings', label: 'Settings' },
-    { path: '/patient/help', label: 'Help' },
+    { path: '/doctor/dashboard', label: 'Dashboard' },
+    { path: '/doctor/settings', label: 'Settings' },
+    { path: '/doctor/help', label: 'Help' },
   ];
   
   // Handle sidebar toggle
@@ -52,15 +51,15 @@ const PatientLayout = () => {
   };
   
   return (
-    <div className="patient-layout">
+    <div className="doctor-layout">
       <Sidebar
         items={sidebarItems}
-        title="Patient Portal"
+        title="Doctor Dashboard"
         collapsed={sidebarCollapsed}
         onToggleCollapse={handleToggleSidebar}
       />
       
-      <div className="patient-content">
+      <div className="doctor-content">
         <Navbar
           title="NxtGen Hospital ERP"
           links={navbarLinks}
@@ -72,7 +71,7 @@ const PatientLayout = () => {
           }
         />
         
-        <main className="patient-main">
+        <main className="doctor-main">
           <Outlet />
         </main>
       </div>
@@ -80,4 +79,4 @@ const PatientLayout = () => {
   );
 };
 
-export default PatientLayout;
+export default DoctorLayout;

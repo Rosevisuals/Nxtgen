@@ -1,24 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+// filepath: c:\Users\user\OneDrive\Desktop\erp\erp\src\index.js (or App.js)
+
+// Import your components
+import Navbar from './components/navbar';
+import Hero from './components/Hero';
+import Features from './components/Features';
+import HealthServices from './components/HealthServices';
+import Login from './components/login';
+import AdminLayout from './admin/AdminLayout';
+import Sidebar from './components/sidebar';
+import Doctor from './components/doctor\'s';
+import Appointment from './components/appointment';
+// ...existing code...
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Router>
+        <Routes>
+          <Route path="/" element={
+            <>
+              <Navbar />
+              
+              <Login />
+              <Sidebar/>
+              <Appointment />
+              <Doctor />
+              <Hero />
+              <Features />
+              
+              <HealthServices />
+            </>
+          } />
+          <Route path="/admin" element={<AdminLayout />} />
+        </Routes>
+      </Router>
+    </>
   );
 }
 

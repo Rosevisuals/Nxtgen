@@ -1,0 +1,205 @@
+/* doctor.css */
+
+.container {
+    max-width: 100%;
+    padding: 20px;
+    background: linear-gradient(135deg, #f1f8ff, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+    font-weight: 700;
+    color: #004085;
+    font-family: 'Poppins', sans-serif;
+}
+
+.stats-row {
+    display: flex;
+    justify-content:space-evenly;
+    position: relative;
+    left: 100px;
+}
+
+.stats-card {
+    background: #ffffff;
+    border: none;
+    border-radius: 16px;
+    height: 200px;
+    width: 200px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.icon-style {
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px;
+}
+
+.card h5 {
+    font-weight: 600;
+    color: #004085;
+}
+
+.card-body {
+    text-align: center;
+    position: relative;
+    top: 20px;
+}
+
+canvas {
+    max-height: 300px !important;
+}
+.try {
+    position: relative;
+    bottom: 380px;
+    left: 120px;
+}
+.try2 {
+    position: relative;
+    bottom: 750px;
+    left: 650px;
+}
+.ty{
+    position: relative;
+    bottom: 320px;
+    right: 400px;
+}
+.react-calendar {
+    width: 100%;
+    position: relative;
+    left: 350px;
+    top: 40px;
+    max-width: 100%;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: 'Poppins', sans-serif;
+}
+
+.react-calendar__tile--active {
+    background: #007bff;
+    color: white;
+}
+.cd{
+    position: relative;
+    right: 400px;
+}
+.react-calendar__tile:enabled:hover {
+    background: #e6f0ff;
+    cursor: pointer;
+}
+.tx{
+    position: relative;
+    left: 300px;
+}
+.appointment-card {
+    position: relative;
+    bottom: 600px;
+    left: 250px;
+    width: 1600px;
+}
+
+.appointment-card .card-body {
+    padding: 20px;
+}
+
+.appointment-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #004085;
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 15px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.appointment-title::before {
+    content: "📅";
+    margin-right: 8px;
+    font-size: 1.3rem;
+}
+
+.table-responsive {
+    max-height: 350px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cce5ff #f8f9fa;
+}
+
+/* Custom scrollbar for WebKit (Chrome, Edge, Safari) 
+.table-responsive::-webkit-scrollbar {
+    width: 100px;
+    position: relative;
+    right: 100px;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+    background-color: #cce5ff;
+    border-radius: 8px;
+    position: relative;
+    right: 100px;
+}
+.table-responsive::-webkit-scrollbar-track {
+    background-color: #f8f9fa;
+    position: relative;
+    right: 100px;
+}*/
+
+.appointment-table {
+    font-size: 0.95rem;
+    width: 1500px;
+    height: 500px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.appointment-table th {
+    background: #cce5ff;
+    color: #003366;
+    width: 200px;
+    height: 80px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.appointment-table td {
+    vertical-align: middle;
+    text-align: center;
+    background-color: #e9f5ff;
+    
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.status-confirmed {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-pending {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.status-cancelled {
+    background-color: #dc3545;
+    color: white;
+}
