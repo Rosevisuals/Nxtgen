@@ -36,15 +36,12 @@ This section tracks the addition of new modules to the ERP system.
     -   **Model:** `models/usersModel.js`
     -   **Controller:** `controllers/usersController.js`
     -   **Route:** `routes/users.js`
-    -   **Tests:** `tests/controllers/usersController.test.js`, `tests/models/usersModel.test.js`
 -   **Roles Module:**
     -   **Model:** `models/rolesModel.js`
-    -   **Tests:** `tests/models/rolesModel.test.js`
 -   **Authentication:**
     -   **Controller:** `controllers/authController.js`
     -   **Route:** `routes/auth.js`
     -   **Middleware:** `middleware/authMiddleware.js`
-    -   **Tests:** `tests/controllers/authController.test.js`, `tests/integration/auth.integration.test.js`, `tests/middleware/authMiddleware.test.js`
 -   **Patients Module:**
     -   **Model:** `models/patientModel.js`
     -   **Controller:** `controllers/patientsController.js`
@@ -53,22 +50,18 @@ This section tracks the addition of new modules to the ERP system.
     -   **Model:** `models/appointmentsModel.js`
     -   **Controller:** `controllers/appointmentsController.js`
     -   **Route:** `routes/appointments.js`
-    -   **Tests:** `tests/integration/appointments.test.js`
 -   **Departments Module:**
     -   **Model:** `models/departmentModel.js`
     -   **Controller:** `controllers/departmentController.js`
     -   **Route:** `routes/departments.js`
-    -   **Tests:** `tests/integration/departments.test.js`
 -   **Billing Module:**
     -   **Model:** `models/billingModel.js`
     -   **Controller:** `controllers/billingController.js`
     -   **Route:** `routes/billing.js`
-    -   **Tests:** `tests/integration/billing.test.js`
 -   **Prescriptions Module:**
     -   **Model:** `models/prescriptionsModel.js`
     -   **Controller:** `controllers/prescriptionsController.js`
     -   **Route:** `routes/prescriptions.js`
-    -   **Tests:** `tests/integration/prescriptions.test.js`
 -   **Consultation Module:**
     -   **Controller:** `controllers/consultationController.js`
     -   **Route:** `routes/consultation.js`
@@ -79,86 +72,6 @@ This section tracks the addition of new modules to the ERP system.
     -   **Controller:** `controllers/staffController.js`
     -   **Route:** `routes/staff.js`
 
----
-
-## Recent Refactor: Users Module
-
-### What Changed
-- **User Model Added:**
-  - A new `models/usersModel.js` was created to encapsulate all user-related database logic, matching the new ERP4 schema.
-- **User Controller Modified:**
-  - `controllers/usersController.js` was updated to use the new model, handle new fields, and return full user objects after creation and update.
-- **User Route Modified:**
-  - The users route was updated to match the new controller and model, supporting the new schema and removing deprecated fields.
-
-### Testing Approach
-- **Mock Database:**
-  - A Jest mock (`__mocks__/db.js`) simulates SQL Server behavior for all user operations, supporting multi-statement queries and CRUD logic.
-- **Unit Tests:**
-  - Model and controller tests are provided for the users module.
-  - The mock ensures tests run without a real database.
-
-### How to Run the New Tests
-
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-2. **Run model unit tests:**
-   ```bash
-   npx jest tests/models/usersModel.test.js
-   ```
-3. **Run controller tests:**
-   ```bash
-   npx jest tests/controllers/usersController.test.js
-   ```
-
-All tests should pass if the mock and code are in sync. For other modules, follow a similar pattern: create a model, update the controller and route, and add/modify tests and mocks as needed.
-
----
-
-## Recent Refactor: Roles Model
-
-### What Changed
-- **Roles Model Added:**
-  - A new `models/rolesModel.js` was created to encapsulate all role-related database logic for the ERP4 schema.
-  - The model provides functions to fetch all roles or a single role by id.
-  - This is useful for populating dropdowns, assigning roles to staff, or referencing roles in other modules.
-  - No controller or route is provided by default, as roles are typically static reference data, but you can add one if you want to expose roles via the API.
-
-### Testing Approach
-- **Unit Tests:**
-  - Direct unit tests for the login logic are provided (see `tests/controllers/authController.test.js`).
-  - All dependencies (`usersModel`, `bcrypt`, `jsonwebtoken`) are mocked for fast, isolated tests.
-- **Mock Database:**
-  - The same Jest mock DB is used for user lookups.
-
-### How to Run the Auth Tests
-
-```bash
-npx jest tests/controllers/authController.test.js
-```
-
-All tests should pass if the code and mocks are in sync. You can add more unit tests for registration or other auth logic as needed.
-
----
-
-## New: Auth Integration Tests
-
-### What Changed
-- **Integration tests now cover the full authentication and authorization flow:**
-  - Test the interaction between middleware, routes, and controllers.
-  - Verify that staff users with the correct role can access protected routes.
-  - Ensure non-staff and unauthenticated users are denied access.
-  - JWTs for staff include their role; non-staff JWTs do not.
-
-### How to Run the Integration Tests
-
-```bash
-npx jest tests/integration/auth.integration.test.js
-```
-
-These tests give you confidence that your authentication and authorization system works end-to-end, enforcing staff role-based access as intended.
 
 ---
 
@@ -177,8 +90,7 @@ The system follows RESTful API principles and uses **JWT** for secure authentica
 - `/routes/` — Express route definitions for each resource
 - `/middleware/` — Authentication and authorization middleware
 - `/config/` — Database connection and configuration
-- `/tests/` — Automated tests (unit and integration)
-  - `/tests/helpers/` — Test utilities and file-based store for integration tests
+- `/utils/` — Utility functions (email, etc.)
 - `server.js` — Main Express app entry point
 - `package.json` — Project dependencies and scripts
 
@@ -196,6 +108,11 @@ DB_SERVER=your_db_server
 DB_DATABASE=your_db_name
 DB_PORT=1433
 JWT_SECRET=your_jwt_secret
+FRONTEND_URL=http://localhost:3000
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USERNAME=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
 ```
 
 > **How to get a JWT secret:**  
@@ -210,6 +127,114 @@ JWT_SECRET=your_jwt_secret
 > JWT (JSON Web Token) is a secure, compact way to represent user identity and claims between the client and server.  
 > It is used for authentication: after a user logs in, the server issues a signed JWT token, which the client includes in the `Authorization` header for all subsequent API requests.  
 > The backend verifies the token using the `JWT_SECRET` to ensure requests are from authenticated users and to check their roles/permissions.
+
+## Email Configuration Setup
+
+The system includes email functionality for:
+- **Password Reset**: Users can request password reset links via email
+- **Email Verification**: New users receive verification emails
+- **Patient Registration**: Staff-created patients receive password setup emails
+- **Account Notifications**: Various account-related notifications
+
+### Required Email Environment Variables
+
+Add these to your `.env` file:
+
+```env
+FRONTEND_URL=http://localhost:3000  # Your frontend application URL
+EMAIL_HOST=smtp.gmail.com          # SMTP server address
+EMAIL_PORT=587                     # SMTP port (usually 587 for TLS)
+EMAIL_USERNAME=your-email@gmail.com # Your email address
+EMAIL_PASSWORD=your-app-password    # App-specific password (NOT your regular password)
+```
+
+### Email Provider Setup Instructions
+
+#### Option 1: Gmail (Recommended for Development)
+
+**Important**: Use your **company email account** that will send emails to patients (e.g., `noreply@yourhospital.com`, `info@yourhospital.com`, or `notifications@yourhospital.com`).
+
+1. **Enable 2-Factor Authentication** on your company's Google account:
+   - Go to [Google Account Security](https://myaccount.google.com/security)
+   - Turn on 2-Step Verification for the company email account
+
+2. **Generate App Password** (NOT your regular email password):
+   - In Security settings, find "App passwords"
+   - Select "Mail" as the app type
+   - Copy the generated 16-character password
+   - **This app password is what you'll use in your `.env` file**
+
+3. **Configure `.env`**:
+   ```env
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=587
+   EMAIL_USERNAME=noreply@yourhospital.com  # Your company email
+   EMAIL_PASSWORD=abcd efgh ijkl mnop        # App password (NOT regular password)
+   ```
+
+**Why App Passwords?**
+- App passwords are more secure than regular passwords for automated systems
+- They can be revoked independently without changing your main email password
+- Required by Gmail for applications that don't support modern authentication
+
+#### Option 2: Outlook/Hotmail
+
+```env
+EMAIL_HOST=smtp-mail.outlook.com
+EMAIL_PORT=587
+EMAIL_USERNAME=your-email@outlook.com
+EMAIL_PASSWORD=your-password
+```
+
+#### Option 3: Professional Services (Recommended for Production)
+
+**SendGrid**:
+```env
+EMAIL_HOST=smtp.sendgrid.net
+EMAIL_PORT=587
+EMAIL_USERNAME=apikey
+EMAIL_PASSWORD=your-sendgrid-api-key
+```
+
+**Mailgun**:
+```env
+EMAIL_HOST=smtp.mailgun.org
+EMAIL_PORT=587
+EMAIL_USERNAME=your-mailgun-username
+EMAIL_PASSWORD=your-mailgun-password
+```
+
+### Testing Email Functionality
+
+1. **Start the server** with email configuration
+2. **Test endpoints that trigger emails**:
+   - `POST /api/auth/forgot-password` - Send password reset email
+   - `POST /api/patients/register` - Send verification email
+   - `POST /api/patients` - Send password setup email (staff-created patients)
+
+3. **Check server logs** for email sending status
+4. **Verify emails arrive** in the recipient's inbox
+
+### Email Templates
+
+The system currently sends plain text emails. Email content includes:
+- **Password Reset**: Link to reset password (expires in 15 minutes)
+- **Email Verification**: Link to verify account (expires in 24 hours)
+- **Password Setup**: Link for new patients to set their password (expires in 24 hours)
+
+### Security Notes
+
+- **Never commit your `.env` file** to version control
+- **Use app-specific passwords**, not your regular email password
+- **For production**, use professional email services like SendGrid or Mailgun
+- **Email links expire** for security (15 minutes for password reset, 24 hours for other actions)
+
+### Troubleshooting Email Issues
+
+- **"Authentication failed" errors**: Check that you're using an app password, not your regular password
+- **"Connection refused" errors**: Verify SMTP host and port settings
+- **Emails not arriving**: Check spam/junk folders
+- **Gmail blocking**: Ensure 2FA is enabled and you're using an app password
 
 ---
 
@@ -236,11 +261,6 @@ JWT_SECRET=your_jwt_secret
 ### Module Example: Appointments
 - **routes/appointments.js**: Defines endpoints for appointment CRUD.
 - **controllers/appointmentsController.js**: Handles appointment logic, including validation and double-booking checks.
-- **tests/helpers/testAppointmentsStore.js**: Used in test mode to persist appointments for integration tests.
-
----
-
-Would you like this written directly to your `README.md` file?
 
 ---
 
@@ -250,9 +270,7 @@ Would you like this written directly to your `README.md` file?
 - **routes/**: Maps HTTP endpoints to controller functions
 - **middleware/**: Contains authentication and role-based access control
 - **config/db.js**: Sets up the SQL Server connection using environment variables
-- **tests/controllers/**: Unit tests for each controller (using mocks)
-- **tests/integration/**: Integration tests for API endpoints (simulate real HTTP requests)
-- **tests/helpers/testAppointmentsStore.js**: File-based persistent store for appointments during integration tests
+- **utils/**: Utility functions like email sending
 - **server.js**: Starts the Express app and loads all routes/middleware
 
 ---
@@ -267,7 +285,7 @@ npm install
 
 ### 2. Set up your `.env` file
 
-Copy the example above and fill in your actual database and JWT details.
+Copy the example above and fill in your actual database, email, and JWT details.
 
 ### 3. Start the server
 
@@ -278,30 +296,6 @@ or for development with auto-reload:
 ```bash
 npm run dev
 ```
-
----
-
-## Running the Tests
-
-### 1. Run all tests
-
-```bash
-npm test
-```
-
-### 2. What the tests do
-
-- **Unit tests** (in `/tests/controllers/`): Test each controller's logic in isolation using mocked database calls.
-- **Integration tests** (in `/tests/integration/`): Test the full API stack using HTTP requests, with a file-based store simulating the database for appointments.
-
-### 3. Disclaimer about the Appointments Integration Test
-
-> **Note:**  
-> The integration test for appointments uses a file-based store (`tests/helpers/testAppointmentsStore.js`) to simulate a database.  
-> This is a workaround for environments where a real test database is not available.  
-> In some environments (especially with Jest and Supertest), state may not persist as expected between requests, which can cause the update or delete steps in the appointments integration test to fail with a 404 error.  
-> **This does not affect the real controller logic or production use.**  
-> For true integration testing, connect to a real test database.
 
 ---
 
@@ -343,8 +337,8 @@ npm test
   - Double-check your `.env` values and ensure your SQL Server is running and accessible.
 - **JWT errors:**  
   - Make sure `JWT_SECRET` is set in your `.env` file.
-- **Integration test failures:**  
-  - See the disclaimer above. For full integration, use a real test database.
+- **Email errors:**  
+  - Verify your email configuration and ensure you're using app passwords for Gmail.
 
 ---
 
@@ -355,31 +349,3 @@ If you have any questions or need help integrating with your backend/database, p
 ---
 
 **Happy coding!**
-
----
-
-## Important: Explicit Jest Mocking for Database Modules
-
-When writing Jest tests for any model or controller that imports the database module (e.g., config/db.js), you must explicitly force Jest to use your mock. This is especially important for models like rolesModel that interact with the database directly.
-
-**How to do it:**
-At the very top of your test file (before any imports), add:
-
-```js
-jest.mock('../../config/db', () => require('../../__mocks__/db.js'));
-```
-
-This ensures that all imports of '../../config/db' in your code and its dependencies will use the mock, not the real database connection. This prevents errors like:
-
-    TypeError: The "config.server" property is required and must be of type string
-
-and ensures your tests run in isolation without requiring a real database.
-
-**Example:**
-```js
-jest.mock('../../config/db', () => require('../../__mocks__/db.js'));
-const rolesModel = require('../../models/rolesModel');
-// ... rest of your tests ...
-```
-
-This pattern should be used for all Jest tests that depend on the database module and require isolation from the real DB.

@@ -7,7 +7,8 @@ const {
   getBillById,
   createBill,
   updateBill,
-  deleteBill
+  deleteBill,
+  generateReceiptPdf
 } = require('../controllers/billingController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
@@ -25,5 +26,8 @@ router.put('/:id', authenticateToken, updateBill);
 
 // DELETE /api/billing/:id
 router.delete('/:id', authenticateToken, deleteBill);
+
+// GET /api/billing/:id/receipt/pdf
+router.get('/:id/receipt/pdf', authenticateToken, generateReceiptPdf);
 
 module.exports = router;

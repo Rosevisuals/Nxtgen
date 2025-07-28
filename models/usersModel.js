@@ -105,4 +105,4 @@ module.exports = {
   deleteUser,
   getAllUsers,
   getStaffRoleByUserId, // export the new function
-}; 
+};

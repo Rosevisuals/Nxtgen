@@ -2,6 +2,7 @@
 const usersModel = require('../models/usersModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const sendEmail = require('../utils/email');
 require('dotenv').config();
 
 // LOGIN FUNCTION (email + password)
@@ -108,4 +109,104 @@ const register = async (req, res) => {
   }
 };
 
-module.exports = { login, register };
+// SETUP PASSWORD FUNCTION (from email link)
+const setupPassword = async (req, res) => {
+  const { token, password } = req.body;
+  if (!token || !password) {
+    return res.status(400).json({ message: 'Token and password are required' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await usersModel.getUserById(decoded.user_id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'Invalid token: user not found' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await usersModel.updateUser(user.user_id, {
+      password_hash: hashedPassword,
+      status: 'active',
+    });
+
+    res.status(200).json({ message: 'Password has been set successfully. You can now log in.' });
+  } catch (error) {
+    console.error('Setup password error:', error);
+    res.status(401).json({ message: 'Invalid or expired token' });
+  }
+};
+
+// VERIFY EMAIL FUNCTION
+const verifyEmail = async (req, res) => {
+  const { token } = req.params;
+  if (!token) {
+    return res.status(400).json({ message: 'Verification token is required' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await usersModel.getUserById(decoded.user_id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'Invalid token: user not found' });
+    }
+
+    await usersModel.updateUser(user.user_id, { status: 'active' });
+    res.status(200).json({ message: 'Email has been verified successfully. You can now log in.' });
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.status(401).json({ message: 'Invalid or expired token' });
+  }
+};
+
+// FORGOT PASSWORD
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    const user = await usersModel.getUserByEmail(email);
+    if (user) {
+      const resetToken = jwt.sign({ user_id: user.user_id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+      const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+      sendEmail({
+        to: email,
+        subject: 'Password Reset Request',
+        text: `You requested a password reset. Click this link to reset your password: ${resetLink}`
+      });
+    }
+    res.status(200).json({ message: 'If a user with that email exists, a password reset link has been sent.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// RESET PASSWORD
+const resetPassword = async (req, res) => {
+  const { token, password } = req.body;
+  if (!token || !password) {
+    return res.status(400).json({ message: 'Token and new password are required' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await usersModel.getUserById(decoded.user_id);
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid token: user not found' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await usersModel.updateUser(user.user_id, { password_hash: hashedPassword });
+    res.status(200).json({ message: 'Password has been reset successfully.' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(401).json({ message: 'Invalid or expired token' });
+  }
+};
+
+module.exports = { login, register, setupPassword, verifyEmail, forgotPassword, resetPassword };
