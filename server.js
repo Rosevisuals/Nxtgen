@@ -56,13 +56,9 @@ app.get('/', (req, res) => {
 });
 
 // ===== START THE SERVER =====
-// Only start the server if we're NOT running tests
-// This prevents conflicts when running automated tests
-if (process.env.NODE_ENV !== 'test' && process.env.JEST_WORKER_ID === undefined) {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);  // Show a message when server starts
-  });
-}
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);  // Show a message when server starts
+});
 
 // Export the app so other files (like tests) can use it
 module.exports = app;
