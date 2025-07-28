@@ -69,10 +69,10 @@ const updateLabRequest = async (id, { patient_id, doctor_id, test_id, technician
         fields.push('results = @results');
         request.input('results', sql.VarChar(30), results);
     }
-    if (fields.length === 0) return res.status(400).json({ message: 'No fields to update' });
+    if (fields.length === 0) return null;
     const updateQuery = `UPDATE labrequests SET ${fields.join(', ')} WHERE labrequest_id = @labrequest_id`;
 
-    request.pool.request().input('labrequest_id', sql.Int, id);
+    request.input('labrequest_id', sql.Int, id);
     await request.query(updateQuery);
 
     const result = await pool.request()

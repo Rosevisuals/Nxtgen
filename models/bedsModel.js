@@ -49,7 +49,7 @@ const updateBed = async (id, {
     if (bed_number) fields.push('bed_number = @bed_number');
     if (status) fields.push('status = @status');
     if (ward_id) fields.push('ward_id = @ward_id');
-    if (fields.length === 0) return res.status(400).json({ message: 'No fields to update' });
+    if (fields.length === 0) return null;
     const updateQuery = `UPDATE beds SET ${fields.join(', ')} WHERE bed_id = @bed_id`;
 
     const request = pool.request().input('bed_id', sql.Int, id);

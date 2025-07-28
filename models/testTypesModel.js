@@ -35,7 +35,7 @@ const updateTestType = async (id, { Name_of_test }) => {
     const fields = [];
 
     if (Name_of_test) fields.push('Name_of_test = @Name_of_test');
-    if (fields.length === 0) return res.status(400).json({ message: 'No fields to update' });
+    if (fields.length === 0) return null;
     const updateQuery = `UPDATE testtype SET ${fields.join(', ')} WHERE test_id = @test_id`;
 
     const request = pool.request().input('test_id', sql.Int, id);

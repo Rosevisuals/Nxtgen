@@ -82,16 +82,16 @@ const updateStaff = async (id, { specialization, biodata, head_department, licen
     if (license_number) fields.push('license_number = @license_number');
     if (role_id) fields.push('role_id = @role_id');
     if (department_id) fields.push('department_id = @department_id');
-    if (fields.length === 0) return res.status(400).json({ message: 'No fields to update' });
+    if (fields.length === 0) return null;
     const updateQuery = `UPDATE staff SET ${fields.join(', ')} WHERE staff_id = @staff_id`;
 
     const request = pool.request().input('staff_id', sql.Int, id);
     if (specialization) request.input('specialization', sql.VarChar(30), specialization);
-    if (biodata) request.input('biodata', sql.VarChar(20), biodata)
-    if (head_department) request.input('head_department', sql.VarChar(15), head_department)
-    if (license_number) request.input('license_number', sql.VarChar(20), license_number)
-    if (role_id) request.input('role_id', sql.Int, role_id)
-    if (department_id) request.input('department_id', sql.Int, department_id)
+    if (biodata) request.input('biodata', sql.VarChar(20), biodata);
+    if (head_department) request.input('head_department', sql.VarChar(15), head_department);
+    if (license_number) request.input('license_number', sql.VarChar(20), license_number);
+    if (role_id) request.input('role_id', sql.Int, role_id);
+    if (department_id) request.input('department_id', sql.Int, department_id);
     await request.query(updateQuery);
 
     const result = await pool.request()

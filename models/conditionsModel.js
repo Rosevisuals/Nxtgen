@@ -39,7 +39,7 @@ const updateCondition = async (id, { Name, Description, Status }) => {
     if (Name) fields.push('Name = @Name');
     if (Description) fields.push('Description = @Description');
     if (Status) fields.push('Status = @Status');
-    if (fields.length === 0) return res.status(400).json({ message: 'No fields to update' });
+    if (fields.length === 0) return null;
     const updateQuery = `UPDATE Conditions SET ${fields.join(', ')} WHERE ConditionID = @ConditionID`;
 
     const request = pool.request().input('ConditionID', sql.Int, id);

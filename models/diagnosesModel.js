@@ -85,7 +85,7 @@ const updateDiagnosis = async (id, {
         fields.push('requestdate = @requestdate');
         request.input('requestdate', sql.DateTime, requestdate);
     }
-    if (fields.length === 0) return res.status(400).json({ message: 'No fields to update' });
+    if (fields.length === 0) return null;
     const updateQuery = `UPDATE Diagnosis SET ${fields.join(', ')} WHERE DiagnosisID = @DiagnosisID`;
 
     request.input('DiagnosisID', sql.Int, id);
