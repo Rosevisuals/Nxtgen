@@ -30,8 +30,8 @@ const getDepartmentById = async (req, res) => {
 
 // ===== CREATE DEPARTMENT FUNCTION =====
 const createDepartment = async (req, res) => {
-  const { department_name } = req.body;
-  if (!department_name) {
+  const { name } = req.body;
+  if (!name) {
     return res.status(400).json({ message: 'Department name is required' });
   }
   try {

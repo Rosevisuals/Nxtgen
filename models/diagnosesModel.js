@@ -32,7 +32,19 @@ const deleteDiagnosis = async (id) => {
 
 const getAllDiagnoses = async () => {
     await poolConnect;
-    const result = await pool.request().query(`SELECT * FROM Diagnosis`);
+    const result = await pool.request().query(`
+        SELECT d.*, 
+               p.user_id as patient_user_id, pu.full_Name as patient_name, pu.email as patient_email, pu.phone as patient_phone,
+               s.user_id as doctor_user_id, su.full_Name as doctor_name, s.specialization, s.license_number,
+               c.Name as condition_name, c.Description as condition_description, c.Status as condition_status
+        FROM Diagnosis d
+        JOIN patients p ON d.patient_id = p.patient_id
+        JOIN users pu ON p.user_id = pu.user_id
+        JOIN staff s ON d.doctor_id = s.staff_id
+        JOIN users su ON s.user_id = su.user_id
+        LEFT JOIN Conditions c ON d.ConditionID = c.ConditionID
+        ORDER BY d.DiagnosisDate DESC
+    `);
     return result.recordset;
 }
 
@@ -40,7 +52,19 @@ const getDiagnosisById = async (id) => {
     await poolConnect;
     const result = await pool.request()
         .input('DiagnosisID', sql.Int, id)
-        .query(`SELECT * FROM Diagnosis WHERE DiagnosisID = @DiagnosisID`);
+        .query(`
+            SELECT d.*, 
+                   p.user_id as patient_user_id, pu.full_Name as patient_name, pu.email as patient_email, pu.phone as patient_phone,
+                   s.user_id as doctor_user_id, su.full_Name as doctor_name, s.specialization, s.license_number,
+                   c.Name as condition_name, c.Description as condition_description, c.Status as condition_status
+            FROM Diagnosis d
+            JOIN patients p ON d.patient_id = p.patient_id
+            JOIN users pu ON p.user_id = pu.user_id
+            JOIN staff s ON d.doctor_id = s.staff_id
+            JOIN users su ON s.user_id = su.user_id
+            LEFT JOIN Conditions c ON d.ConditionID = c.ConditionID
+            WHERE d.DiagnosisID = @DiagnosisID
+        `);
     return result.recordset[0];
 }
 
@@ -91,11 +115,74 @@ const updateDiagnosis = async (id, {
     request.input('DiagnosisID', sql.Int, id);
     await request.query(updateQuery);
 
-    const result = await pool.request()
-        .input('DiagnosisID', sql.Int, id)
-        .query(`SELECT * FROM Diagnosis WHERE DiagnosisID = @DiagnosisID`);
+    // Return updated diagnosis with complete details
+    return await getDiagnosisById(id);
+}
 
-    return result.recordset[0];
+// Get diagnoses by patient ID
+const getDiagnosesByPatientId = async (patient_id) => {
+    await poolConnect;
+    const result = await pool.request()
+        .input('patient_id', sql.Int, patient_id)
+        .query(`
+            SELECT d.*, 
+                   p.user_id as patient_user_id, pu.full_Name as patient_name, pu.email as patient_email, pu.phone as patient_phone,
+                   s.user_id as doctor_user_id, su.full_Name as doctor_name, s.specialization, s.license_number,
+                   c.Name as condition_name, c.Description as condition_description, c.Status as condition_status
+            FROM Diagnosis d
+            JOIN patients p ON d.patient_id = p.patient_id
+            JOIN users pu ON p.user_id = pu.user_id
+            JOIN staff s ON d.doctor_id = s.staff_id
+            JOIN users su ON s.user_id = su.user_id
+            LEFT JOIN Conditions c ON d.ConditionID = c.ConditionID
+            WHERE d.patient_id = @patient_id
+            ORDER BY d.DiagnosisDate DESC
+        `);
+    return result.recordset;
+}
+
+// Get diagnoses by doctor/staff ID
+const getDiagnosesByDoctorId = async (doctor_id) => {
+    await poolConnect;
+    const result = await pool.request()
+        .input('doctor_id', sql.Int, doctor_id)
+        .query(`
+            SELECT d.*, 
+                   p.user_id as patient_user_id, pu.full_Name as patient_name, pu.email as patient_email, pu.phone as patient_phone,
+                   s.user_id as doctor_user_id, su.full_Name as doctor_name, s.specialization, s.license_number,
+                   c.Name as condition_name, c.Description as condition_description, c.Status as condition_status
+            FROM Diagnosis d
+            JOIN patients p ON d.patient_id = p.patient_id
+            JOIN users pu ON p.user_id = pu.user_id
+            JOIN staff s ON d.doctor_id = s.staff_id
+            JOIN users su ON s.user_id = su.user_id
+            LEFT JOIN Conditions c ON d.ConditionID = c.ConditionID
+            WHERE d.doctor_id = @doctor_id
+            ORDER BY d.DiagnosisDate DESC
+        `);
+    return result.recordset;
+}
+
+// Get diagnoses by condition ID
+const getDiagnosesByConditionId = async (condition_id) => {
+    await poolConnect;
+    const result = await pool.request()
+        .input('condition_id', sql.Int, condition_id)
+        .query(`
+            SELECT d.*, 
+                   p.user_id as patient_user_id, pu.full_Name as patient_name, pu.email as patient_email, pu.phone as patient_phone,
+                   s.user_id as doctor_user_id, su.full_Name as doctor_name, s.specialization, s.license_number,
+                   c.Name as condition_name, c.Description as condition_description, c.Status as condition_status
+            FROM Diagnosis d
+            JOIN patients p ON d.patient_id = p.patient_id
+            JOIN users pu ON p.user_id = pu.user_id
+            JOIN staff s ON d.doctor_id = s.staff_id
+            JOIN users su ON s.user_id = su.user_id
+            LEFT JOIN Conditions c ON d.ConditionID = c.ConditionID
+            WHERE d.ConditionID = @condition_id
+            ORDER BY d.DiagnosisDate DESC
+        `);
+    return result.recordset;
 }
 
 module.exports = {
@@ -103,5 +190,8 @@ module.exports = {
     deleteDiagnosis,
     getAllDiagnoses,
     getDiagnosisById,
-    updateDiagnosis
+    updateDiagnosis,
+    getDiagnosesByPatientId,
+    getDiagnosesByDoctorId,
+    getDiagnosesByConditionId
 }

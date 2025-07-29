@@ -30,8 +30,8 @@ const getAppointmentById = async (req, res) => {
 
 // ===== CREATE APPOINTMENT FUNCTION =====
 const createAppointment = async (req, res) => {
-  const { patient_id, doctor_id, appointment_date, status } = req.body;
-  if (!patient_id || !doctor_id || !appointment_date || !status) {
+  const { patient_id, staff_id, department_id, appointment_date, status, notes } = req.body;
+  if (!patient_id || !staff_id || !department_id || !appointment_date || !status) {
     return res.status(400).json({ message: 'Required appointment data missing' });
   }
   try {

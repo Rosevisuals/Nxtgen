@@ -1,5 +1,5 @@
 // controllers/patientsController.js - Patient Management Controller
-const Patient = require('../models/patientModel');
+const { Patient, registerPatient: registerPatientModel } = require('../models/patientModel');
 const usersModel = require('../models/usersModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -34,40 +34,59 @@ const getPatientById = async (req, res) => {
 
 // ===== CREATE PATIENT FUNCTION (In-Person by Staff) =====
 const createPatient = async (req, res) => {
-  const { full_name, email, phone_number, gender, date_of_birth, address, doctor_id } = req.body;
-  if (!full_name || !email || !phone_number || !gender || !date_of_birth || !doctor_id) {
-    return res.status(400).json({ message: 'All patient details are required' });
+  const { 
+    full_Name, 
+    email, 
+    phone, 
+    gender, 
+    DOB, 
+    marital_status,
+    Address,
+    blood_group,
+    BMI,
+    NOTES,
+    emergency_contact
+  } = req.body;
+
+  // Validate required fields
+  if (!full_Name || !email || !phone || !gender || !DOB) {
+    return res.status(400).json({ message: 'All required patient details must be provided' });
   }
 
   try {
+    // Check if user already exists
     const existingUser = await usersModel.getUserByEmail(email);
     if (existingUser) {
       return res.status(409).json({ message: 'A user with this email already exists.' });
     }
 
-    const newUser = await usersModel.createUser({
-      full_Name: full_name,
+    // Prepare complete patient data for staff creation
+    const patientData = {
+      // User fields
+      full_Name,
       email,
-      phone: phone_number,
+      password_hash: null, // No password for staff-created patients initially
+      phone,
       gender,
-      DOB: date_of_birth,
-      Address: address,
+      DOB,
+      marital_status: marital_status || 'Single',
+      Address: Address || '',
       status: 'pending_setup', // Awaiting initial password setup
-      created_at: new Date(),
-    });
+      // Patient fields
+      blood_group: blood_group || null,
+      BMI: BMI || null,
+      NOTES: NOTES || 'Created by staff',
+      emergency_contact: emergency_contact || phone
+    };
 
-    await Patient.create({
-      // Note: We are not linking user_id here as the schema is unchanged
-      full_name,
-      date_of_birth,
-      gender,
-      phone_number,
-      address,
-      doctor_id,
-    });
+    // Use the combined registration function
+    const newPatient = await registerPatientModel(patientData);
 
-    const setupToken = jwt.sign({ user_id: newUser.user_id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    // Generate setup token for password creation
+    const setupToken = jwt.sign({ user_id: newPatient.user_id }, process.env.JWT_SECRET, { expiresIn: '24h' });
     const setupLink = `${process.env.FRONTEND_URL}/setup-password?token=${setupToken}`;
+    
+    // Send setup email
     sendEmail({
       to: email,
       subject: 'Set Up Your Hospital Account Password',
@@ -75,7 +94,14 @@ const createPatient = async (req, res) => {
     });
 
     res.status(201).json({
-      message: 'Patient registered. A password setup link has been sent to their email.',
+      message: 'Patient registered by staff. A password setup link has been sent to their email.',
+      patient: {
+        patient_id: newPatient.patient_id,
+        full_Name: newPatient.full_Name,
+        email: newPatient.email,
+        phone: newPatient.phone,
+        status: newPatient.status
+      }
     });
 
   } catch (error) {
@@ -116,41 +142,63 @@ const deletePatient = async (req, res) => {
 
 // ===== REGISTER PATIENT FUNCTION (Online Self-Registration) =====
 const registerPatient = async (req, res) => {
-  const { full_name, email, password, phone_number, gender, date_of_birth, address } = req.body;
-  if (!full_name || !email || !password || !phone_number || !gender || !date_of_birth) {
+  const { 
+    full_Name, 
+    email, 
+    password, 
+    phone, 
+    gender, 
+    DOB, 
+    marital_status, 
+    Address,
+    blood_group,
+    BMI,
+    NOTES,
+    emergency_contact
+  } = req.body;
+
+  // Validate required fields
+  if (!full_Name || !email || !password || !phone || !gender || !DOB) {
     return res.status(400).json({ message: 'All required fields must be provided.' });
   }
 
   try {
+    // Check if user already exists
     const existingUser = await usersModel.getUserByEmail(email);
     if (existingUser) {
       return res.status(409).json({ message: 'A user with this email already exists.' });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await usersModel.createUser({
-      full_Name: full_name,
+
+    // Prepare complete patient data
+    const patientData = {
+      // User fields
+      full_Name,
       email,
       password_hash: hashedPassword,
-      phone: phone_number,
+      phone,
       gender,
-      DOB: date_of_birth,
-      Address: address,
+      DOB,
+      marital_status: marital_status || 'Single',
+      Address: Address || '',
       status: 'pending_verification',
-      created_at: new Date(),
-    });
+      // Patient fields
+      blood_group: blood_group || null,
+      BMI: BMI || null,
+      NOTES: NOTES || '',
+      emergency_contact: emergency_contact || phone
+    };
 
-    await Patient.create({
-      full_name,
-      date_of_birth,
-      gender,
-      phone_number,
-      address,
-      doctor_id: null,
-    });
+    // Use the new combined registration function
+    const newPatient = await registerPatientModel(patientData);
 
-    const verificationToken = jwt.sign({ user_id: newUser.user_id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    // Generate verification token
+    const verificationToken = jwt.sign({ user_id: newPatient.user_id }, process.env.JWT_SECRET, { expiresIn: '24h' });
     const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+    
+    // Send verification email
     sendEmail({
       to: email,
       subject: 'Verify Your Email Address',
@@ -159,6 +207,12 @@ const registerPatient = async (req, res) => {
 
     res.status(201).json({
       message: 'Registration successful. Please check your email to verify your account.',
+      patient: {
+        patient_id: newPatient.patient_id,
+        full_Name: newPatient.full_Name,
+        email: newPatient.email,
+        status: newPatient.status
+      }
     });
 
   } catch (error) {

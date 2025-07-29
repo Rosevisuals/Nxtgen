@@ -34,7 +34,7 @@ router.post('/',
       isString: true,
       optional: false,
       isEmpty: false,
-      isIn: { options: "Available,unaviable" }
+      isIn: { options: "Available,unavailable" }
     },
     ward_id: {
       isInt: true,
@@ -62,7 +62,7 @@ router.put('/:id', checkSchema({
     isString: true,
     optional: false,
     isEmpty: false,
-    isIn: { options: "unaviable,Available" }
+    isIn: { options: "unavailable,Available" }
   },
   ward_id: {
     isInt: true,

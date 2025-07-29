@@ -111,10 +111,58 @@ const deleteDiagnosis = async (req, res) => {
   }
 };
 
+// Get diagnoses by patient ID
+const getDiagnosesByPatient = async (req, res) => {
+  const { patient_id } = req.params;
+  if (!patient_id) {
+    return res.status(400).json({ message: 'Patient ID is required' });
+  }
+  try {
+    const diagnoses = await diagnosesModel.getDiagnosesByPatientId(parseInt(patient_id));
+    res.json(diagnoses);
+  } catch (error) {
+    console.error('Error fetching patient diagnoses:', error.message);
+    res.status(500).json({ error: 'Failed to fetch patient diagnoses' });
+  }
+};
+
+// Get diagnoses by doctor/staff ID
+const getDiagnosesByDoctor = async (req, res) => {
+  const { doctor_id } = req.params;
+  if (!doctor_id) {
+    return res.status(400).json({ message: 'Doctor ID is required' });
+  }
+  try {
+    const diagnoses = await diagnosesModel.getDiagnosesByDoctorId(parseInt(doctor_id));
+    res.json(diagnoses);
+  } catch (error) {
+    console.error('Error fetching doctor diagnoses:', error.message);
+    res.status(500).json({ error: 'Failed to fetch doctor diagnoses' });
+  }
+};
+
+// Get diagnoses by condition ID
+const getDiagnosesByCondition = async (req, res) => {
+  const { condition_id } = req.params;
+  if (!condition_id) {
+    return res.status(400).json({ message: 'Condition ID is required' });
+  }
+  try {
+    const diagnoses = await diagnosesModel.getDiagnosesByConditionId(parseInt(condition_id));
+    res.json(diagnoses);
+  } catch (error) {
+    console.error('Error fetching condition diagnoses:', error.message);
+    res.status(500).json({ error: 'Failed to fetch condition diagnoses' });
+  }
+};
+
 module.exports = {
   createDiagnosis,
   deleteDiagnosis,
   getAllDiagnoses,
   getDiagnosisById,
-  updateDiagnosis
-}; 
+  updateDiagnosis,
+  getDiagnosesByPatient,
+  getDiagnosesByDoctor,
+  getDiagnosesByCondition
+};

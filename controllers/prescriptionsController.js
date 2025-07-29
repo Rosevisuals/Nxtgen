@@ -30,8 +30,8 @@ const getPrescriptionById = async (req, res) => {
 
 // ===== CREATE PRESCRIPTION FUNCTION =====
 const createPrescription = async (req, res) => {
-  const { patient_id, doctor_id, medication, dosage, frequency, start_date, end_date } = req.body;
-  if (!patient_id || !doctor_id || !medication || !dosage || !frequency || !start_date || !end_date) {
+  const { patient_id, staff_id, DiagnosisID, medication, dosage, date_issued, notes } = req.body;
+  if (!patient_id || !staff_id || !DiagnosisID || !medication || !dosage || !date_issued) {
     return res.status(400).json({ message: 'Required prescription data missing' });
   }
   try {
@@ -73,10 +73,58 @@ const deletePrescription = async (req, res) => {
   }
 };
 
+// Get prescriptions by patient ID
+const getPrescriptionsByPatient = async (req, res) => {
+  const { patient_id } = req.params;
+  if (!patient_id) {
+    return res.status(400).json({ message: 'Patient ID is required' });
+  }
+  try {
+    const prescriptions = await Prescription.findByPatientId(patient_id);
+    res.json(prescriptions);
+  } catch (error) {
+    console.error('Error fetching prescriptions for patient:', error.message);
+    res.status(500).json({ error: 'Failed to fetch prescriptions for patient' });
+  }
+};
+
+// Get prescriptions by staff ID
+const getPrescriptionsByStaff = async (req, res) => {
+  const { staff_id } = req.params;
+  if (!staff_id) {
+    return res.status(400).json({ message: 'Staff ID is required' });
+  }
+  try {
+    const prescriptions = await Prescription.findByStaffId(staff_id);
+    res.json(prescriptions);
+  } catch (error) {
+    console.error('Error fetching prescriptions for staff:', error.message);
+    res.status(500).json({ error: 'Failed to fetch prescriptions for staff' });
+  }
+};
+
+// Get prescriptions by diagnosis ID
+const getPrescriptionsByDiagnosis = async (req, res) => {
+  const { diagnosis_id } = req.params;
+  if (!diagnosis_id) {
+    return res.status(400).json({ message: 'Diagnosis ID is required' });
+  }
+  try {
+    const prescriptions = await Prescription.findByDiagnosisId(diagnosis_id);
+    res.json(prescriptions);
+  } catch (error) {
+    console.error('Error fetching prescriptions for diagnosis:', error.message);
+    res.status(500).json({ error: 'Failed to fetch prescriptions for diagnosis' });
+  }
+};
+
 module.exports = {
   getAllPrescriptions,
   getPrescriptionById,
   createPrescription,
   updatePrescription,
-  deletePrescription
+  deletePrescription,
+  getPrescriptionsByPatient,
+  getPrescriptionsByStaff,
+  getPrescriptionsByDiagnosis
 };

@@ -52,7 +52,7 @@ const deleteStaff = async (id) => {
 const getAllStaff = async () => {
     await poolConnect;
     const result = await pool.request().query(`
-      SELECT s.*, u.full_name AS user_name, u.email, u.phone, dept.name AS department_name
+      SELECT s.*, u.full_Name AS user_name, u.email, u.phone, dept.name AS department_name
       FROM staff s
       JOIN users u ON s.user_id = u.user_id
       JOIN departments dept ON s.department_id = dept.department_id
@@ -64,7 +64,7 @@ const getStaffById = async (id) => {
     await poolConnect;
     const result = await pool.request()
         .input('staff_id', sql.Int, id)
-        .query(`SELECT s.*, u.full_name AS user_name, u.email, u.phone, dept.name AS department_name
+        .query(`SELECT s.*, u.full_Name AS user_name, u.email, u.phone, dept.name AS department_name
         FROM staff s
         JOIN users u ON s.user_id = u.user_id
         JOIN departments dept ON s.department_id = dept.department_id
@@ -96,7 +96,7 @@ const updateStaff = async (id, { specialization, biodata, head_department, licen
 
     const result = await pool.request()
         .input('staff_id', sql.Int, id)
-        .query(`SELECT s.*, u.full_name AS user_name, u.email, u.phone, dept.name AS department_name
+        .query(`SELECT s.*, u.full_Name AS user_name, u.email, u.phone, dept.name AS department_name
               FROM staff s
               JOIN users u ON s.user_id = u.user_id
               JOIN departments dept ON s.department_id = dept.department_id

@@ -39,7 +39,7 @@ const updateTestType = async (id, { Name_of_test }) => {
     const updateQuery = `UPDATE testtype SET ${fields.join(', ')} WHERE test_id = @test_id`;
 
     const request = pool.request().input('test_id', sql.Int, id);
-    if (Name_of_test) request.input('Name_of_test', sql.VarChar(30), Name_of_test);
+    if (Name_of_test) request.input('Name_of_test', sql.VarChar(25), Name_of_test);
     await request.query(updateQuery);
 
     const result = await pool.request()

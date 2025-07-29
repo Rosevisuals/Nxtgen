@@ -10,15 +10,16 @@ const {
 } = require('../controllers/labRequestsController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
-router.get('/', getAllLabRequests);
-router.get('/:id', checkSchema({
+router.get('/', authenticateToken, getAllLabRequests);
+router.get('/:id', authenticateToken, checkSchema({
   id: {
     isInt: true,
     optional: false,
     isEmpty: false
   }
 }), getLabRequestById);
-router.post('/', checkSchema({
+
+router.post('/', authenticateToken, checkSchema({
   patient_id: {
     isInt: true,
     optional: false,
@@ -36,40 +37,26 @@ router.post('/', checkSchema({
   },
   technician_id: {
     isInt: true,
-    optional: true,
-    isEmpty: false
-  },
-  specialization: {
-    isString: true,
-    isLength: { options: { max: 30 } },
-    optional: true,
-    isEmpty: false
-  },
-  biodata: {
-    isString: true,
-    isLength: { options: { max: 20 } },
-    optional: true,
-    isEmpty: false
+    optional: true
   },
   notes: {
     isString: true,
     isLength: { options: { max: 25 } },
-    optional: true,
-    isEmpty: false
+    optional: true
   },
   results: {
     isString: true,
     isLength: { options: { max: 100 } },
-    optional: true,
-    isEmpty: false
+    optional: true
   },
   date_conducted: {
-    isDate: true,
+    isISO8601: true,
     optional: false,
     isEmpty: false
   }
 }), createLabRequest);
-router.put('/:id', checkSchema({
+
+router.put('/:id', authenticateToken, checkSchema({
   id: {
     isInt: true,
     optional: false,
@@ -77,55 +64,37 @@ router.put('/:id', checkSchema({
   },
   patient_id: {
     isInt: true,
-    optional: false,
-    isEmpty: false
+    optional: true
   },
   doctor_id: {
     isInt: true,
-    optional: false,
-    isEmpty: false
+    optional: true
   },
   test_id: {
     isInt: true,
-    optional: false,
-    isEmpty: false
+    optional: true
   },
   technician_id: {
     isInt: true,
-    optional: true,
-    isEmpty: false
-  },
-  specialization: {
-    isString: true,
-    isLength: { options: { max: 30 } },
-    optional: true,
-    isEmpty: false
-  },
-  biodata: {
-    isString: true,
-    isLength: { options: { max: 20 } },
-    optional: true,
-    isEmpty: false
+    optional: true
   },
   notes: {
     isString: true,
     isLength: { options: { max: 25 } },
-    optional: true,
-    isEmpty: false
+    optional: true
   },
   results: {
     isString: true,
     isLength: { options: { max: 100 } },
-    optional: true,
-    isEmpty: false
+    optional: true
   },
   date_conducted: {
-    isDate: true,
-    optional: false,
-    isEmpty: false
+    isISO8601: true,
+    optional: true
   }
 }), updateLabRequest);
-router.delete('/:id', checkSchema({
+
+router.delete('/:id', authenticateToken, checkSchema({
   id: {
     isInt: true,
     optional: false,
@@ -133,4 +102,4 @@ router.delete('/:id', checkSchema({
   }
 }), deleteLabRequest);
 
-module.exports = router; 
+module.exports = router;

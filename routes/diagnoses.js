@@ -5,7 +5,10 @@ const {
   getDiagnosisById,
   createDiagnosis,
   updateDiagnosis,
-  deleteDiagnosis
+  deleteDiagnosis,
+  getDiagnosesByPatient,
+  getDiagnosesByDoctor,
+  getDiagnosesByCondition
 } = require('../controllers/diagnosesController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 const { checkSchema } = require('express-validator');
@@ -104,4 +107,13 @@ router.delete('/:id', checkSchema({
   }
 }), deleteDiagnosis);
 
-module.exports = router; 
+// Get diagnoses by patient ID
+router.get('/patient/:patient_id', getDiagnosesByPatient);
+
+// Get diagnoses by doctor/staff ID  
+router.get('/doctor/:doctor_id', getDiagnosesByDoctor);
+
+// Get diagnoses by condition ID
+router.get('/condition/:condition_id', getDiagnosesByCondition);
+
+module.exports = router;
