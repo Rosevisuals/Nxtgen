@@ -1,4 +1,0 @@
-{"level":"info","message":"🚀 Server running on port 5000","service":"user-service"}
-{"level":"error","message":"Error: Failed to connect to your_db_server:1433 - getaddrinfo ENOTFOUND your_db_server","service":"user-service"}
-{"level":"info","message":"🚀 Server running on port 5000","service":"user-service"}
-{"level":"error","message":"Error: Failed to connect to your_db_server:1433 - getaddrinfo ENOTFOUND your_db_server","service":"user-service"}

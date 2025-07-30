@@ -11,6 +11,7 @@ const helmet = require('helmet'); // Helmet helps secure your apps by setting va
 const rateLimit = require('express-rate-limit'); // Rate limiting middleware to prevent abuse
 const logger = require('./config/logger'); // Import our custom logger
 const morgan = require('morgan'); // HTTP request logger middleware
+const { authenticateToken } = require('./middleware/authMiddleware');
 
 // Create our Express application (this is like creating a new web server)
 const app = express();
@@ -69,13 +70,13 @@ app.use('/api/patients', require('./routes/patients'));   // Patient routes
 // // app.use('/api/chats', require('./routes/chats'));
 // // app.use('/api/emails', require('./routes/emails'));
 // // app.use('/api/reports', require('./routes/reports'));
-app.use('/api/test-types', require('./routes/test-types'));
-app.use('/api/conditions', require('./routes/conditions'));
-app.use('/api/wards', require('./routes/wards'));
-app.use('/api/diagnoses', require('./routes/diagnoses'));
-app.use('/api/lab-requests', require('./routes/lab-requests'));
-app.use('/api/beds', require('./routes/beds'));
-app.use('/api/staff', require('./routes/staff'));
+app.use('/api/test-types', authenticateToken, require('./routes/test-types'));
+app.use('/api/conditions', authenticateToken, require('./routes/conditions'));
+app.use('/api/wards', authenticateToken, require('./routes/wards'));
+app.use('/api/diagnoses', authenticateToken, require('./routes/diagnoses'));
+app.use('/api/lab-requests', authenticateToken, require('./routes/lab-requests'));
+app.use('/api/beds', authenticateToken, require('./routes/beds'));
+app.use('/api/staff', authenticateToken, require('./routes/staff'));
 
 // ===== ROOT ROUTE =====
 // This is what people see when they visit the main URL (like http://localhost:5000/)

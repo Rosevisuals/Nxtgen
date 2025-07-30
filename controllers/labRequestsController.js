@@ -50,7 +50,7 @@ const createLabRequest = async (req, res) => {
       doctor_id,
       test_id,
       technician_id,
-      date_conducted,
+      date_conducted: date_conducted ?? new Date().toISOString(),
       notes,
       results
     });

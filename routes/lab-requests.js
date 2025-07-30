@@ -8,10 +8,9 @@ const {
   updateLabRequest,
   deleteLabRequest
 } = require('../controllers/labRequestsController');
-const { authenticateToken } = require('../middleware/authMiddleware');
 
-router.get('/', authenticateToken, getAllLabRequests);
-router.get('/:id', authenticateToken, checkSchema({
+router.get('/', getAllLabRequests);
+router.get('/:id', checkSchema({
   id: {
     isInt: true,
     optional: false,
@@ -19,7 +18,7 @@ router.get('/:id', authenticateToken, checkSchema({
   }
 }), getLabRequestById);
 
-router.post('/', authenticateToken, checkSchema({
+router.post('/', checkSchema({
   patient_id: {
     isInt: true,
     optional: false,
@@ -51,12 +50,12 @@ router.post('/', authenticateToken, checkSchema({
   },
   date_conducted: {
     isISO8601: true,
-    optional: false,
+    optional: true,
     isEmpty: false
   }
 }), createLabRequest);
 
-router.put('/:id', authenticateToken, checkSchema({
+router.put('/:id', checkSchema({
   id: {
     isInt: true,
     optional: false,
@@ -94,7 +93,7 @@ router.put('/:id', authenticateToken, checkSchema({
   }
 }), updateLabRequest);
 
-router.delete('/:id', authenticateToken, checkSchema({
+router.delete('/:id', checkSchema({
   id: {
     isInt: true,
     optional: false,

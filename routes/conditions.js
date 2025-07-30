@@ -8,7 +8,6 @@ const {
   updateCondition,
   deleteCondition
 } = require('../controllers/conditionsController');
-const { authenticateToken } = require('../middleware/authMiddleware');
 
 router.get('/', getAllConditions);
 router.get('/:id', checkSchema({

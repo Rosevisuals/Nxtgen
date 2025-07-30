@@ -34,12 +34,12 @@ const getPatientById = async (req, res) => {
 
 // ===== CREATE PATIENT FUNCTION (In-Person by Staff) =====
 const createPatient = async (req, res) => {
-  const { 
-    full_Name, 
-    email, 
-    phone, 
-    gender, 
-    DOB, 
+  const {
+    full_Name,
+    email,
+    phone,
+    gender,
+    DOB,
     marital_status,
     Address,
     blood_group,
@@ -85,7 +85,7 @@ const createPatient = async (req, res) => {
     // Generate setup token for password creation
     const setupToken = jwt.sign({ user_id: newPatient.user_id }, process.env.JWT_SECRET, { expiresIn: '24h' });
     const setupLink = `${process.env.FRONTEND_URL}/setup-password?token=${setupToken}`;
-    
+
     // Send setup email
     sendEmail({
       to: email,
@@ -142,14 +142,14 @@ const deletePatient = async (req, res) => {
 
 // ===== REGISTER PATIENT FUNCTION (Online Self-Registration) =====
 const registerPatient = async (req, res) => {
-  const { 
-    full_Name, 
-    email, 
-    password, 
-    phone, 
-    gender, 
-    DOB, 
-    marital_status, 
+  const {
+    full_Name,
+    email,
+    password,
+    phone,
+    gender,
+    DOB,
+    marital_status,
     Address,
     blood_group,
     BMI,
@@ -183,7 +183,7 @@ const registerPatient = async (req, res) => {
       DOB,
       marital_status: marital_status || 'Single',
       Address: Address || '',
-      status: 'pending_verification',
+      status: 'inactive',
       // Patient fields
       blood_group: blood_group || null,
       BMI: BMI || null,
@@ -197,7 +197,7 @@ const registerPatient = async (req, res) => {
     // Generate verification token
     const verificationToken = jwt.sign({ user_id: newPatient.user_id }, process.env.JWT_SECRET, { expiresIn: '24h' });
     const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
-    
+
     // Send verification email
     sendEmail({
       to: email,

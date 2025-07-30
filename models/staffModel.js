@@ -1,7 +1,15 @@
 const { poolConnect, pool, sql } = require('../config/db');
 
 const createStaff = async ({
-    user_id,
+    full_Name,
+    email,
+    phone,
+    password_hash,
+    gender,
+    DOB,
+    marital_status,
+    Address,
+    status,
     specialization,
     biodata,
     head_department,
@@ -11,17 +19,34 @@ const createStaff = async ({
     created_at
 }) => {
     await poolConnect;
-    const now = new Date();
-    const insertResult = await pool.request()
-        .input('user_id', sql.Int, user_id)
-        .input('specialization', sql.VarChar(30), specialization)
-        .input('biodata', sql.VarChar(20), biodata)
-        .input('head_department', sql.VarChar(15), head_department)
-        .input('license_number', sql.VarChar(20), license_number)
-        .input('role_id', sql.Int, role_id)
-        .input('department_id', sql.Int, department_id)
-        .input('created_at', sql.DateTime, created_at ?? now)
-        .query(`INSERT INTO staff (
+    const transaction = new sql.Transaction(pool);
+    try {
+        const now = new Date();
+        await transaction.begin();
+        const userInsertResult = await transaction.request()
+            .input('full_Name', sql.VarChar(50), full_Name)
+            .input('email', sql.VarChar(100), email)
+            .input('phone', sql.VarChar(20), phone)
+            .input('password_hash', sql.VarChar(255), password_hash)
+            .input('gender', sql.VarChar(5), gender)
+            .input('DOB', sql.Date, DOB)
+            .input('marital_status', sql.VarChar(25), marital_status)
+            .input('Address', sql.VarChar(50), Address)
+            .input('status', sql.VarChar(20), status || 'active')
+            .input('created_at', sql.DateTime, new Date())
+            .query('INSERT INTO users (full_Name, email, phone, password_hash, gender, DOB, marital_status, Address, status, created_at) OUTPUT INSERTED.user_id VALUES (@full_Name, @email, @phone, @password_hash, @gender, @DOB, @marital_status, @Address, @status, @created_at)');
+
+        const user_id = userInsertResult.recordset[0].user_id;
+        const insertResult = await transaction.request()
+            .input('user_id', sql.Int, user_id)
+            .input('specialization', sql.VarChar(30), specialization)
+            .input('biodata', sql.VarChar(20), biodata)
+            .input('head_department', sql.VarChar(15), head_department)
+            .input('license_number', sql.VarChar(20), license_number)
+            .input('role_id', sql.Int, role_id)
+            .input('department_id', sql.Int, department_id)
+            .input('created_at', sql.DateTime, created_at ?? now)
+            .query(`INSERT INTO staff (
         user_id, 
         specialization, 
         biodata, 
@@ -39,7 +64,13 @@ const createStaff = async ({
         @role_id, 
         @department_id, 
         @created_at)`);
-    return insertResult.recordset[0];
+        return insertResult.recordset[0];
+        await transaction.commit();
+    }
+    catch (err) {
+        await transaction.rollback();
+        throw err;
+    }
 }
 
 const deleteStaff = async (id) => {

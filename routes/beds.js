@@ -8,7 +8,6 @@ const {
   updateBed,
   deleteBed
 } = require('../controllers/bedsController');
-const { authenticateToken } = require('../middleware/authMiddleware');
 
 router.get('/', getAllBeds);
 router.get('/:id', checkSchema({
