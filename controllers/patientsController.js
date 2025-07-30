@@ -221,6 +221,55 @@ const registerPatient = async (req, res) => {
   }
 };
 
+// ===== GET PATIENT DASHBOARD SUMMARY =====
+const getPatientDashboard = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const patient = await Patient.findById(id);
+    if (!patient) {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+
+    // Get dashboard data
+    const appointments = await Patient.getAppointments(id);
+    const prescriptions = await Patient.getPrescriptions(id);
+    const labRequests = await Patient.getLabRequests(id);
+    const billing = await Patient.getBilling(id);
+
+    // Process data for dashboard
+    const upcomingAppointments = appointments.filter(apt => new Date(apt.appointment_date) > new Date());
+    const pendingResults = labRequests.filter(lab => !lab.results || lab.results === 'Pending').length;
+    const unpaidBills = billing.filter(bill => bill.status === 'unpaid').reduce((sum, bill) => sum + parseFloat(bill.amount), 0);
+
+    res.json({
+      patient,
+      nextAppointment: upcomingAppointments[0] || null,
+      pendingResults,
+      unpaidBills,
+      recentAppointments: appointments.slice(0, 3),
+      activePrescriptions: prescriptions.slice(0, 3)
+    });
+  } catch (error) {
+    console.error('Error fetching patient dashboard:', error.message);
+    res.status(500).json({ error: 'Failed to fetch dashboard data' });
+  }
+};
+
+// ===== GET CURRENT PATIENT (ME) =====
+const getCurrentPatient = async (req, res) => {
+  try {
+    const user_id = req.user.user_id; // From JWT token
+    const patient = await Patient.findByUserId(user_id);
+    if (!patient) {
+      return res.status(404).json({ message: 'Patient profile not found' });
+    }
+    res.json(patient);
+  } catch (error) {
+    console.error('Error fetching current patient:', error.message);
+    res.status(500).json({ error: 'Failed to fetch patient profile' });
+  }
+};
+
 module.exports = {
   getAllPatients,
   getPatientById,
@@ -228,4 +277,6 @@ module.exports = {
   updatePatient,
   deletePatient,
   registerPatient,
+  getPatientDashboard,
+  getCurrentPatient
 };
