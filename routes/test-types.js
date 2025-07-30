@@ -7,7 +7,6 @@ const {
   updateTestType,
   deleteTestType
 } = require('../controllers/testTypesController');
-const { authenticateToken } = require('../middleware/authMiddleware');
 const { checkSchema } = require('express-validator');
 
 router.get('/', getAllTestType);

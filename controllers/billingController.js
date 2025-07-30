@@ -33,8 +33,8 @@ const getBillById = async (req, res) => {
 
 // ===== CREATE BILL FUNCTION =====
 const createBill = async (req, res) => {
-  const { patient_id, amount, status, due_date } = req.body;
-  if (!patient_id || !amount || !status || !due_date) {
+  const { patient_id, amount, status, method_of_payment, service_name, service_id, received_by, paid_by, due_date } = req.body;
+  if (!patient_id || !amount || !status || !method_of_payment || !service_name || !service_id || !received_by || !paid_by || !due_date) {
     return res.status(400).json({ message: 'Required bill data missing' });
   }
   try {

@@ -7,7 +7,6 @@ const {
   updateWard,
   deleteWard
 } = require('../controllers/wardsController');
-const { authenticateToken } = require('../middleware/authMiddleware');
 const { checkSchema } = require('express-validator');
 
 router.get('/', getAllWards);

@@ -33,7 +33,15 @@ const createStaff = async (req, res) => {
     return res.status(400).json({ error: result.array() });
   }
   const {
-    user_id,
+    full_Name,
+    email,
+    password,
+    phone,
+    gender,
+    DOB,
+    marital_status,
+    Address,
+    status,
     specialization,
     biodata,
     head_department,
@@ -44,7 +52,15 @@ const createStaff = async (req, res) => {
   } = req.body;
   try {
     const newStaff = await staffModel.createStaff({
-      user_id,
+      full_Name,
+      email,
+      password,
+      phone,
+      gender,
+      DOB,
+      marital_status,
+      Address,
+      status,
       specialization,
       biodata,
       head_department,

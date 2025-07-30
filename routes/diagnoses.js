@@ -10,7 +10,6 @@ const {
   getDiagnosesByDoctor,
   getDiagnosesByCondition
 } = require('../controllers/diagnosesController');
-const { authenticateToken } = require('../middleware/authMiddleware');
 const { checkSchema } = require('express-validator');
 
 router.get('/', getAllDiagnoses);
@@ -49,12 +48,12 @@ router.post('/', checkSchema({
   },
   DiagnosisDate: {
     isDate: true,
-    optional: false,
+    optional: true,
     isEmpty: false
   },
   requestdate: {
     isDate: true,
-    optional: false,
+    optional: true,
     isEmpty: false
   }
 }), createDiagnosis);

@@ -8,7 +8,6 @@ const {
   updateStaff,
   deleteStaff
 } = require('../controllers/staffController');
-const { authenticateToken } = require('../middleware/authMiddleware');
 
 router.get('/', getAllStaff);
 router.get('/:id', checkSchema({
@@ -19,10 +18,64 @@ router.get('/:id', checkSchema({
   }
 }), getStaffById);
 router.post('/', checkSchema({
-  user_id: {
-    isInt: true,
+  full_Name: {
+    isString: true,
+    isLength: { options: { max: 100 } },
+    optional: true,
+    isEmpty: false
+  },
+  email: {
+    isString: true,
+    isLength: { options: { max: 100 } },
+    optional: true,
+    isEmpty: false
+  },
+  password: {
+    isString: true,
+    isLength: { options: { max: 50 } },
+    optional: true,
+    isEmpty: false
+  },
+  phone: {
+    isString: true,
+    isLength: { options: { max: 50 } },
+    optional: true,
+    isEmpty: false
+  },
+  gender: {
+    isString: true,
+    isLength: { options: { max: 15 } },
+    isIn: {
+      options: "M,F",
+      optional: false,
+      isEmpty: false
+    }
+  },
+  DOB: {
+    isDate: true,
     optional: false,
     isEmpty: false
+  },
+  marital_status: {
+    isString: true,
+    isLength: { options: { max: 30 } },
+    optional: false,
+    isEmpty: false
+  },
+  Address: {
+    isString: true,
+    isLength: { options: { max: 30 } },
+    optional: false,
+    isEmpty: false
+  },
+  status: {
+    isString: true,
+    isLength: { options: { max: 15 } },
+    isIn: {
+      options: "active,inactive",
+      optional: true,
+      isEmpty: false
+    }
   },
   specialization: {
     isString: true,
