@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const { validationResult } = require("express-validator");
 const staffModel = require("../models/staffModel");
 
@@ -54,7 +55,7 @@ const createStaff = async (req, res) => {
     const newStaff = await staffModel.createStaff({
       full_Name,
       email,
-      password,
+      password: await bcrypt.hash(password, 10),
       phone,
       gender,
       DOB,

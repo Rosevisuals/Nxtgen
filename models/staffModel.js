@@ -4,7 +4,7 @@ const createStaff = async ({
     full_Name,
     email,
     phone,
-    password_hash,
+    password,
     gender,
     DOB,
     marital_status,
@@ -27,7 +27,7 @@ const createStaff = async ({
             .input('full_Name', sql.VarChar(50), full_Name)
             .input('email', sql.VarChar(100), email)
             .input('phone', sql.VarChar(20), phone)
-            .input('password_hash', sql.VarChar(255), password_hash)
+            .input('password_hash', sql.VarChar(255), password)
             .input('gender', sql.VarChar(5), gender)
             .input('DOB', sql.Date, DOB)
             .input('marital_status', sql.VarChar(25), marital_status)
