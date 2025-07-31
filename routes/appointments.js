@@ -8,7 +8,8 @@ const {
   getAppointmentById,
   createAppointment,
   updateAppointment,
-  deleteAppointment
+  deleteAppointment,
+  getPatientAppointments
 } = require('../controllers/appointmentsController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
@@ -26,5 +27,9 @@ router.put('/:id', authenticateToken, updateAppointment);
 
 // DELETE /api/appointments/:id
 router.delete('/:id', authenticateToken, deleteAppointment);
+
+// GET /api/appointments/patient/:patient_id
+// Get appointments for specific patient
+router.get('/patient/:patient_id', authenticateToken, getPatientAppointments);
 
 module.exports = router;

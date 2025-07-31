@@ -9,12 +9,22 @@ const {
   createPatient,
   updatePatient,
   deletePatient,
-  registerPatient 
+  registerPatient,
+  getPatientDashboard,
+  getCurrentPatient
 } = require('../controllers/patientsController');
 
 // GET /api/patients
 // Get all patients
 router.get('/', getAllPatients);
+
+// GET /api/patients/me
+// Get current patient (from JWT token)
+router.get('/me', getCurrentPatient);
+
+// GET /api/patients/:id/dashboard
+// Get patient dashboard summary
+router.get('/:id/dashboard', getPatientDashboard);
 
 // GET /api/patients/:id
 // Get patient by ID
