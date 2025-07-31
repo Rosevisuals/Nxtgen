@@ -64,8 +64,8 @@ const createStaff = async ({
         @role_id, 
         @department_id, 
         @created_at)`);
-        return insertResult.recordset[0];
         await transaction.commit();
+        return insertResult.recordset[0];
     }
     catch (err) {
         await transaction.rollback();

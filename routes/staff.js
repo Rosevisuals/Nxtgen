@@ -126,11 +126,6 @@ router.put('/:id', checkSchema({
     optional: false,
     isEmpty: false
   },
-  user_id: {
-    isInt: true,
-    optional: false,
-    isEmpty: false
-  },
   specialization: {
     isString: true,
     isLength: { options: { max: 30 } },
