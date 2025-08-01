@@ -71,7 +71,7 @@ const createPatient = async (req, res) => {
       DOB,
       marital_status: marital_status || 'Single',
       Address: Address || '',
-      status: 'pending_setup', // Awaiting initial password setup
+      status: 'inactive', // Will be activated after password setup
       // Patient fields
       blood_group: blood_group || null,
       BMI: BMI || null,
@@ -87,14 +87,19 @@ const createPatient = async (req, res) => {
     const setupLink = `${process.env.FRONTEND_URL}/setup-password?token=${setupToken}`;
 
     // Send setup email
-    sendEmail({
+    const emailResult = await sendEmail({
       to: email,
       subject: 'Set Up Your Hospital Account Password',
       text: `Welcome to our hospital. Please set up your password by clicking this link: ${setupLink}`
     });
 
+    const message = emailResult.success 
+      ? 'Patient registered successfully. Password setup email sent.'
+      : `Patient registered successfully. Warning: Email failed to send (${emailResult.error})`;
+
     res.status(201).json({
-      message: 'Patient registered by staff. A password setup link has been sent to their email.',
+      message,
+      emailSent: emailResult.success,
       patient: {
         patient_id: newPatient.patient_id,
         full_Name: newPatient.full_Name,
@@ -105,8 +110,13 @@ const createPatient = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error creating patient:', error.message);
-    res.status(500).json({ error: 'Failed to create patient' });
+    console.error('Error creating patient:', error);
+    console.error('Stack trace:', error.stack);
+    res.status(500).json({ 
+      error: 'Failed to create patient',
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 

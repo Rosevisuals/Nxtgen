@@ -29,11 +29,11 @@ const sendEmail = async (options) => {
   // 3) Actually send the email
   try {
     await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully!');
+    console.log('Email sent successfully to:', options.to);
+    return { success: true, message: 'Email sent successfully' };
   } catch (error) {
-    console.error('Error sending email:', error);
-    // In a real app, you might want to throw the error to be handled by the calling function
-    // throw new Error('There was an error sending the email. Please try again later.');
+    console.error('Error sending email to:', options.to, error.message);
+    return { success: false, error: error.message };
   }
 };
 
