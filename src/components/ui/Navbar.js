@@ -2,19 +2,12 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Button from './Button';
+import './navbar.css';
 
 /**
  * Navbar Component
  * 
  * A reusable navbar component for the application header.
- * 
- * @param {string} title - The navbar title
- * @param {node} logo - The navbar logo
- * @param {array} links - Array of navigation links
- * @param {node} rightContent - Content to display on the right side
- * @param {boolean} transparent - Whether the navbar should be transparent
- * @param {boolean} fixed - Whether the navbar should be fixed at the top
- * @param {string} className - Additional CSS classes
  */
 const Navbar = ({
   title,
@@ -27,25 +20,11 @@ const Navbar = ({
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
-  // Base navbar class
   let navbarClass = 'navbar';
+  if (transparent) navbarClass += ' navbar-transparent';
+  if (fixed) navbarClass += ' navbar-fixed';
+  if (className) navbarClass += ` ${className}`;
   
-  // Add transparent class if needed
-  if (transparent) {
-    navbarClass += ' navbar-transparent';
-  }
-  
-  // Add fixed class if needed
-  if (fixed) {
-    navbarClass += ' navbar-fixed';
-  }
-  
-  // Add any additional classes
-  if (className) {
-    navbarClass += ` ${className}`;
-  }
-  
-  // Toggle mobile menu
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -115,12 +94,10 @@ Navbar.propTypes = {
 const NavbarUser = ({ user, onLogout }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
-  // Toggle dropdown
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
   
-  // Close dropdown when clicking outside
   const closeDropdown = () => {
     setIsDropdownOpen(false);
   };
@@ -157,16 +134,6 @@ const NavbarUser = ({ user, onLogout }) => {
             </div>
             
             <ul className="navbar-user-menu">
-              <li>
-                <Link to="/profile" onClick={closeDropdown}>
-                  <i className="fas fa-user"></i> Profile
-                </Link>
-              </li>
-              <li>
-                <Link to="/settings" onClick={closeDropdown}>
-                  <i className="fas fa-cog"></i> Settings
-                </Link>
-              </li>
               <li className="navbar-user-divider"></li>
               <li>
                 <button onClick={onLogout} className="navbar-user-logout">
@@ -190,7 +157,6 @@ NavbarUser.propTypes = {
   onLogout: PropTypes.func.isRequired,
 };
 
-// Attach NavbarUser as a property of Navbar for convenience
 Navbar.User = NavbarUser;
 
 export default Navbar;

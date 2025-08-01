@@ -1,0 +1,89 @@
+.doctor-navbar {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 800;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand a {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a3c34;
+  text-decoration: none;
+}
+
+.navbar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.navbar-menu {
+  display: flex;
+}
+
+.navbar-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 1rem;
+}
+
+.navbar-menu li a,
+.navbar-menu .logout-button {
+  color: #1a3c34;
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+.navbar-menu li a:hover,
+.navbar-menu .logout-button:hover {
+  background-color: #f1f5f9;
+  border-radius: 4px;
+}
+
+.navbar-menu li a.active {
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .navbar-toggle {
+    display: block;
+  }
+
+  .navbar-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 200px;
+  }
+
+  .navbar-menu.open {
+    display: block;
+  }
+
+  .navbar-menu ul {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .navbar-menu li a,
+  .navbar-menu .logout-button {
+    display: block;
+    padding: 0.5rem;
+  }
+}

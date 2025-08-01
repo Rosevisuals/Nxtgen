@@ -1,12 +1,54 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { login } from '../services/authService';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert(`Email: ${email}\nPassword: ${password}`);
+        setIsLoading(true);
+        
+        try {
+            const response = await login(email, password);
+            
+            // Store user data in localStorage
+            localStorage.setItem('user_id', response.user.user_id);
+            localStorage.setItem('user_email', response.user.email);
+            localStorage.setItem('user_name', response.user.full_Name);
+            
+            // Navigate based on user role or default to patient dashboard
+            if (response.user.role) {
+                // Handle different roles
+                switch (response.user.role.toLowerCase()) {
+                    case 'doctor':
+                        navigate('/DoctorsDashboard');
+                        break;
+                    case 'receptionist':
+                        navigate('/ReceptionistDashboard');
+                        break;
+                    case 'admin':
+                        navigate('/AdminDashboard');
+                        break;
+                    default:
+                        navigate('/PatientDashboard');
+                }
+            } else {
+                // Default to patient dashboard
+                navigate('/PatientDashboard');
+            }
+            
+        } catch (error) {
+            console.error('Login error:', error);
+            toast.error(error.message || 'Login failed. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -15,6 +57,7 @@ const Login = () => {
             display: 'flex',
             fontFamily: 'Segoe UI, sans-serif',
         }}>
+            <ToastContainer position="top-right" autoClose={3000} />
             
             <div style={{
                 flex: 1,
@@ -112,25 +155,27 @@ const Login = () => {
 
                     <button
                         type="submit"
+                        disabled={isLoading}
                         style={{
-                            background: '#1976d2',
+                            background: isLoading ? '#ccc' : '#1976d2',
                             color: '#fff',
                             padding: '0.9rem',
                             border: 'none',
-                            borderRadius: '8px',
+                            borderRadius: '8px', 
                             fontWeight: '600',
                             fontSize: '1rem',
-                            cursor: 'pointer',
+                            cursor: isLoading ? 'not-allowed' : 'pointer',
                             transition: 'background 0.3s ease',
                         }}
-                        onMouseOver={e => e.target.style.background = '#155db0'}
-                        onMouseOut={e => e.target.style.background = '#1976d2'}
+                        onMouseOver={e => !isLoading && (e.target.style.background = '#155db0')}
+                        onMouseOut={e => !isLoading && (e.target.style.background = '#1976d2')}
                     >
-                        Login
+                        {isLoading ? 'Logging in...' : 'Login'}
                     </button>
 
                     <p style={{ textAlign: 'center', fontSize: '0.85rem', color: '#666' }}>
                         Forgot your password? <a href="/reset" style={{ color: '#1976d2', textDecoration: 'none' }}>Reset</a>
+                         <Link to="/DoctorsDashboard">Doctor's dashboard</Link>
                     </p>
                 </form>
             </div>

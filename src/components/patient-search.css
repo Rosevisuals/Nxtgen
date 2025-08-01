@@ -1,0 +1,84 @@
+.patient-search {
+  padding: 20px;
+  margin-left: 250px;
+  transition: margin-left 0.3s ease-in-out;
+  background-color: #f9fafb;
+}
+
+@media (max-width: 768px) {
+  .patient-search {
+    margin-left: 0;
+  }
+}
+
+.page-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #b91c1c;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.page-icon {
+  margin-right: 0.5rem;
+}
+
+.search-card {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.search-input {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.search-input input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.results-card {
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.no-results {
+  text-align: center;
+  color: #6b7280;
+  padding: 1rem;
+}
+
+@media (max-width: 576px) {
+  .search-card,
+  .results-card {
+    padding: 1rem;
+  }
+
+  .form-group label {
+    font-size: 0.875rem;
+  }
+
+  .search-input input {
+    font-size: 0.875rem;
+  }
+}

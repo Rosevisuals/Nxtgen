@@ -1,0 +1,172 @@
+/* Container styles */
+.appointment-scheduling {
+  max-width: calc(100% - 250px);
+  margin-left: 250px;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f1f8ff, #ffffff);
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  font-family: 'Poppins', sans-serif;
+}
+
+@media (max-width: 768px) {
+  .appointment-scheduling {
+    max-width: 100%;
+    margin-left: 0;
+    padding: 1rem;
+  }
+}
+
+/* Heading */
+.appointment-scheduling h1 {
+  font-weight: 700;
+  color: #004085;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Scheduling controls */
+.scheduling-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.scheduling-controls .card {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  width: 100%;
+  max-width: 300px;
+}
+
+.scheduling-controls .card:hover {
+  transform: translateY(-4px);
+}
+
+/* Form controls */
+.form-control, .form-select {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.95rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+/* Table */
+.appointment-card {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 1rem 0;
+}
+
+.appointment-card .card-body {
+  padding: 1.5rem;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.table {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+.table th {
+  background-color: #f9fafb;
+  color: #374151;
+  font-weight: 600;
+  padding: 0.75rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.table td {
+  padding: 0.75rem;
+  vertical-align: middle;
+  text-align: center;
+  background-color: #e9f5ff;
+}
+
+.table tr:hover {
+  background-color: #f3f4f6;
+}
+
+/* Status badges */
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-scheduled {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-pending-approval {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-checked-in {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-in-progress {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-completed {
+  background-color: #e0f2fe;
+  color: #0e7490;
+}
+
+.status-cancelled {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* Table actions */
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+/* Modal */
+.modal-content {
+  border-radius: 0.5rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.modal-title {
+  color: #004085;
+}
+
+/* Toastify */
+.Toastify__toast {
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Accessibility */
+button[aria-label], .form-control, .form-select {
+  position: relative;
+}
+
+button[aria-label]:focus, .form-control:focus, .form-select:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}

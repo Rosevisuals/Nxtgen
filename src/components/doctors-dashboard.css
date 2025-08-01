@@ -1,0 +1,185 @@
+.doctors-dashboard {
+  padding: 20px;
+  margin-left: 250px;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .doctors-dashboard {
+    margin-left: 0;
+  }
+}
+
+.dashboard-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1a3c34;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.stats-row {
+  margin-bottom: 2rem;
+}
+
+.stats-card {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a3c34;
+}
+
+.icon-style {
+  font-size: 2.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.calendar-card {
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-card .card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.calendar-date {
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.chart-card {
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chart-card .card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.appointment-card {
+  margin-bottom: 2rem;
+}
+
+.appointment-card .card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.appointment-table {
+  width: 100%;
+}
+
+.appointment-time {
+  display: flex;
+  align-items: center;
+}
+
+.patient-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.patient-name {
+  font-weight: 600;
+}
+
+.patient-id {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+}
+
+.status-primary {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.status-success {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.status-warning {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.status-info {
+  background-color: #17a2b8;
+  color: #fff;
+}
+
+.status-danger {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.no-data {
+  text-align: center;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.loading {
+  text-align: center;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+@media (max-width: 576px) {
+  .stats-card {
+    margin-bottom: 1rem;
+  }
+
+  .view-toggle button {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .appointment-table {
+    font-size: 0.875rem;
+  }
+
+  .table-actions button {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}

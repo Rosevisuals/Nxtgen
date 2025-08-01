@@ -1,0 +1,172 @@
+/* appointment-request.css */
+.appointment-request {
+  padding: 2rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.request-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.appointment-request.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+}
+
+.appointment-request.loading p {
+  font-size: 1.2rem;
+  color: #6b7280;
+}
+
+.appointment-request-card {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.form-section {
+  margin-bottom: 1.5rem;
+}
+
+.form-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-row {
+  margin-bottom: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Input and Select styles (assumes Input and Select components use these classes) */
+.form-control {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-control[aria-multiline="true"] {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+/* Button styles (assumes Button component uses these classes) */
+.btn-primary {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.btn-primary:disabled {
+  background-color: #6b7280;
+  border-color: #6b7280;
+  cursor: not-allowed;
+}
+
+.btn-outline-primary {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.btn-outline-primary:hover {
+  background-color: #eff6ff;
+}
+
+.btn-outline-primary:disabled {
+  border-color: #6b7280;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.btn-outline-secondary {
+  border-color: #6b7280;
+  color: #6b7280;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #f3f4f6;
+}
+
+/* Modal styles (assumes Modal component uses these classes) */
+.modal-content {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.success-modal-content {
+  text-align: center;
+  color: #1f2937;
+}
+
+.success-modal-content p {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}

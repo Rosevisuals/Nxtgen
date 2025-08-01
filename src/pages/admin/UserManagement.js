@@ -68,8 +68,8 @@ const UserManagement = () => {
   
   // Status options
   const statusOptions = [
-    { value: 'Active', label: 'Active' },
-    { value: 'Inactive', label: 'Inactive' },
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' },
   ];
   
   // Table columns
@@ -141,7 +141,7 @@ const UserManagement = () => {
       department: '',
       password: '',
       confirmPassword: '',
-      status: 'Active',
+      status: 'active',
     });
     setIsModalOpen(true);
   };

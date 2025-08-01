@@ -1,18 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
+import './Sidebar2.css';
 
 /**
  * Sidebar Component
  * 
  * A reusable sidebar component for navigation.
- * 
- * @param {array} items - Array of navigation items
- * @param {string} title - The sidebar title
- * @param {node} logo - The sidebar logo
- * @param {boolean} collapsed - Whether the sidebar is collapsed
- * @param {function} onToggleCollapse - Function to toggle sidebar collapse
- * @param {string} className - Additional CSS classes
  */
 const Sidebar = ({
   items = [],
@@ -24,15 +18,10 @@ const Sidebar = ({
 }) => {
   const location = useLocation();
   
-  // Base sidebar class
   let sidebarClass = 'sidebar';
-  
-  // Add collapsed class if needed
   if (collapsed) {
     sidebarClass += ' sidebar-collapsed';
   }
-  
-  // Add any additional classes
   if (className) {
     sidebarClass += ` ${className}`;
   }
@@ -42,7 +31,6 @@ const Sidebar = ({
       <div className="sidebar-header">
         {logo && <div className="sidebar-logo">{logo}</div>}
         {title && <h2 className="sidebar-title">{title}</h2>}
-        
         {onToggleCollapse && (
           <button 
             className="sidebar-toggle" 
@@ -53,19 +41,14 @@ const Sidebar = ({
           </button>
         )}
       </div>
-      
       <nav className="sidebar-nav">
         <ul className="sidebar-menu">
           {items.map((item, index) => {
-            // Check if the current path matches this item's path
             const isActive = location.pathname === item.path;
-            
-            // Item class
             let itemClass = 'sidebar-menu-item';
             if (isActive) {
               itemClass += ' active';
             }
-            
             return (
               <li key={index} className={itemClass}>
                 <Link to={item.path} className="sidebar-menu-link">
