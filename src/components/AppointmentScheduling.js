@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './appointment-scheduling.css';
-import './DoctorsSidebar';
+import { apiFetch } from '../utils/api';
 /**
  * AppointmentScheduling Component
  * Page for doctors to schedule, reschedule, cancel, approve, and manage appointments.
@@ -133,48 +133,38 @@ const AppointmentScheduling = () => {
   ];
 
   const statusOptions = [
+    { value: 'Pending', label: 'Pending' },
+    { value: 'Approved', label: 'Approved' },
     { value: 'Scheduled', label: 'Scheduled' },
-    { value: 'Pending Approval', label: 'Pending Approval' },
     { value: 'Checked In', label: 'Checked In' },
     { value: 'In Progress', label: 'In Progress' },
     { value: 'Completed', label: 'Completed' },
+    { value: 'Rejected', label: 'Rejected' },
     { value: 'Cancelled', label: 'Cancelled' },
   ];
 
   // Fetch data
   useEffect(() => {
-    // TODO: Fetch appointments, patients, and doctors from API
-    /*
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('/api/doctor/appointments', {
-          headers: { 'X-API-Key': process.env.REACT_APP_API_KEY },
-        });
-        if (!response.ok) throw new Error('Failed to fetch appointments');
-        const data = await response.json();
-        if (!Array.isArray(data.appointments)) throw new Error('Invalid appointment data');
-        setAppointments(data.appointments);
-        setIsLoading(false);
+        const appointmentsData = await apiFetch('/appointments');
+        setAppointments(appointmentsData || []);
       } catch (error) {
-        toast.error(`Error fetching appointments: ${error.message}`);
+        console.error('Error fetching appointments:', error);
+        toast.error('Failed to load appointments');
         setAppointments(mockAppointments);
+      } finally {
         setIsLoading(false);
       }
     };
     fetchData();
-    */
-
-    setTimeout(() => {
-      setAppointments(mockAppointments);
-      setIsLoading(false);
-    }, 500);
   }, [mockAppointments]);
 
   // Filter appointments
   useEffect(() => {
     const filtered = appointments.filter(appointment => {
-      const appointmentDate = new Date(appointment.date);
+      const appointmentDate = new Date(appointment.appointment_date);
       const selected = new Date(selectedDate);
       const dateMatches =
         appointmentDate.getDate() === selected.getDate() &&
@@ -183,13 +173,13 @@ const AppointmentScheduling = () => {
 
       const query = searchQuery.toLowerCase();
       const searchMatches = query === '' ||
-        appointment.patientName.toLowerCase().includes(query) ||
-        appointment.doctorName.toLowerCase().includes(query) ||
-        appointment.department.toLowerCase().includes(query) ||
-        appointment.type.toLowerCase().includes(query);
+        appointment.patient_name?.toLowerCase().includes(query) ||
+        appointment.doctor_name?.toLowerCase().includes(query) ||
+        appointment.department_name?.toLowerCase().includes(query) ||
+        appointment.notes?.toLowerCase().includes(query);
 
-      const doctorMatches = filterDoctor === '' || appointment.doctorId === filterDoctor;
-      const departmentMatches = filterDepartment === '' || appointment.department === filterDepartment;
+      const doctorMatches = filterDoctor === '' || appointment.staff_id === filterDoctor;
+      const departmentMatches = filterDepartment === '' || appointment.department_name === filterDepartment;
 
       return dateMatches && searchMatches && doctorMatches && departmentMatches;
     });
@@ -323,28 +313,18 @@ const AppointmentScheduling = () => {
   };
 
   const handleApproveAppointmentConfirm = async () => {
-    // TODO: PATCH to /api/doctor/appointments/:id/approve
-    /*
     try {
-      const response = await fetch(`/api/doctor/appointments/${currentAppointment.id}/approve`, {
-        method: 'PATCH',
-        headers: { 'X-API-Key': process.env.REACT_APP_API_KEY },
+      await apiFetch(`/appointments/${currentAppointment.appointment_id}/approve`, {
+        method: 'PUT'
       });
-      if (!response.ok) throw new Error('Failed to approve appointment');
-      const updatedAppointment = await response.json();
-      setAppointments(appointments.map(a => a.id === updatedAppointment.id ? updatedAppointment : a));
+      const appointmentsData = await apiFetch('/appointments');
+      setAppointments(appointmentsData || []);
       toast.success('Appointment approved successfully!');
     } catch (error) {
-      toast.error(`Error approving appointment: ${error.message}`);
+      console.error('Error approving appointment:', error);
+      toast.error('Failed to approve appointment');
     }
-    */
-
-    const updatedAppointments = appointments.map(a =>
-      a.id === currentAppointment.id ? { ...a, status: 'Scheduled' } : a
-    );
-    setAppointments(updatedAppointments);
     setIsApproveAppointmentModalOpen(false);
-    toast.success('Appointment approved successfully!');
   };
 
   // Handle delete appointment
@@ -354,28 +334,20 @@ const AppointmentScheduling = () => {
   };
 
   const handleDeleteAppointmentConfirm = async () => {
-    // TODO: PATCH to /api/doctor/appointments/:id/cancel
-    /*
     try {
-      const response = await fetch(`/api/doctor/appointments/${currentAppointment.id}/cancel`, {
-        method: 'PATCH',
-        headers: { 'X-API-Key': process.env.REACT_APP_API_KEY },
+      await apiFetch(`/appointments/${currentAppointment.appointment_id}/reject`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: 'Cancelled by doctor' })
       });
-      if (!response.ok) throw new Error('Failed to cancel appointment');
-      const updatedAppointment = await response.json();
-      setAppointments(appointments.map(a => a.id === updatedAppointment.id ? updatedAppointment : a));
+      const appointmentsData = await apiFetch('/appointments');
+      setAppointments(appointmentsData || []);
       toast.success('Appointment cancelled successfully!');
     } catch (error) {
-      toast.error(`Error cancelling appointment: ${error.message}`);
+      console.error('Error cancelling appointment:', error);
+      toast.error('Failed to cancel appointment');
     }
-    */
-
-    const updatedAppointments = appointments.map(a =>
-      a.id === currentAppointment.id ? { ...a, status: 'Cancelled' } : a
-    );
-    setAppointments(updatedAppointments);
     setIsDeleteAppointmentModalOpen(false);
-    toast.success('Appointment cancelled successfully!');
   };
 
   // Handle bulk status update
@@ -509,8 +481,8 @@ const AppointmentScheduling = () => {
       accessor: 'patientName',
       cell: (row) => (
         <div>
-          <span className="font-semibold">{row.patientName}</span>
-          <span className="block text-gray-500">{row.patientId}</span>
+          <span className="font-semibold">{row.patient_name}</span>
+          <span className="block text-gray-500">{row.patient_id}</span>
         </div>
       ),
     },
@@ -520,12 +492,12 @@ const AppointmentScheduling = () => {
       cell: (row) => (
         <div className="flex items-center">
           <FaUserMd className="mr-2 text-blue-500" />
-          <span>{row.doctorName}</span>
+          <span>{row.doctor_name}</span>
         </div>
       ),
     },
-    { header: 'Department', accessor: 'department' },
-    { header: 'Type', accessor: 'type' },
+    { header: 'Department', accessor: 'department_name' },
+    { header: 'Notes', accessor: 'notes' },
     {
       header: 'Status',
       accessor: 'status',
@@ -539,17 +511,17 @@ const AppointmentScheduling = () => {
       header: 'Actions',
       cell: (row) => (
         <div className="table-actions flex space-x-2">
-          {row.status === 'Pending Approval' && (
+          {row.status === 'Pending' && (
             <Button
               variant="success"
               size="sm"
               onClick={() => handleApproveAppointment(row)}
-              aria-label={`Approve appointment for ${row.patientName}`}
+              aria-label={`Approve appointment for ${row.patient_name}`}
             >
               <FaCheck />
             </Button>
           )}
-          {['Scheduled', 'Pending Approval'].includes(row.status) && (
+          {['Scheduled', 'Pending', 'Approved'].includes(row.status) && (
             <>
               <Button
                 variant="outline-primary"

@@ -20,3 +20,11 @@ export const updateAppointmentStatus = async (appointmentId, status) => {
     body: JSON.stringify({ status }),
   });
 };
+
+export const getAllPatients = async () => {
+  return await apiFetch('/patients');
+};
+
+export const searchPatients = async (searchTerm) => {
+  return await apiFetch(`/patients?search=${encodeURIComponent(searchTerm)}`);
+};

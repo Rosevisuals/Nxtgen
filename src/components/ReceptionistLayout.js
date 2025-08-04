@@ -4,6 +4,7 @@ import ReceptionistSidebar from './ReceptionistSidebar';
 import ReceptionistNavbar from './ReceptionistNavbar';
 import { FaBars } from 'react-icons/fa';
 import './receptionist-layout.css';
+import './receptionist-responsive.css';
 
 const ReceptionistLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -36,7 +37,7 @@ const ReceptionistLayout = () => {
         >
           <FaBars />
         </button>
-        <main className="main-content">
+        <main className="main-content container-fluid">
           <Outlet />
         </main>
       </div>

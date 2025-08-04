@@ -7,6 +7,7 @@ import Card from './ui/Card';
 import Button from './ui/Button';
 import { registerPatient } from '../services/receptionistService';
 import './patient-register.css';
+import './receptionist-responsive.css';
 
 const PatientRegister = () => {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ const PatientRegister = () => {
   };
 
   return (
-    <div className="patient-register">
+    <div className="patient-register container-fluid">
       <ToastContainer position="top-right" autoClose={3000} />
       <h1 className="page-title">
         <FaUserPlus className="page-icon" /> Register New Patient

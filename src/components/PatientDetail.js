@@ -19,6 +19,8 @@ import Button from './ui/Button';
 import Badge from './ui/Badge';
 import Table from './ui/Table';
 import Tabs from './ui/Tabs';
+import { apiFetch } from '../utils/api';
+import { toast } from 'react-toastify';
 
 /**
  * PatientDetail Component
@@ -32,137 +34,56 @@ const PatientDetail = () => {
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  // Mock patient data (in a real app, this would come from an API)
-useEffect(() => {
-    const mockPatients = {
-      'P-10025': {
-        id: 'P-10025',
-        name: 'John Doe',
-        age: 45,
-        gender: 'Male',
-        dob: '1980-05-15',
-        phone: '(123) 456-7890',
-        email: 'john.doe@example.com',
-        address: '123 Main St, Anytown, USA',
-        bloodType: 'O+',
-        height: '5\'10"',
-        weight: '180 lbs',
-        bmi: 25.8,
-        allergies: ['Penicillin', 'Peanuts'],
-        chronicConditions: ['Hypertension', 'Type 2 Diabetes'],
-        emergencyContact: {
-          name: 'Jane Doe',
-          relation: 'Wife',
-          phone: '(123) 456-7899',
-        },
-        vitalSigns: [
-          {
-            date: '2025-07-20',
-            bloodPressure: '130/85',
-            heartRate: 75,
-            temperature: '98.6°F',
-            respiratoryRate: 16,
-            oxygenSaturation: '98%',
-          },
-        ],
-        consultations: [
-          {
-            id: 'C-5001',
-            date: '2025-07-20',
-            doctor: 'Dr. John Smith',
-            diagnosis: 'Hypertension',
-            notes: 'Blood pressure remains elevated.',
-            followUp: '2025-08-20',
-          },
-        ],
-        prescriptions: [
-          {
-            id: 'RX-7001',
-            date: '2025-07-20',
-            medication: 'Lisinopril',
-            dosage: '20mg',
-            frequency: 'Once daily',
-            duration: '30 days',
-            doctor: 'Dr. John Smith',
-            notes: 'Take in the morning with food.',
-          },
-        ],
-        labResults: [
-          {
-            id: 'LAB-3001',
-            date: '2025-07-20',
-            test: 'Complete Blood Count',
-            result: 'Normal',
-            notes: 'All values within normal range.',
-            doctor: 'Dr. John Smith',
-          },
-        ],
-      },
-
-      'P-10032': {
-        id: 'P-10032',
-        name: 'Jane Smith',
-        age: 38,
-        gender: 'Female',
-        dob: '1987-08-22',
-        phone: '(123) 456-7891',
-        email: 'jane.smith@example.com',
-        address: '456 Oak Ave, Anytown, USA',
-        bloodType: 'A+',
-        height: '5\'6"',
-        weight: '140 lbs',
-        bmi: 22.6,
-        allergies: ['Sulfa drugs'],
-        chronicConditions: [],
-        emergencyContact: {
-          name: 'Robert Smith',
-          relation: 'Husband',
-          phone: '(123) 456-7892',
-        },
-        vitalSigns: [
-          {
-            date: '2025-07-22',
-            bloodPressure: '120/80',
-            heartRate: 72,
-            temperature: '98.6°F',
-            respiratoryRate: 16,
-            oxygenSaturation: '99%',
-          },
-        ],
-        consultations: [
-          {
-            id: 'C-5002',
-            date: '2025-07-22',
-            doctor: 'Dr. John Smith',
-            diagnosis: 'Chest Pain',
-            notes: 'ECG normal. Scheduled stress test.',
-            followUp: '2025-07-29',
-          },
-        ],
-        prescriptions: [],
-        labResults: [
-          {
-            id: 'LAB-3002',
-            date: '2025-07-22',
-            test: 'Complete Blood Count',
-            result: 'Normal',
-            notes: 'All values within normal range.',
-            doctor: 'Dr. John Smith',
-          },
-        ],
+  useEffect(() => {
+    const fetchPatientData = async () => {
+      setLoading(true);
+      try {
+        const patientsData = await apiFetch('/patients');
+        const patientData = patientsData?.find(p => p.patient_id.toString() === patientId);
+        
+        if (patientData) {
+          const formattedPatient = {
+            id: patientData.patient_id,
+            name: patientData.full_Name,
+            age: patientData.DOB ? new Date().getFullYear() - new Date(patientData.DOB).getFullYear() : 0,
+            gender: patientData.gender === 'M' ? 'Male' : patientData.gender === 'F' ? 'Female' : 'Other',
+            dob: patientData.DOB ? new Date(patientData.DOB).toISOString().split('T')[0] : '',
+            phone: patientData.phone || '',
+            email: patientData.email || '',
+            address: patientData.Address || '',
+            bloodType: patientData.blood_group || '',
+            height: '',
+            weight: '',
+            bmi: parseFloat(patientData.BMI) || 0,
+            allergies: [],
+            chronicConditions: [],
+            emergencyContact: {
+              name: '',
+              relation: '',
+              phone: '',
+            },
+            vitalSigns: [],
+            consultations: [],
+            prescriptions: [],
+            labResults: [],
+          };
+          setPatient(formattedPatient);
+        } else {
+          setPatient(null);
+        }
+      } catch (error) {
+        console.error('Error fetching patient data:', error);
+        toast.error('Failed to load patient data');
+        setPatient(null);
+      } finally {
+        setLoading(false);
       }
     };
-
-    setLoading(true);
-    setTimeout(() => {
-      const patientData = mockPatients[patientId];
-      setPatient(patientData);
-      setLoading(false);
-    }, 500);
+    
+    fetchPatientData();
   }, [patientId]);
 
-  if (loading) return <p>Loading patient details...</p>;
-  if (!patient) return <p>Patient not found.</p>;
+
 
 
   // Handle tab change

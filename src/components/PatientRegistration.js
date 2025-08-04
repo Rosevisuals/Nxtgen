@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUserPlus, FaIdCard, FaPhone, FaEnvelope, FaMapMarkerAlt, FaCalendarAlt, FaHeartbeat } from 'react-icons/fa';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Card from './ui/Card';
 import Button from './ui/Button';
 import Input from './ui/Input';
@@ -114,17 +116,21 @@ const PatientRegistration = () => {
     const patientId = `P-${Math.floor(10000 + Math.random() * 90000)}`;
     
     // Show success message and navigate to the new patient's page
-    alert(`Patient registered successfully! Patient ID: ${patientId}`);
-    navigate(`/receptionist/patients/${patientId}`);
+    toast.success(`Patient registered successfully! Patient ID: ${patientId}`);
+    setTimeout(() => {
+      navigate(`/receptionist/patients/${patientId}`);
+    }, 1500);
   };
   
   // Handle cancel
   const handleCancel = () => {
+    toast.info('Patient registration cancelled');
     navigate('/receptionist/dashboard');
   };
   
   return (
     <div className="patient-registration">
+      <ToastContainer position="top-right" autoClose={3000} />
       <h1>
         <FaUserPlus className="page-icon" />
         Patient Registration

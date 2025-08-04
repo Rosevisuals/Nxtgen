@@ -33,6 +33,7 @@ const Select = ({
   error = '',
   helperText = '',
   className = '',
+  isMulti = false,
   ...props
 }) => {
   // Generate a unique ID if not provided
@@ -73,6 +74,7 @@ const Select = ({
         required={required}
         disabled={disabled}
         className={selectClass}
+        multiple={isMulti}
         {...props}
       >
         {placeholder && (
@@ -117,6 +119,7 @@ Select.propTypes = {
   error: PropTypes.string,
   helperText: PropTypes.string,
   className: PropTypes.string,
+  isMulti: PropTypes.bool,
 };
 
 export default Select;

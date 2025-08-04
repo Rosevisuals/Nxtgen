@@ -17,10 +17,15 @@ const Login = () => {
         try {
             const response = await login(email, password);
             
-            // Store user data in localStorage
+            // Store user data in localStorage (token is already stored by authService)
             localStorage.setItem('user_id', response.user.user_id);
             localStorage.setItem('user_email', response.user.email);
             localStorage.setItem('user_name', response.user.full_Name);
+            
+            // Ensure token is stored
+            if (response.token) {
+                localStorage.setItem('token', response.token);
+            }
             
             // Navigate based on user role or default to patient dashboard
             if (response.user.role) {
@@ -175,7 +180,7 @@ const Login = () => {
 
                     <p style={{ textAlign: 'center', fontSize: '0.85rem', color: '#666' }}>
                         Forgot your password? <a href="/reset" style={{ color: '#1976d2', textDecoration: 'none' }}>Reset</a>
-                         <Link to="/DoctorsDashboard">Doctor's dashboard</Link>
+                         <Link to="/ReceptionistDashboard">Doctor's dashboard</Link>
                     </p>
                 </form>
             </div>

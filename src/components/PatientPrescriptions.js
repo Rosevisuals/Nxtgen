@@ -1,10 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Container, Row } from 'react-bootstrap';
-import { FaFileMedical } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { Container } from 'react-bootstrap';
+import { FaFileMedical, FaArrowLeft } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 import Card from './ui/Card';
+import Button from './ui/Button';
+import { getPatientByUserId, getPatientPrescriptions } from '../services/patientService';
 import './patient-dashboard.css';
+import './patient-responsive.css';
 
 const MedicationItem = React.memo(({ medication }) => (
   <div className="medication-item" role="listitem">
@@ -12,72 +16,57 @@ const MedicationItem = React.memo(({ medication }) => (
       <FaFileMedical />
     </div>
     <div className="medication-details">
-      <h4>{medication.name}</h4>
+      <h4>{medication.Medication || medication.medicine_name}</h4>
       <div className="medication-meta">
         <span>{medication.dosage}</span>
-        <span>{medication.frequency}</span>
+        <span>{medication.notes || 'As prescribed'}</span>
       </div>
       <div className="medication-prescribed">
-        Prescribed by {medication.prescribedBy} on {new Date(medication.startDate).toLocaleDateString()}
+        Prescribed by {medication.doctor_name || 'Doctor'} on {new Date(medication.date_issued).toLocaleDateString()}
       </div>
     </div>
   </div>
 ));
 
 const PatientPrescriptions = () => {
+  const navigate = useNavigate();
   const [medications, setMedications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const mockMedications = useMemo(() => [
-    {
-      name: 'Lisinopril',
-      dosage: '20mg',
-      frequency: 'Once daily',
-      startDate: new Date('2025-07-20'),
-      endDate: null,
-      prescribedBy: 'Dr. John Smith',
-    },
-    {
-      name: 'Metformin',
-      dosage: '500mg',
-      frequency: 'Twice daily',
-      startDate: new Date('2025-07-20'),
-      endDate: null,
-      prescribedBy: 'Dr. John Smith',
-    },
-    {
-      name: 'Atorvastatin',
-      dosage: '10mg',
-      frequency: 'Once daily',
-      startDate: new Date('2025-06-15'),
-      endDate: null,
-      prescribedBy: 'Dr. John Smith',
-    },
-  ], []);
+  const [patientName, setPatientName] = useState('');
 
   useEffect(() => {
-    setIsLoading(true);
-    // TODO: Replace with actual API call
-    // const token = localStorage.getItem('authToken');
-    // fetch('/api/patient/prescriptions', {
-    //   headers: { Authorization: `Bearer ${token}` },
-    // })
-    //   .then(res => res.json())
-    //   .then(data => {
-    //     setMedications(data);
-    //     setIsLoading(false);
-    //   })
-    //   .catch(err => {
-    //     setError('Failed to fetch prescriptions.');
-    //     setIsLoading(false);
-    //     toast.error('Failed to load prescriptions.');
-    //   });
-    setTimeout(() => {
-      setMedications(mockMedications);
-      setIsLoading(false);
-    }, 500);
-  }, [mockMedications]);
+    const fetchPrescriptions = async () => {
+      setIsLoading(true);
+      try {
+        const userId = localStorage.getItem('user_id');
+        if (!userId) {
+          throw new Error('Please login to view prescriptions');
+        }
+
+        // Get patient data first
+        const patientData = await getPatientByUserId(userId);
+        if (!patientData) {
+          throw new Error('Patient data not found');
+        }
+
+        setPatientName(patientData.full_Name || 'Patient');
+
+        // Get prescriptions
+        const prescriptionsData = await getPatientPrescriptions(patientData.patient_id);
+        setMedications(prescriptionsData || []);
+
+      } catch (err) {
+        console.error('Error fetching prescriptions:', err);
+        setError(err.message);
+        toast.error(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPrescriptions();
+  }, []);
 
   if (isLoading) {
     return (
@@ -87,28 +76,47 @@ const PatientPrescriptions = () => {
     );
   }
 
-  if (error || !medications.length) {
-    return (
-      <Container className="patient-dashboard not-found">
-        <h1>No Prescriptions Found</h1>
-        <p>{error || 'No prescriptions available.'}</p>
-      </Container>
-    );
-  }
-
   return (
     <Container className="patient-dashboard">
       <ToastContainer position="top-right" autoClose={3000} />
-      <h1 className="text-3xl font-bold mb-6 text-gray-800 flex items-center">
-        <FaFileMedical className="mr-2" /> Prescriptions
-      </h1>
-      <Card title="Current Prescriptions" className="medications-card">
-        <div className="medications-list" role="list">
-          {medications.map((medication, index) => (
-            <MedicationItem key={index} medication={medication} />
-          ))}
-        </div>
-      </Card>
+      <div className="dashboard-header">
+        <Button
+          variant="outline-secondary"
+          onClick={() => navigate('/PatientDashboard')}
+          className="back-button"
+        >
+          <FaArrowLeft className="mr-1" /> Back to Dashboard
+        </Button>
+        <h1 className="text-3xl font-bold text-gray-800 flex items-center">
+          <FaFileMedical className="mr-2" /> {patientName}'s Prescriptions
+        </h1>
+      </div>
+
+      {error ? (
+        <Card className="error-card">
+          <div className="error-message">
+            <h3>Error Loading Prescriptions</h3>
+            <p>{error}</p>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
+          </div>
+        </Card>
+      ) : (
+        <Card title="Current Prescriptions" className="medications-card">
+          {medications.length > 0 ? (
+            <div className="medications-list" role="list">
+              {medications.map((medication) => (
+                <MedicationItem key={medication.prescription_id} medication={medication} />
+              ))}
+            </div>
+          ) : (
+            <div className="no-medications">
+              <FaFileMedical size={48} className="text-gray-400 mb-3" />
+              <h3>No Prescriptions Found</h3>
+              <p>You don't have any active prescriptions.</p>
+            </div>
+          )}
+        </Card>
+      )}
     </Container>
   );
 };

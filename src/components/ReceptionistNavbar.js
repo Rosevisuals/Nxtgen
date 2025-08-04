@@ -29,24 +29,6 @@ const ReceptionistNavbar = ({ isMenuOpen, toggleMenu, handleLogout }) => {
       <div className={`navbar-menu ${isMenuOpen ? 'open' : ''}`}>
         <ul>
           <li>
-            <NavLink
-              to="/receptionist/profile"
-              className={({ isActive }) => (isActive ? 'active' : '')}
-              aria-label="Profile"
-            >
-              Profile
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/receptionist/settings"
-              className={({ isActive }) => (isActive ? 'active' : '')}
-              aria-label="Settings"
-            >
-              Settings
-            </NavLink>
-          </li>
-          <li>
             <button
               onClick={handleLogout}
               onKeyDown={(e) => handleKeyDown(e, handleLogout)}

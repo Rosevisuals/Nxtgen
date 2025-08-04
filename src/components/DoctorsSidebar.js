@@ -20,7 +20,7 @@ const DoctorSidebar = ({ isOpen, toggleSidebar }) => {
   return (
     <div className={`doctor-sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
-        <h2>Doctor's Dashboard</h2>
+        <h2>NxtGen Hospital</h2>
       </div>
       <ul className="sidebar-menu">
         <li>

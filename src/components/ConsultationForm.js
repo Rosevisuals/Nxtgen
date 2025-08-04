@@ -9,6 +9,7 @@ import Input from './ui/Input';
 import Select from './ui/Select';
 import DatePicker from './ui/DatePicker';
 import Badge from './ui/Badge';
+import { apiFetch } from '../utils/api';
 
 // Mock data
 const mockPatients = {
@@ -154,52 +155,64 @@ const ConsultationForm = () => {
   });
 
   useEffect(() => {
-    // Simulate API call
-    setLoading(true);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch patient data
+        if (patientId) {
+          const patientsData = await apiFetch('/patients');
+          const patientData = patientsData?.find(p => p.patient_id.toString() === patientId);
+          
+          if (patientData) {
+            const formattedPatient = {
+              id: patientData.patient_id,
+              name: patientData.full_Name,
+              age: patientData.DOB ? new Date().getFullYear() - new Date(patientData.DOB).getFullYear() : 0,
+              gender: patientData.gender === 'M' ? 'Male' : patientData.gender === 'F' ? 'Female' : 'Other',
+              dob: patientData.DOB,
+              bloodType: patientData.blood_group || '',
+              allergies: [],
+              chronicConditions: [],
+              lastVitalSigns: {
+                bloodPressure: '',
+                heartRate: '',
+                temperature: '',
+                respiratoryRate: '',
+                oxygenSaturation: '',
+                weight: '',
+                height: '',
+              },
+            };
+            setPatient(formattedPatient);
+          } else {
+            setPatient(null);
+          }
+        }
 
-    const timer = setTimeout(() => {
-      // Fetch patient data
-      if (patientId && mockPatients[patientId]) {
-        const patientData = mockPatients[patientId];
-        setPatient(patientData);
-
-        // Pre-fill vital signs from patient's last record
-        setFormData((prevData) => ({
-          ...prevData,
-          vitalSigns: {
-            ...prevData.vitalSigns,
-            bloodPressure: patientData.lastVitalSigns?.bloodPressure || '',
-            heartRate: patientData.lastVitalSigns?.heartRate || '',
-            temperature: patientData.lastVitalSigns?.temperature || '',
-            respiratoryRate: patientData.lastVitalSigns?.respiratoryRate || '',
-            oxygenSaturation: patientData.lastVitalSigns?.oxygenSaturation || '',
-            weight: patientData.weight ? patientData.weight.replace(' lbs', '') : '',
-            height: patientData.height || '',
-          },
-        }));
-      } else {
-        setPatient(null);
+        // Fetch appointment data
+        if (appointmentId) {
+          const appointmentsData = await apiFetch('/appointments');
+          const appointmentData = appointmentsData?.find(a => a.appointment_id.toString() === appointmentId);
+          
+          if (appointmentData) {
+            setAppointment(appointmentData);
+            setFormData((prevData) => ({
+              ...prevData,
+              chiefComplaint: appointmentData.notes || '',
+            }));
+          } else {
+            setAppointment(null);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load data');
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // Fetch appointment data
-      if (appointmentId && mockAppointments[appointmentId]) {
-        const appointmentData = mockAppointments[appointmentId];
-        setAppointment(appointmentData);
-
-        // Pre-fill chief complaint from appointment notes
-        setFormData((prevData) => ({
-          ...prevData,
-          chiefComplaint: appointmentData.notes || '',
-        }));
-      } else {
-        setAppointment(null);
-      }
-
-      setLoading(false);
-    }, 500);
-
-    // Cleanup timeout on component unmount
-    return () => clearTimeout(timer);
+    fetchData();
   }, [patientId, appointmentId]);
 
   // Format date to YYYY-MM-DD
@@ -289,11 +302,14 @@ const ConsultationForm = () => {
 
     // Show success message and navigate back
     toast.success('Consultation saved successfully!');
-    navigate(`/doctor/patients/${patientId}`);
+    setTimeout(() => {
+      navigate(`/doctor/patients/${patientId}`);
+    }, 1000);
   };
 
   // Handle cancel
   const handleCancel = () => {
+    toast.info('Consultation cancelled');
     if (patientId) {
       navigate(`/doctor/patients/${patientId}`);
     } else {

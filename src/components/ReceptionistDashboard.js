@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaCalendarAlt, FaUserPlus, FaSearch, FaClock, FaUserCheck, FaArrowLeft } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserPlus, FaSearch, FaClock, FaUserCheck, FaArrowLeft, FaClipboardList } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Card from './ui/Card';
@@ -7,7 +7,10 @@ import Button from './ui/Button';
 import Badge from './ui/Badge';
 import Table from './ui/Table';
 import { useNavigate } from 'react-router-dom';
+import { getTodayAppointments, updateAppointmentStatus } from '../services/receptionistService';
 import './receptionist-dashboard.css';
+import './receptionist-responsive.css';
+import './premium-dashboard.css';
 
 const ReceptionistDashboard = () => {
   const navigate = useNavigate();
@@ -15,93 +18,24 @@ const ReceptionistDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Mock receptionist name (replace with API data later)
-  const receptionistName = 'Harriet';
+  const receptionistName = localStorage.getItem('user_name') || 'Receptionist';
 
-  // Mock appointments based on database schema
-  const mockAppointments = [
-    {
-      appointment_id: 1,
-      patient_id: 1,
-      patient_name: 'Mark Leewe',
-      appointment_date: '2025-07-30T09:00:00',
-      staff_name: 'Jane Smith',
-      department_name: 'Cardiology',
-      status: 'Approved',
-    },
-    {
-      appointment_id: 2,
-      patient_id: 2,
-      patient_name: 'Tom Cruse',
-      appointment_date: '2025-07-30T10:30:00',
-      staff_name: 'Jane Smith',
-      department_name: 'Cardiology',
-      status: 'Approved',
-    },
-    {
-      appointment_id: 3,
-      patient_id: 1,
-      patient_name: 'Mark Leewe',
-      appointment_date: '2025-07-30T13:00:00',
-      staff_name: 'Jane Smith',
-      department_name: 'Neurology',
-      status: 'Pending',
-    },
-    {
-      appointment_id: 4,
-      patient_id: 2,
-      patient_name: 'Tom Cruse',
-      appointment_date: '2025-07-30T14:30:00',
-      staff_name: 'Jane Smith',
-      department_name: 'Pediatrics',
-      status: 'Pending',
-    },
-    {
-      appointment_id: 5,
-      patient_id: 1,
-      patient_name: 'Mark Leewe',
-      appointment_date: '2025-07-30T16:00:00',
-      staff_name: 'Jane Smith',
-      department_name: 'Cardiology',
-      status: 'Declined',
-    },
-  ];
-
-  // Fetch appointments (mock for now, API-ready)
   useEffect(() => {
-    setIsLoading(true);
-
-    // TODO: Uncomment and configure for API integration
-    /*
-    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
-    const API_KEY = process.env.REACT_APP_API_KEY;
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_KEY || localStorage.getItem('authToken')}`,
-    };
-
     const fetchAppointments = async () => {
+      setIsLoading(true);
       try {
-        const today = new Date().toISOString().split('T')[0];
-        const response = await fetch(`${API_BASE_URL}/appointments?date=${today}`, { headers });
-        if (!response.ok) throw new Error('Failed to fetch appointments.');
-        const data = await response.json();
-        setAppointments(data);
-      } catch (err) {
-        toast.error(err.message);
+        const data = await getTodayAppointments();
+        setAppointments(data || []);
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+        toast.error('Failed to load today\'s appointments');
+        setAppointments([]);
       } finally {
         setIsLoading(false);
       }
     };
     fetchAppointments();
-    */
-
-    // Mock data loading
-    setTimeout(() => {
-      setAppointments(mockAppointments);
-      setIsLoading(false);
-    }, 500);
-  }, []);
+  }, [navigate]);
 
   // Filter appointments for today and next 3 hours
   const todayAppointments = appointments.filter(appointment => {
@@ -115,11 +49,11 @@ const ReceptionistDashboard = () => {
     const threeHoursLater = new Date(currentTime.getTime() + 3 * 60 * 60 * 1000);
     return appointmentTime >= currentTime && 
            appointmentTime <= threeHoursLater && 
-           appointment.status !== 'Declined';
+           appointment.status !== 'Rejected' && appointment.status !== 'Cancelled';
   });
 
   const checkedInPatients = todayAppointments.filter(appointment => 
-    appointment.status === 'Approved' && appointment.appointment_date <= new Date().toISOString()
+    appointment.status === 'Checked In'
   );
 
   const appointmentColumns = [
@@ -151,10 +85,14 @@ const ReceptionistDashboard = () => {
       cell: (row) => {
         let variant = 'primary';
         switch (row.status) {
-          case 'Approved': variant = 'success'; break;
           case 'Pending': variant = 'warning'; break;
-          case 'Declined': variant = 'danger'; break;
-          default: variant = 'primary';
+          case 'Approved': 
+          case 'Scheduled': variant = 'success'; break;
+          case 'Checked In': variant = 'info'; break;
+          case 'Completed': variant = 'primary'; break;
+          case 'Rejected':
+          case 'Cancelled': variant = 'danger'; break;
+          default: variant = 'secondary';
         }
         return <Badge variant={variant} pill>{row.status}</Badge>;
       },
@@ -163,50 +101,38 @@ const ReceptionistDashboard = () => {
       header: 'Actions',
       cell: (row) => (
         <div className="table-actions">
-          {row.status === 'Pending' && (
-            <Button 
-              variant="primary" 
-              size="sm" 
+          {(row.status === 'Approved' || row.status === 'Scheduled') && (
+            <button 
+              className="btn-premium btn-success"
               onClick={() => handleCheckIn(row)}
               aria-label={`Check in ${row.patient_name}`}
             >
               <FaUserCheck /> Check In
-            </Button>
+            </button>
           )}
-          <Button 
-            variant="outline-primary" 
-            size="sm" 
+          <button 
+            className="btn-premium btn-outline-primary"
             onClick={() => handleViewPatient(row)}
             aria-label={`View patient ${row.patient_name}`}
           >
             View
-          </Button>
+          </button>
         </div>
       ),
     },
   ];
 
-  const handleCheckIn = (appointment) => {
-    // TODO: Implement API call to update appointment status
-    /*
-    fetch(`${API_BASE_URL}/appointments/${appointment.appointment_id}`, {
-      method: 'PATCH',
-      headers,
-      body: JSON.stringify({ status: 'Approved' }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        setAppointments(prev => prev.map(appt => 
-          appt.appointment_id === appointment.appointment_id ? { ...appt, status: 'Approved' } : appt
-        ));
-        toast.success(`Checked in ${appointment.patient_name}`);
-      })
-      .catch(err => toast.error('Failed to check in patient.'));
-    */
-    setAppointments(prev => prev.map(appt => 
-      appt.appointment_id === appointment.appointment_id ? { ...appt, status: 'Approved' } : appt
-    ));
-    toast.success(`Checked in ${appointment.patient_name}`);
+  const handleCheckIn = async (appointment) => {
+    try {
+      await updateAppointmentStatus(appointment.appointment_id, 'Checked In');
+      setAppointments(prev => prev.map(appt => 
+        appt.appointment_id === appointment.appointment_id ? { ...appt, status: 'Checked In' } : appt
+      ));
+      toast.success(`Checked in ${appointment.patient_name}`);
+    } catch (error) {
+      console.error('Error checking in patient:', error);
+      toast.error('Failed to check in patient');
+    }
   };
 
   const handleViewPatient = (appointment) => {
@@ -222,7 +148,7 @@ const ReceptionistDashboard = () => {
   };
 
   const handlePatientSearch = () => {
-    navigate('/PatientsSearch');
+    navigate('/PatientSearch');
   };
 
   const handleBack = () => navigate(-1);
@@ -243,28 +169,27 @@ const ReceptionistDashboard = () => {
   }
 
   return (
-    <div className="receptionist-dashboard">
+    <div className="premium-dashboard receptionist-dashboard">
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="dashboard-header">
-        <Button
-          variant="outline-secondary"
+      <div className="dashboard-header animate-slide-up">
+        <button
+          className="btn-premium btn-outline-primary"
           onClick={handleBack}
           onKeyDown={(e) => handleKeyDown(e, handleBack)}
           aria-label="Go back"
-          className="back-button"
         >
-          <FaArrowLeft className="mr-1" /> Back
-        </Button>
+          <FaArrowLeft /> Back
+        </button>
         <h1 className="dashboard-title">
-          <FaUserCheck className="dashboard-icon" /> Receptionist Dashboard
+          <FaClipboardList className="page-icon" /> Receptionist Dashboard
         </h1>
       </div>
-      <Card className="welcome-card">
-        <div className="welcome-content">
-          <h2>Welcome Back, {receptionistName}</h2>
+      <div className="welcome-card animate-slide-up">
+        <div className="card-body">
+          <h3>Welcome Back, {receptionistName}</h3>
           <p>Manage appointments and patient information efficiently.</p>
         </div>
-      </Card>
+      </div>
       <div className="date-display">
         <h2>
           <FaCalendarAlt className="calendar-icon" />
@@ -276,60 +201,119 @@ const ReceptionistDashboard = () => {
           })}
         </h2>
       </div>
-      <Card title="Quick Actions" className="quick-actions-card">
-        <div className="quick-actions">
-          <Button variant="primary" onClick={handleNewPatient} aria-label="Register new patient">
-            <FaUserPlus /> Register Patient
-          </Button>
-          <Button variant="primary" onClick={handleNewAppointment} aria-label="Schedule new appointment">
-            <FaCalendarAlt /> New Appointment
-          </Button>
-          <Button variant="primary" onClick={handlePatientSearch} aria-label="Search patients">
-            <FaSearch /> Find Patient
-          </Button>
+      <div className="premium-card quick-actions-card animate-slide-up">
+        <div className="card-body">
+          <h5 className="card-title">⚡ Quick Actions</h5>
+          <div className="quick-actions">
+            <button className="btn-premium btn-primary" onClick={handleNewPatient} aria-label="Register new patient">
+              <FaUserPlus /> Register Patient
+            </button>
+            <button className="btn-premium btn-primary" onClick={handleNewAppointment} aria-label="Schedule new appointment">
+              <FaCalendarAlt /> New Appointment
+            </button>
+            <button className="btn-premium btn-primary" onClick={handlePatientSearch} aria-label="Search patients">
+              <FaSearch /> Find Patient
+            </button>
+          </div>
         </div>
-      </Card>
-      <div className="dashboard-summary">
-        <Card className="summary-card">
-          <div className="summary-icon">
-            <FaCalendarAlt />
-          </div>
-          <div className="summary-content">
-            <h3>{todayAppointments.length}</h3>
-            <p>Today's Appointments</p>
-          </div>
-        </Card>
-        <Card className="summary-card">
-          <div className="summary-icon">
-            <FaUserCheck />
-          </div>
-          <div className="summary-content">
-            <h3>{checkedInPatients.length}</h3>
-            <p>Checked In</p>
-          </div>
-        </Card>
-        <Card className="summary-card">
-          <div className="summary-icon">
-            <FaClock />
-          </div>
-          <div className="summary-content">
-            <h3>{upcomingAppointments.length}</h3>
-            <p>Upcoming (Next 3 Hours)</p>
-          </div>
-        </Card>
       </div>
-      <Card title="Today's Appointments" className="appointments-card">
-        <Table columns={appointmentColumns} data={todayAppointments} striped hoverable />
-      </Card>
-      <Card title="Upcoming Appointments (Next 3 Hours)" className="upcoming-appointments-card">
-        {upcomingAppointments.length > 0 ? (
-          <Table columns={appointmentColumns} data={upcomingAppointments} striped hoverable />
-        ) : (
-          <div className="no-appointments">
-            <p>No upcoming appointments in the next 3 hours.</p>
+      <div className="stats-row animate-slide-up">
+        <div className="row">
+          <div className="col-md-4">
+            <div className="stats-card premium-card">
+              <div className="card-body">
+                <FaCalendarAlt className="icon-style text-blue-500" />
+                <div>
+                  <h5>Today's Appointments</h5>
+                  <p className="stat-number">{todayAppointments.length}</p>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-      </Card>
+          <div className="col-md-4">
+            <div className="stats-card premium-card">
+              <div className="card-body">
+                <FaUserCheck className="icon-style text-green-500" />
+                <div>
+                  <h5>Checked In</h5>
+                  <p className="stat-number">{checkedInPatients.length}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="stats-card premium-card">
+              <div className="card-body">
+                <FaClock className="icon-style text-yellow-500" />
+                <div>
+                  <h5>Upcoming (Next 3 Hours)</h5>
+                  <p className="stat-number">{upcomingAppointments.length}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="premium-card appointments-card animate-slide-up">
+        <div className="card-body">
+          <h5 className="card-title">📅 Today's Appointments</h5>
+          <div className="table-responsive">
+            <table className="premium-table">
+              <thead>
+                <tr>
+                  {appointmentColumns.map((col, index) => (
+                    <th key={index}>{col.header}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {todayAppointments.map((row, index) => (
+                  <tr key={index}>
+                    {appointmentColumns.map((col, colIndex) => (
+                      <td key={colIndex}>
+                        {col.cell ? col.cell(row) : row[col.accessor]}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div className="premium-card upcoming-appointments-card animate-slide-up">
+        <div className="card-body">
+          <h5 className="card-title">🕰️ Upcoming Appointments (Next 3 Hours)</h5>
+          <div className="table-responsive">
+            {upcomingAppointments.length > 0 ? (
+              <table className="premium-table">
+                <thead>
+                  <tr>
+                    {appointmentColumns.map((col, index) => (
+                      <th key={index}>{col.header}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {upcomingAppointments.map((row, index) => (
+                    <tr key={index}>
+                      {appointmentColumns.map((col, colIndex) => (
+                        <td key={colIndex}>
+                          {col.cell ? col.cell(row) : row[col.accessor]}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="no-appointments">
+                <p>No upcoming appointments in the next 3 hours.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

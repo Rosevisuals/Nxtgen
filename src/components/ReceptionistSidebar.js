@@ -75,7 +75,7 @@ const ReceptionistSidebar = ({ isOpen, toggleSidebar }) => {
               </li>
               <li>
                 <NavLink
-                  to="/FindPatient"
+                  to="/PatientSearch"
                   className={({ isActive }) => (isActive ? 'active' : '')}
                   aria-label="Find Patient"
                 >

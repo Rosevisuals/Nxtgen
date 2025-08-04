@@ -8,7 +8,9 @@ import Button from './ui/Button';
 import Input from './ui/Input';
 import Select from './ui/Select';
 import { jsPDF } from 'jspdf';
+import { apiFetch } from '../utils/api';
 import './new-bill.css';
+import './receptionist-responsive.css';
 
 const NewBill = () => {
   const navigate = useNavigate();
@@ -23,11 +25,7 @@ const NewBill = () => {
   const [patients, setPatients] = useState([]);
   const [errors, setErrors] = useState({});
 
-  // Mock patients data
-  const mockPatients = [
-    { patient_id: 1, full_Name: 'Mark Leewe' },
-    { patient_id: 2, full_Name: 'Tom Cruse' },
-  ];
+
 
   // Patient options for select
   const patientOptions = patients.map(patient => ({
@@ -35,34 +33,17 @@ const NewBill = () => {
     label: `${patient.full_Name} (ID: ${patient.patient_id})`,
   }));
 
-  // Fetch patients (mock for now, API-ready)
   useEffect(() => {
-    // TODO: Uncomment and configure for API integration
-    /*
-    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
-    const API_KEY = process.env.REACT_APP_API_KEY;
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_KEY || localStorage.getItem('authToken')}`,
-    };
-
     const fetchPatients = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/patients`, { headers });
-        if (!response.ok) throw new Error('Failed to fetch patients.');
-        const data = await response.json();
-        setPatients(data);
-      } catch (err) {
-        toast.error(err.message);
+        const data = await apiFetch('/patients');
+        setPatients(data || []);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+        toast.error('Failed to load patients');
       }
     };
     fetchPatients();
-    */
-
-    // Mock data loading
-    setTimeout(() => {
-      setPatients(mockPatients);
-    }, 500);
   }, []);
 
   // Handle form input change
@@ -113,7 +94,7 @@ const NewBill = () => {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
@@ -122,54 +103,34 @@ const NewBill = () => {
     }
 
     const billData = {
-      bill_id: Math.floor(Math.random() * 10000) + 1, // Temporary ID for mock
       patient_id: formData.patient_id,
       patient_name: formData.patient_name,
       service_name: formData.service_name,
       amount: parseFloat(formData.amount),
       date_issued: formData.date_issued,
-      method_of_payment: null,
       status: 'Pending',
       notes: formData.notes,
     };
 
-    // TODO: Replace with actual API call
-    /*
-    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
-    const API_KEY = process.env.REACT_APP_API_KEY;
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_KEY || localStorage.getItem('authToken')}`,
-    };
-
-    fetch(`${API_BASE_URL}/bills`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        patient_id: billData.patient_id,
-        patient_name: billData.patient_name,
-        service_name: billData.service_name,
-        amount: billData.amount,
-        date_issued: billData.date_issued,
-        status: billData.status,
-        notes: billData.notes,
-      }),
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to create bill.');
-        return res.json();
-      })
-      .then(data => {
-        generatePDF(data);
-        toast.success('Bill created successfully!');
+    try {
+      const createdBill = await apiFetch('/billing', {
+        method: 'POST',
+        body: JSON.stringify(billData)
+      });
+      
+      generatePDF({ ...billData, bill_id: createdBill.bill_id });
+      toast.success('Bill created successfully!');
+      setTimeout(() => {
         navigate('/Billing');
-      })
-      .catch(err => toast.error(err.message));
-    */
+      }, 1500);
+    } catch (error) {
+      console.error('Error creating bill:', error);
+      toast.error('Failed to create bill');
+    }
+  };
 
-    // Mock submission
-    generatePDF(billData);
-    toast.success('Bill created successfully!');
+  const handleCancel = () => {
+    toast.info('Bill creation cancelled');
     navigate('/Billing');
   };
 
@@ -185,7 +146,7 @@ const NewBill = () => {
   };
 
   return (
-    <div className="new-bill">
+    <div className="new-bill container-fluid">
       <ToastContainer position="top-right" autoClose={3000} />
       <div className="new-bill-header">
         <Button
@@ -265,8 +226,8 @@ const NewBill = () => {
               Create & Generate PDF
             </Button>
             <Button
-              variant="outline-primary"
-              onClick={handleBack}
+              variant="outline-secondary"
+              onClick={handleCancel}
               aria-label="Cancel billing"
             >
               Cancel

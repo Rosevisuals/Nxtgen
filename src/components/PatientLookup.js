@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaSearch, FaUserInjured, FaCalendarAlt, FaFileMedical, FaVial, FaPrescriptionBottleAlt } from 'react-icons/fa';
 import Card from './ui/Card';
 import Button from './ui/Button';
@@ -6,6 +6,8 @@ import Input from './ui/Input';
 import Table from './ui/Table';
 import Badge from './ui/Badge';
 import { useNavigate } from 'react-router-dom';
+import { apiFetch } from '../utils/api';
+import { toast } from 'react-toastify';
 
 /**
  * PatientLookup Component
@@ -17,102 +19,31 @@ const PatientLookup = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [recentPatients, setRecentPatients] = useState([
-    {
-      id: 'P-10025',
-      name: 'John Doe',
-      age: 45,
-      gender: 'Male',
-      phone: '(123) 456-7890',
-      lastVisit: '2025-07-20',
-      condition: 'Hypertension',
-    },
-    {
-      id: 'P-10032',
-      name: 'Jane Smith',
-      age: 38,
-      gender: 'Female',
-      phone: '(123) 456-7891',
-      lastVisit: '2025-07-22',
-      condition: 'Chest Pain',
-    },
-    {
-      id: 'P-10018',
-      name: 'Robert Johnson',
-      age: 62,
-      gender: 'Male',
-      phone: '(123) 456-7892',
-      lastVisit: '2025-07-15',
-      condition: 'Post-Surgery Recovery',
-    },
-  ]);
+  const [recentPatients, setRecentPatients] = useState([]);
+  const [allPatients, setAllPatients] = useState([]);
   
-  // Mock patient data (in a real app, this would come from an API)
-  const allPatients = [
-    {
-      id: 'P-10025',
-      name: 'John Doe',
-      age: 45,
-      gender: 'Male',
-      phone: '(123) 456-7890',
-      lastVisit: '2025-07-20',
-      condition: 'Hypertension',
-    },
-    {
-      id: 'P-10032',
-      name: 'Jane Smith',
-      age: 38,
-      gender: 'Female',
-      phone: '(123) 456-7891',
-      lastVisit: '2025-07-22',
-      condition: 'Chest Pain',
-    },
-    {
-      id: 'P-10018',
-      name: 'Robert Johnson',
-      age: 62,
-      gender: 'Male',
-      phone: '(123) 456-7892',
-      lastVisit: '2025-07-15',
-      condition: 'Post-Surgery Recovery',
-    },
-    {
-      id: 'P-10045',
-      name: 'Emily Davis',
-      age: 29,
-      gender: 'Female',
-      phone: '(123) 456-7893',
-      lastVisit: '2025-07-18',
-      condition: 'Pregnancy',
-    },
-    {
-      id: 'P-10050',
-      name: 'Michael Brown',
-      age: 55,
-      gender: 'Male',
-      phone: '(123) 456-7894',
-      lastVisit: '2025-07-10',
-      condition: 'Diabetes',
-    },
-    {
-      id: 'P-10060',
-      name: 'Sarah Wilson',
-      age: 42,
-      gender: 'Female',
-      phone: '(123) 456-7895',
-      lastVisit: '2025-07-05',
-      condition: 'Asthma',
-    },
-    {
-      id: 'P-10075',
-      name: 'David Miller',
-      age: 35,
-      gender: 'Male',
-      phone: '(123) 456-7896',
-      lastVisit: '2025-07-12',
-      condition: 'Allergies',
-    },
-  ];
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const patientsData = await apiFetch('/patients');
+        const formattedPatients = (patientsData || []).map(patient => ({
+          id: patient.patient_id,
+          name: patient.full_Name,
+          age: patient.DOB ? new Date().getFullYear() - new Date(patient.DOB).getFullYear() : 0,
+          gender: patient.gender === 'M' ? 'Male' : patient.gender === 'F' ? 'Female' : 'Other',
+          phone: patient.phone,
+          lastVisit: new Date().toISOString().split('T')[0],
+          condition: 'General',
+        }));
+        setAllPatients(formattedPatients);
+        setRecentPatients(formattedPatients.slice(0, 5));
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+        toast.error('Failed to load patients');
+      }
+    };
+    fetchPatients();
+  }, []);
   
   // Table columns for patients
   const patientColumns = [
@@ -193,20 +124,18 @@ const PatientLookup = () => {
     
     setIsSearching(true);
     
-    // Simulate API call with setTimeout
-    setTimeout(() => {
-      const results = allPatients.filter(patient => {
-        const query = searchQuery.toLowerCase();
-        return (
-          patient.id.toLowerCase().includes(query) ||
-          patient.name.toLowerCase().includes(query) ||
-          patient.condition.toLowerCase().includes(query)
-        );
-      });
-      
-      setSearchResults(results);
-      setIsSearching(false);
-    }, 500);
+    // Filter patients based on search query
+    const results = allPatients.filter(patient => {
+      const query = searchQuery.toLowerCase();
+      return (
+        patient.id.toString().toLowerCase().includes(query) ||
+        patient.name.toLowerCase().includes(query) ||
+        patient.condition.toLowerCase().includes(query)
+      );
+    });
+    
+    setSearchResults(results);
+    setIsSearching(false);
   };
   
   // Handle view patient

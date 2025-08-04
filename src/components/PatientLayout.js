@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { FaHome, FaCalendarAlt, FaHistory, FaUserMd, FaFileMedical } from 'react-icons/fa';
 import Sidebar from './ui/Sidebar';
 import Navbar from './ui/Navbar';
 import { useNavigate } from 'react-router-dom';
+import { getPatientByUserId } from '../services/patientService';
 import './patient-layout.css';
 
 /**
@@ -13,14 +14,34 @@ import './patient-layout.css';
  */
 const PatientLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const navigate = useNavigate();
-  
-  // Mock user data (replace with actual user data from authentication)
-  const user = {
-    name: 'John Doe',
+  const [user, setUser] = useState({
+    name: 'Loading...',
     role: 'Patient',
     avatar: '/images/images.jpg',
-  };
+  });
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const fetchPatientData = async () => {
+      try {
+        const userId = localStorage.getItem('user_id');
+        if (userId) {
+          const patientData = await getPatientByUserId(userId);
+          if (patientData) {
+            setUser({
+              name: patientData.full_Name || 'Patient',
+              role: 'Patient',
+              avatar: '/images/images.jpg',
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching patient data:', error);
+      }
+    };
+    
+    fetchPatientData();
+  }, []);
   
   // Sidebar navigation items
   const sidebarItems = [

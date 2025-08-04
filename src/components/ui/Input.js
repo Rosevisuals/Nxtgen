@@ -33,6 +33,8 @@ const Input = ({
   error = '',
   helperText = '',
   className = '',
+  multiline = false,
+  rows = 3,
   ...props
 }) => {
   // Generate a unique ID if not provided
@@ -65,18 +67,33 @@ const Input = ({
         </label>
       )}
       
-      <input
-        type={type}
-        id={inputId}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        disabled={disabled}
-        className={inputClass}
-        {...props}
-      />
+      {multiline ? (
+        <textarea
+          id={inputId}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled}
+          className={inputClass}
+          rows={rows}
+          {...props}
+        />
+      ) : (
+        <input
+          type={type}
+          id={inputId}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled}
+          className={inputClass}
+          {...props}
+        />
+      )}
       
       {error && <div className="form-error">{error}</div>}
       {helperText && !error && <div className="form-helper-text">{helperText}</div>}
@@ -97,6 +114,8 @@ Input.propTypes = {
   error: PropTypes.string,
   helperText: PropTypes.string,
   className: PropTypes.string,
+  multiline: PropTypes.bool,
+  rows: PropTypes.number,
 };
 
 export default Input;

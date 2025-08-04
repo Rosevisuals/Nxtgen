@@ -9,6 +9,7 @@ import Input from './ui/Input';
 import Select from './ui/Select';
 import DatePicker from './ui/DatePicker';
 import Badge from './ui/Badge';
+import { apiFetch } from '../utils/api';
 
 // Mock patient data (move to a separate file for production)
 const mockPatients = {
@@ -145,18 +146,38 @@ const PrescriptionForm = () => {
   });
 
   useEffect(() => {
-    // Simulate API call to fetch patient data
-    setLoading(true);
-    const timer = setTimeout(() => {
-      if (patientId && mockPatients[patientId]) {
-        setPatient(mockPatients[patientId]);
-      } else {
+    const fetchPatientData = async () => {
+      setLoading(true);
+      try {
+        if (patientId) {
+          const patientsData = await apiFetch('/patients');
+          const patientData = patientsData?.find(p => p.patient_id.toString() === patientId);
+          
+          if (patientData) {
+            const formattedPatient = {
+              id: patientData.patient_id,
+              name: patientData.full_Name,
+              age: patientData.DOB ? new Date().getFullYear() - new Date(patientData.DOB).getFullYear() : 0,
+              gender: patientData.gender === 'M' ? 'Male' : patientData.gender === 'F' ? 'Female' : 'Other',
+              dob: patientData.DOB,
+              allergies: [],
+              chronicConditions: [],
+            };
+            setPatient(formattedPatient);
+          } else {
+            setPatient(null);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching patient data:', error);
+        toast.error('Failed to load patient data');
         setPatient(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }, 500);
+    };
 
-    return () => clearTimeout(timer);
+    fetchPatientData();
   }, [patientId]);
 
   // Format date to YYYY-MM-DD for API submission
@@ -249,38 +270,35 @@ const PrescriptionForm = () => {
     };
 
     try {
-      // TODO: Replace with actual API call
-      /*
-      const response = await fetch('/api/prescriptions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Add auth token if required
-        },
-        body: JSON.stringify(submissionData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save prescription');
-      }
-
-      const result = await response.json();
-      console.log('Prescription saved:', result);
-      */
+      // Save prescription to database
+      const prescriptionData = {
+        patient_id: parseInt(patientId),
+        staff_id: parseInt(localStorage.getItem('user_id') || '1'),
+        Medication: formData.medications.map(med => med.name).join(', '),
+        dosage: formData.medications.map(med => med.dosage).join(', '),
+        notes: formData.notes,
+        date_issued: submissionData.date
+      };
       
-      // Mock API success
-      console.log('Prescription data:', submissionData);
+      await apiFetch('/prescriptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(prescriptionData)
+      });
+      
       toast.success('Prescription saved successfully!');
-      navigate(`/doctor/patients/${patientId}`);
+      setTimeout(() => {
+        navigate(`/doctor/patients/${patientId}`);
+      }, 1000);
     } catch (error) {
-      // Handle API errors
-      toast.error(`Error saving prescription: ${error.message}`);
+      console.error('Error saving prescription:', error);
+      toast.error('Failed to save prescription');
     }
   };
 
   // Handle cancel
   const handleCancel = () => {
+    toast.info('Prescription cancelled');
     if (patientId) {
       navigate(`/doctor/patients/${patientId}`);
     } else {

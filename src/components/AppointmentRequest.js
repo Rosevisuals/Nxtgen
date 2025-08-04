@@ -131,12 +131,25 @@ const AppointmentRequest = () => {
     setTimeout(() => {
       console.log('Appointment request data:', formData);
       setIsSubmitting(false);
+      toast.success('Appointment request submitted successfully!');
+      
+      // Clear form fields
+      setFormData({
+        department_id: '',
+        notes: '',
+        patient_id: '1',
+        status: 'Pending',
+      });
+      
       setIsSuccessModalOpen(true);
     }, 1000);
   };
 
   const handleBack = () => navigate(-1);
-  const handleCancel = () => navigate('/patient/dashboard');
+  const handleCancel = () => {
+    toast.info('Appointment request cancelled');
+    navigate('/PatientDashboard');
+  };
   const handleSuccessModalClose = () => {
     setIsSuccessModalOpen(false);
     navigate('/patient/appointments');
@@ -213,7 +226,7 @@ const AppointmentRequest = () => {
 
           <div className="form-actions mt-4 flex justify-end gap-2">
             <Button
-              variant="outline-primary"
+              variant="outline-secondary"
               onClick={handleCancel}
               onKeyDown={(e) => handleKeyDown(e, handleCancel)}
               disabled={isSubmitting}

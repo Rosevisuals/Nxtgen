@@ -10,7 +10,9 @@ import Select from './ui/Select';
 import Table from './ui/Table';
 import Badge from './ui/Badge';
 import Modal from './ui/Modal';
+import { apiFetch } from '../utils/api';
 import './billing.css';
+import './receptionist-responsive.css';
 
 /**
  * Billing Component
@@ -36,58 +38,7 @@ const Billing = () => {
     date_issued: new Date().toISOString().split('T')[0],
   });
 
-  // Mock data based on database schema
-  const mockPatients = [
-    { patient_id: 1, full_Name: 'Mark Leewe' },
-    { patient_id: 2, full_Name: 'Tom Cruse' },
-  ];
 
-  const mockBills = [
-    {
-      bill_id: 1,
-      patient_id: 1,
-      patient_name: 'Mark Leewe',
-      service_name: 'Consultation',
-      amount: 150000,
-      date_issued: '2025-07-20',
-      method_of_payment: 'Credit Card',
-      status: 'Paid',
-      notes: '',
-    },
-    {
-      bill_id: 2,
-      patient_id: 2,
-      patient_name: 'Tom Cruse',
-      service_name: 'Blood Test',
-      amount: 200000,
-      date_issued: '2025-07-22',
-      method_of_payment: null,
-      status: 'Pending',
-      notes: '',
-    },
-    {
-      bill_id: 3,
-      patient_id: 1,
-      patient_name: 'Mark Leewe',
-      service_name: 'Follow-up Consultation',
-      amount: 100000,
-      date_issued: '2025-07-15',
-      method_of_payment: 'Cash',
-      status: 'Partially Paid',
-      notes: 'Patient paid 50000 UGX, remaining 50000 UGX due.',
-    },
-    {
-      bill_id: 4,
-      patient_id: 2,
-      patient_name: 'Tom Cruse',
-      service_name: 'X-Ray',
-      amount: 250000,
-      date_issued: '2025-07-18',
-      method_of_payment: null,
-      status: 'Overdue',
-      notes: '',
-    },
-  ];
 
   // Payment method options
   const paymentMethodOptions = [
@@ -106,48 +57,26 @@ const Billing = () => {
     label: `${patient.full_Name} (ID: ${patient.patient_id})`,
   }));
 
-  // Fetch bills and patients (mock for now, API-ready)
   useEffect(() => {
-    setIsLoading(true);
-
-    // TODO: Uncomment and configure for API integration
-    /*
-    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
-    const API_KEY = process.env.REACT_APP_API_KEY;
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_KEY || localStorage.getItem('authToken')}`,
-    };
-
     const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const [billsResponse, patientsResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/bills`, { headers }),
-          fetch(`${API_BASE_URL}/patients`, { headers }),
-        ]);
-        if (!billsResponse.ok) throw new Error('Failed to fetch bills.');
-        if (!patientsResponse.ok) throw new Error('Failed to fetch patients.');
         const [billsData, patientsData] = await Promise.all([
-          billsResponse.json(),
-          patientsResponse.json(),
+          apiFetch('/billing'),
+          apiFetch('/patients')
         ]);
-        setBills(billsData);
-        setPatients(patientsData);
-      } catch (err) {
-        toast.error(err.message);
+        setBills(billsData || []);
+        setPatients(patientsData || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load billing data');
+        setBills([]);
+        setPatients([]);
       } finally {
         setIsLoading(false);
       }
     };
     fetchData();
-    */
-
-    // Mock data loading
-    setTimeout(() => {
-      setBills(mockBills);
-      setPatients(mockPatients);
-      setIsLoading(false);
-    }, 500);
   }, []);
 
   // Filter bills based on search query
@@ -156,9 +85,9 @@ const Billing = () => {
     const filtered = bills.filter(bill => {
       const query = searchQuery.toLowerCase();
       return query === '' ||
-        bill.patient_name.toLowerCase().includes(query) ||
+        (bill.patient_name && bill.patient_name.toLowerCase().includes(query)) ||
         bill.bill_id.toString().includes(query) ||
-        bill.status.toLowerCase().includes(query);
+        (bill.status && bill.status.toLowerCase().includes(query));
     });
     setFilteredBills(filtered);
   }, [bills, searchQuery]);
@@ -299,7 +228,7 @@ const Billing = () => {
   };
 
   // Handle payment form submission
-  const handlePaymentSubmit = (e) => {
+  const handlePaymentSubmit = async (e) => {
     e.preventDefault();
     if (!paymentData.amount || !paymentData.method_of_payment) {
       toast.error('Please fill in all required payment fields.');
@@ -339,27 +268,41 @@ const Billing = () => {
       .catch(err => toast.error(err.message));
     */
 
-    // Mock submission
-    const updatedBills = bills.map(bill => {
-      if (bill.bill_id === currentBill.bill_id) {
-        const newStatus = parseFloat(paymentData.amount) >= bill.amount ? 'Paid' : 'Partially Paid';
-        return {
-          ...bill,
-          amount: bill.amount - parseFloat(paymentData.amount),
+    try {
+      await apiFetch(`/billing/${currentBill.bill_id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          amount: currentBill.amount - parseFloat(paymentData.amount),
           method_of_payment: paymentData.method_of_payment,
-          status: newStatus,
-          notes: bill.notes + (bill.notes ? '\n' : '') + paymentData.notes,
-        };
-      }
-      return bill;
-    });
-    setBills(updatedBills);
-    setIsPaymentModalOpen(false);
-    toast.success('Payment recorded successfully!');
+          status: parseFloat(paymentData.amount) >= currentBill.amount ? 'Paid' : 'Partially Paid',
+          notes: currentBill.notes + (currentBill.notes ? '\n' : '') + paymentData.notes,
+        })
+      });
+      
+      const updatedBills = bills.map(bill => {
+        if (bill.bill_id === currentBill.bill_id) {
+          const newStatus = parseFloat(paymentData.amount) >= bill.amount ? 'Paid' : 'Partially Paid';
+          return {
+            ...bill,
+            amount: bill.amount - parseFloat(paymentData.amount),
+            method_of_payment: paymentData.method_of_payment,
+            status: newStatus,
+            notes: bill.notes + (bill.notes ? '\n' : '') + paymentData.notes,
+          };
+        }
+        return bill;
+      });
+      setBills(updatedBills);
+      setIsPaymentModalOpen(false);
+      toast.success('Payment recorded successfully!');
+    } catch (error) {
+      console.error('Error recording payment:', error);
+      toast.error('Failed to record payment');
+    }
   };
 
   // Handle delete bill confirmation
-  const handleDeleteBillConfirm = () => {
+  const handleDeleteBillConfirm = async () => {
     // TODO: Replace with actual API call
     /*
     fetch(`${API_BASE_URL}/bills/${currentBill.bill_id}`, {
@@ -375,10 +318,17 @@ const Billing = () => {
       .catch(err => toast.error(err.message));
     */
 
-    // Mock deletion
-    setBills(prev => prev.filter(bill => bill.bill_id !== currentBill.bill_id));
-    setIsDeleteBillModalOpen(false);
-    toast.success('Bill deleted successfully!');
+    try {
+      await apiFetch(`/billing/${currentBill.bill_id}`, {
+        method: 'DELETE'
+      });
+      setBills(prev => prev.filter(bill => bill.bill_id !== currentBill.bill_id));
+      setIsDeleteBillModalOpen(false);
+      toast.success('Bill deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting bill:', error);
+      toast.error('Failed to delete bill');
+    }
   };
 
   // Handle back navigation
@@ -404,7 +354,7 @@ const Billing = () => {
   }
 
   return (
-    <div className="billing">
+    <div className="billing container-fluid">
       <ToastContainer position="top-right" autoClose={3000} />
       <div className="billing-header">
         <Button
@@ -446,18 +396,20 @@ const Billing = () => {
       </div>
 
       <Card title="Bills" className="bills-card">
-        {filteredBills.length > 0 ? (
-          <Table
-            columns={billColumns}
-            data={filteredBills}
-            striped
-            hoverable
-          />
-        ) : (
-          <div className="no-bills">
-            <p>No bills found.</p>
-          </div>
-        )}
+        <div className="table-responsive">
+          {filteredBills.length > 0 ? (
+            <Table
+              columns={billColumns}
+              data={filteredBills}
+              striped
+              hoverable
+            />
+          ) : (
+            <div className="no-bills">
+              <p>No bills found.</p>
+            </div>
+          )}
+        </div>
       </Card>
 
       {/* Delete Bill Modal */}

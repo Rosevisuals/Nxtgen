@@ -1,6 +1,6 @@
 // src/utils/api.js
 
-const BASE_URL = 'http://192.168.1.10:5000/api'; // Adjust if your backend runs elsewhere
+const BASE_URL = 'http://localhost:5000/api'; // Adjust if your backend runs elsewhere
 
 // Function to get the JWT from localStorage
 const getToken = () => localStorage.getItem('token');

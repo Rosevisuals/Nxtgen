@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
-import { FaUserCircle, FaRulerVertical, FaHeartbeat, FaCalendarAlt, FaFileMedical, FaArrowLeft } from 'react-icons/fa';
+import { FaUserCircle, FaRulerVertical, FaHeartbeat, FaCalendarAlt, FaFileMedical, FaArrowLeft, FaUser } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Card from './ui/Card';
@@ -9,6 +9,8 @@ import Button from './ui/Button';
 import Badge from './ui/Badge';
 import { getPatientByUserId, getPatientAppointments, getPatientPrescriptions } from '../services/patientService';
 import './patient-dashboard.css';
+import './patient-responsive.css';
+import './premium-dashboard.css';
 
 // ErrorBoundary component
 class ErrorBoundary extends React.Component {
@@ -46,7 +48,12 @@ const AppointmentItem = React.memo(({ appointment }) => (
       </div>
     </div>
     <div className="appointment-status">
-      <Badge variant={appointment.status === 'Pending' ? 'warning' : appointment.status === 'Approved' ? 'success' : 'danger'} pill>
+      <Badge variant={
+        appointment.status === 'Pending' ? 'warning' : 
+        appointment.status === 'Approved' || appointment.status === 'Scheduled' ? 'success' : 
+        appointment.status === 'Completed' ? 'info' :
+        appointment.status === 'Rejected' || appointment.status === 'Cancelled' ? 'danger' : 'secondary'
+      } pill>
         {appointment.status}
       </Badge>
     </div>
@@ -144,9 +151,11 @@ const PatientDashboard = () => {
       try {
         // Get user ID from localStorage (set during login)
         const userId = localStorage.getItem('user_id') || '6'; // Default for testing
+        console.log('Fetching patient data for user ID:', userId);
         
         // Fetch patient data by user ID
         const patientData = await getPatientByUserId(userId);
+        console.log('Patient data received:', patientData);
         
         if (!patientData) {
           throw new Error('Patient data not found');
@@ -238,85 +247,88 @@ const PatientDashboard = () => {
 
   return (
     <ErrorBoundary>
-      <Container className="patient-dashboard">
+      <div className="premium-dashboard patient-dashboard">
         <ToastContainer position="top-right" autoClose={3000} />
-        <div className="dashboard-header">
-          <Button
-            variant="outline-secondary"
+        <div className="dashboard-header animate-slide-up">
+          <button
+            className="btn-premium btn-outline-primary"
             onClick={handleBack}
             onKeyDown={(e) => handleKeyDown(e, handleBack)}
             aria-label="Go back"
-            className="back-button"
           >
-            <FaArrowLeft className="mr-1" /> Back
-          </Button>
-          <h1 className="text-3xl font-bold text-gray-800 flex items-center">
-            <FaUserCircle className="mr-2" /> My Dashboard
+            <FaArrowLeft /> Back
+          </button>
+          <h1 className="dashboard-title">
+            <FaUser className="page-icon" /> My Dashboard
           </h1>
         </div>
 
-        <Card className="personal-info-card mb-4">
-          <div className="personal-header">
-            <div className="personal-avatar">
-              <FaUserCircle size={80} />
-            </div>
-            <div className="personal-details">
-              <h2>{patient.full_Name}</h2>
-              <div className="personal-meta">
-                <span>{patient.age} years</span>
-                <span>{patient.gender}</span>
-                <span>ID: {patient.id}</span>
+        <div className="welcome-card animate-slide-up">
+          <div className="card-body">
+            <div className="personal-header">
+              <div className="personal-avatar">
+                <FaUserCircle size={80} />
               </div>
-              <div className="personal-contact">
-                <span>{patient.phone}</span>
-                <span>{patient.email}</span>
-              </div>
-            </div>
-            <div className="personal-actions">
-              <Button
-                variant="primary"
-                onClick={handleRequestAppointment}
-                onKeyDown={(e) => handleKeyDown(e, handleRequestAppointment)}
-                aria-label="Request a new appointment"
-              >
-                <FaCalendarAlt className="mr-1" /> Request Appointment
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        <h2 className="text-2xl font-semibold mb-4 text-gray-800">My Health Metrics</h2>
-        <Row className="health-metrics mb-4">
-          <Col md={3}>
-            <Card className="metric-card">
-              <div className="metric-icon">
-                <FaHeartbeat size={32} />
-              </div>
-              <div className="metric-content">
-                <h3>Blood Group</h3>
-                <div className="metric-value">{patient.blood_group}</div>
-              </div>
-            </Card>
-          </Col>
-          <Col md={3}>
-            <Card className="metric-card">
-              <div className="metric-icon">
-                <FaRulerVertical size={32} />
-              </div>
-              <div className="metric-content">
-                <h3>BMI</h3>
-                <div className="metric-value">
-                  {parseFloat(patient.BMI).toFixed(1)}
-                  <Badge variant={bmiStatus.color} pill className="bmi-badge">
-                    {bmiStatus.label}
-                  </Badge>
+              <div className="personal-details">
+                <h2>{patient.full_Name}</h2>
+                <div className="personal-meta">
+                  <span>{patient.age} years</span>
+                  <span>{patient.gender}</span>
+                  <span>ID: {patient.id}</span>
+                </div>
+                <div className="personal-contact">
+                  <span>{patient.phone}</span>
+                  <span>{patient.email}</span>
                 </div>
               </div>
-            </Card>
+              <div className="personal-actions">
+                <button
+                  className="btn-premium btn-primary"
+                  onClick={handleRequestAppointment}
+                  onKeyDown={(e) => handleKeyDown(e, handleRequestAppointment)}
+                  aria-label="Request a new appointment"
+                >
+                  <FaCalendarAlt /> Request Appointment
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2 className="text-2xl font-semibold mb-4 text-gray-800">My Health Metrics</h2>
+        <Row className="stats-row animate-slide-up">
+          <Col md={6}>
+            <div className="stats-card premium-card">
+              <div className="card-body">
+                <FaHeartbeat className="icon-style text-danger" />
+                <div>
+                  <h5>Blood Group</h5>
+                  <p className="stat-number">{patient.blood_group}</p>
+                </div>
+              </div>
+            </div>
+          </Col>
+          <Col md={6}>
+            <div className="stats-card premium-card">
+              <div className="card-body">
+                <FaRulerVertical className="icon-style text-blue-500" />
+                <div>
+                  <h5>BMI</h5>
+                  <p className="stat-number">
+                    {parseFloat(patient.BMI).toFixed(1)}
+                    <span className={`status-badge status-${bmiStatus.color === 'success' ? 'approved' : bmiStatus.color === 'warning' ? 'pending' : 'rejected'}`}>
+                      {bmiStatus.label}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
           </Col>
         </Row>
 
-        <Card title="Current Medications" className="medications-card mb-4">
+        <div className="premium-card medications-card animate-slide-up">
+          <div className="card-body">
+            <h5 className="card-title">💊 Current Medications</h5>
           {medications.length > 0 ? (
             <div className="medications-list" role="list">
               {medications.map((medication) => (
@@ -328,19 +340,22 @@ const PatientDashboard = () => {
               <p>No current medications.</p>
             </div>
           )}
-          <div className="medications-actions">
-            <Button
-              variant="outline-primary"
-              onClick={handleViewAllPrescriptions}
-              onKeyDown={(e) => handleKeyDown(e, handleViewAllPrescriptions)}
-              aria-label="View all prescriptions"
-            >
-              View All Prescriptions
-            </Button>
+            <div className="medications-actions">
+              <button
+                className="btn-premium btn-outline-primary"
+                onClick={handleViewAllPrescriptions}
+                onKeyDown={(e) => handleKeyDown(e, handleViewAllPrescriptions)}
+                aria-label="View all prescriptions"
+              >
+                View All Prescriptions
+              </button>
+            </div>
           </div>
-        </Card>
+        </div>
 
-        <Card title="Upcoming Appointments" className="appointments-card mb-4">
+        <div className="premium-card appointments-card animate-slide-up">
+          <div className="card-body">
+            <h5 className="card-title">📅 Upcoming Appointments</h5>
           {appointments.length > 0 ? (
             <div className="appointments-list" role="list">
               {appointments.map((appointment) => (
@@ -352,26 +367,27 @@ const PatientDashboard = () => {
               <p>No upcoming appointments.</p>
             </div>
           )}
-          <div className="appointments-actions">
-            <Button
-              variant="primary"
-              onClick={handleRequestAppointment}
-              onKeyDown={(e) => handleKeyDown(e, handleRequestAppointment)}
-              aria-label="Request a new appointment"
-            >
-              <FaCalendarAlt className="mr-1" /> Request Appointment
-            </Button>
-            <Button
-              variant="outline-primary"
-              onClick={handleViewAllAppointments}
-              onKeyDown={(e) => handleKeyDown(e, handleViewAllAppointments)}
-              aria-label="View all appointments"
-            >
-              View All Appointments
-            </Button>
+            <div className="appointments-actions">
+              <button
+                className="btn-premium btn-primary"
+                onClick={handleRequestAppointment}
+                onKeyDown={(e) => handleKeyDown(e, handleRequestAppointment)}
+                aria-label="Request a new appointment"
+              >
+                <FaCalendarAlt /> Request Appointment
+              </button>
+              <button
+                className="btn-premium btn-outline-primary"
+                onClick={handleViewAllAppointments}
+                onKeyDown={(e) => handleKeyDown(e, handleViewAllAppointments)}
+                aria-label="View all appointments"
+              >
+                View All Appointments
+              </button>
+            </div>
           </div>
-        </Card>
-      </Container>
+        </div>
+      </div>
     </ErrorBoundary>
   );
 };
