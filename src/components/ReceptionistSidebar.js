@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaUserPlus, FaCalendarAlt, FaSearch, FaChevronUp, FaChevronDown, FaSignOutAlt, FaClipboardList, FaFileInvoiceDollar } from 'react-icons/fa';
-import './receptionist-sidebar.css';
+import './unified-sidebar.css';
 
 const ReceptionistSidebar = ({ isOpen, toggleSidebar }) => {
   const [isPatientsOpen, setIsPatientsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const togglePatientsDropdown = () => {
     setIsPatientsOpen(!isPatientsOpen);
@@ -18,18 +26,38 @@ const ReceptionistSidebar = ({ isOpen, toggleSidebar }) => {
   };
 
   return (
-    <div className={`receptionist-sidebar ${isOpen ? 'open' : ''}`}>
-      <div className="sidebar-header">
-        <h2>Receptionist Dashboard</h2>
-        <button
-          className="toggle-button"
+    <>
+      {isMobile && (
+        <button 
+          className="mobile-menu-toggle"
           onClick={toggleSidebar}
-          onKeyDown={(e) => handleKeyDown(e, toggleSidebar)}
-          aria-label={isOpen ? 'Close sidebar' : 'Open sidebar'}
+          aria-label="Toggle menu"
         >
-          {isOpen ? <FaChevronUp /> : <FaChevronDown />}
+          <i className="fas fa-bars"></i>
         </button>
-      </div>
+      )}
+      <div className={`receptionist-sidebar ${isOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <div className="sidebar-logo">RD</div>
+          <h2>Receptionist</h2>
+          {!isMobile && (
+            <button
+              className="toggle-button"
+              onClick={toggleSidebar}
+              onKeyDown={(e) => handleKeyDown(e, toggleSidebar)}
+              aria-label={isOpen ? 'Close sidebar' : 'Open sidebar'}
+            >
+              {isOpen ? <FaChevronUp /> : <FaChevronDown />}
+            </button>
+          )}
+        </div>
+        <input 
+          type="text" 
+          className="sidebar-search" 
+          placeholder="Search menu..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       <ul className="sidebar-menu">
         <li>
           <NavLink
@@ -104,7 +132,8 @@ const ReceptionistSidebar = ({ isOpen, toggleSidebar }) => {
           </NavLink>
         </li>
       </ul>
-    </div>
+      </div>
+    </>
   );
 };
 

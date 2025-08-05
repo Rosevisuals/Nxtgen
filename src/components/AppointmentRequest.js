@@ -9,6 +9,7 @@ import Input from './ui/Input';
 import Select from './ui/Select';
 import Modal from './ui/Modal';
 import './AppointmentRequests.css';
+import { apiFetch } from '../utils/api';
 
 /**
  * AppointmentRequest Component
@@ -40,6 +41,7 @@ const AppointmentRequest = () => {
     value: dept.department_id,
     label: dept.name,
   }));
+
 
   // Fetch departments (mock for now, API-ready)
   useEffect(() => {
@@ -95,54 +97,35 @@ const AppointmentRequest = () => {
     setIsSubmitting(true);
 
     // TODO: Replace with actual API call
-    /*
-    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
-    const API_KEY = process.env.REACT_APP_API_KEY;
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_KEY || localStorage.getItem('authToken')}`,
-    };
+  
+    // const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
+    // const API_KEY = process.env.REACT_APP_API_KEY;
+    // const headers = {
+    //   'Content-Type': 'application/json',
+    //   'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+    // };
 
-    fetch(`${API_BASE_URL}/appointments`, {
+    const appointmentData = apiFetch(`/appointments`, {
       method: 'POST',
-      headers,
       body: JSON.stringify({
         patient_id: formData.patient_id,
+        appointment_date: new Date().toISOString(),
         department_id: formData.department_id,
         status: formData.status,
         notes: formData.notes,
-      }),
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to submit appointment request.');
-        return res.json();
+        staff_id: 1005 // Add field to form and get it from the form
       })
-      .then(() => {
+    })
+      .then((data) => {
+        console.log(data);
         setIsSubmitting(false);
-        setIsSuccessModalOpen(true);
+        toast.success('Appointment request submitted successfully!');
+        setTimeout(navigate('/PatientAppointments'), 2000)
       })
       .catch(err => {
         setIsSubmitting(false);
         toast.error(err.message);
       });
-    */
-
-    // Mock submission
-    setTimeout(() => {
-      console.log('Appointment request data:', formData);
-      setIsSubmitting(false);
-      toast.success('Appointment request submitted successfully!');
-      
-      // Clear form fields
-      setFormData({
-        department_id: '',
-        notes: '',
-        patient_id: '1',
-        status: 'Pending',
-      });
-      
-      setIsSuccessModalOpen(true);
-    }, 1000);
   };
 
   const handleBack = () => navigate(-1);

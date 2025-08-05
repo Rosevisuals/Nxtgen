@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { FaHome, FaCalendarAlt, FaHistory, FaUserMd, FaFileMedical } from 'react-icons/fa';
 import Sidebar from './ui/Sidebar';
-import Navbar from './ui/Navbar';
 import { useNavigate } from 'react-router-dom';
 import { getPatientByUserId } from '../services/patientService';
 import './patient-layout.css';
@@ -52,10 +51,7 @@ const PatientLayout = () => {
     { path: '/PatientHelp', label: 'Help', icon: <FaHistory /> },
   ];
 
-  // Navbar links
-  const navbarLinks = [
-    
-  ]
+
   
   // Handle sidebar toggle
   const handleToggleSidebar = () => {
@@ -78,16 +74,6 @@ const PatientLayout = () => {
         onToggleCollapse={handleToggleSidebar}
       />
       <div className={`patient-content ${sidebarCollapsed ? 'collapsed' : ''}`}>
-        <Navbar
-          title="NxtGen Hospital"
-          links={navbarLinks}
-          rightContent={
-            <Navbar.User
-              user={user}
-              onLogout={handleLogout}
-            />
-          }
-        />
         <main className="patient-main">
           <Outlet />
         </main>

@@ -11,8 +11,7 @@ import Table from './ui/Table';
 import Badge from './ui/Badge';
 import Modal from './ui/Modal';
 import { apiFetch } from '../utils/api';
-import './billing.css';
-import './receptionist-responsive.css';
+import './centered-layout.css';
 
 /**
  * Billing Component
@@ -135,7 +134,7 @@ const Billing = () => {
           case 'Overdue': variant = 'danger'; break;
           default: variant = 'primary';
         }
-        return <Badge variant={variant} pill>{row.status}</Badge>;
+        return <span className={`badge badge-${variant === 'success' ? 'success' : variant === 'warning' ? 'warning' : variant === 'danger' ? 'danger' : 'primary'}`}>{row.status}</span>;
       },
     },
     {
@@ -144,40 +143,39 @@ const Billing = () => {
         <div className="table-actions">
           {row.status !== 'Paid' && (
             <>
-              <Button
-                variant="primary"
-                size="sm"
+              <button
+                className="btn btn-success btn-sm"
                 onClick={() => handlePayment(row)}
                 aria-label={`Record payment for bill ${row.bill_id}`}
+                style={{marginRight: '0.5rem'}}
               >
                 <FaCheck /> Pay
-              </Button>
-              <Button
-                variant="outline-primary"
-                size="sm"
+              </button>
+              <button
+                className="btn btn-secondary btn-sm"
                 onClick={() => handleDeleteBill(row)}
                 aria-label={`Delete bill ${row.bill_id}`}
+                style={{marginRight: '0.5rem'}}
               >
                 <FaTrash />
-              </Button>
+              </button>
             </>
           )}
-          <Button
-            variant="outline-primary"
-            size="sm"
+          <button
+            className="btn btn-outline btn-sm"
             onClick={() => handlePrintBill(row)}
             aria-label={`Print bill ${row.bill_id}`}
+            style={{marginRight: '0.5rem'}}
           >
             <FaPrint />
-          </Button>
-          <Button
-            variant="outline-primary"
-            size="sm"
+          </button>
+          <button
+            className="btn btn-outline btn-sm"
             onClick={() => handleEmailBill(row)}
             aria-label={`Email bill ${row.bill_id}`}
           >
             <FaEnvelope />
-          </Button>
+          </button>
         </div>
       ),
     },
@@ -354,63 +352,88 @@ const Billing = () => {
   }
 
   return (
-    <div className="billing container-fluid">
-      <ToastContainer position="top-right" autoClose={3000} />
-      <div className="billing-header">
-        <Button
-          variant="outline-secondary"
-          onClick={handleBack}
-          onKeyDown={(e) => handleKeyDown(e, handleBack)}
-          aria-label="Go back"
-          className="back-button"
-        >
-          <FaArrowLeft className="mr-1" /> Back
-        </Button>
-        <h1 className="text-3xl font-bold text-gray-800 flex items-center">
-          <FaFileInvoiceDollar className="mr-2" /> Billing
-        </h1>
-      </div>
-
-      <div className="billing-controls">
-        <Card className="search-card">
-          <div className="search-box">
-            <FaSearch className="search-icon" />
-            <Input
-              type="text"
-              placeholder="Search bills by patient, bill ID, or status..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="search-input"
-            />
-          </div>
-        </Card>
-        <Card className="actions-card">
-          <Button
-            variant="primary"
-            onClick={handleNewBill}
-            aria-label="Create new bill"
-          >
-            <FaPlus /> New Bill
-          </Button>
-        </Card>
-      </div>
-
-      <Card title="Bills" className="bills-card">
-        <div className="table-responsive">
-          {filteredBills.length > 0 ? (
-            <Table
-              columns={billColumns}
-              data={filteredBills}
-              striped
-              hoverable
-            />
-          ) : (
-            <div className="no-bills">
-              <p>No bills found.</p>
-            </div>
-          )}
+    <div className="centered-container">
+      <div className="centered-content">
+        <ToastContainer position="top-right" autoClose={3000} />
+        <div className="page-header">
+          <h1 className="page-title">
+            <FaFileInvoiceDollar /> Billing Management
+          </h1>
+          <p className="page-subtitle">Manage patient bills and payments</p>
         </div>
-      </Card>
+
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">Search & Actions</h2>
+          </div>
+          <div className="card-body">
+            <div className="row">
+              <div className="col-8">
+                <div className="form-group">
+                  <label className="form-label" htmlFor="searchQuery">
+                    <FaSearch style={{marginRight: '0.5rem'}} /> Search Bills
+                  </label>
+                  <input
+                    type="text"
+                    id="searchQuery"
+                    className="form-input"
+                    placeholder="Search by patient, bill ID, or status..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                  />
+                </div>
+              </div>
+              <div className="col-4">
+                <div className="form-group">
+                  <label className="form-label" style={{visibility: 'hidden'}}>Actions</label>
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleNewBill}
+                    aria-label="Create new bill"
+                  >
+                    <FaPlus /> New Bill
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">Bills ({filteredBills.length} found)</h2>
+          </div>
+          <div className="card-body">
+            {filteredBills.length > 0 ? (
+              <div className="table-container">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      {billColumns.map((col, index) => (
+                        <th key={index}>{col.header}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredBills.map((row, index) => (
+                      <tr key={index}>
+                        {billColumns.map((col, colIndex) => (
+                          <td key={colIndex}>
+                            {col.cell ? col.cell(row) : row[col.accessor]}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center" style={{padding: '2rem', color: '#64748b'}}>
+                <p>No bills found.</p>
+              </div>
+            )}
+          </div>
+        </div>
 
       {/* Delete Bill Modal */}
       <Modal
@@ -476,6 +499,7 @@ const Billing = () => {
           />
         </form>
       </Modal>
+      </div>
     </div>
   );
 };

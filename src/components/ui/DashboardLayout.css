@@ -1,0 +1,57 @@
+/* DashboardLayout.css - Unified Dashboard Layout */
+
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.dashboard-main {
+  flex: 1;
+  margin-left: 280px;
+  min-height: 100vh;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.dashboard-main.mobile {
+  margin-left: 0;
+  padding-top: 120px; /* Space for mobile header + search */
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .dashboard-main {
+    margin-left: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-main {
+    margin-left: 0;
+    padding-top: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-main.mobile {
+    padding-top: 110px; /* Adjusted for smaller mobile header */
+  }
+}
+
+/* Performance Optimizations */
+.dashboard-layout {
+  contain: layout style;
+}
+
+.dashboard-main {
+  will-change: margin-left;
+  contain: layout style paint;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-main {
+    transition: none;
+  }
+}

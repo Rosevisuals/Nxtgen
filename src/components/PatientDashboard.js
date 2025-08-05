@@ -8,9 +8,7 @@ import Card from './ui/Card';
 import Button from './ui/Button';
 import Badge from './ui/Badge';
 import { getPatientByUserId, getPatientAppointments, getPatientPrescriptions } from '../services/patientService';
-import './patient-dashboard.css';
-import './patient-responsive.css';
-import './premium-dashboard.css';
+import './centered-layout.css';
 
 // ErrorBoundary component
 class ErrorBoundary extends React.Component {
@@ -82,7 +80,9 @@ const PatientDashboard = () => {
   const navigate = useNavigate();
   const [patient, setPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
+  const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [medications, setMedications] = useState([]);
+  const [filteredMedications, setFilteredMedications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -247,143 +247,177 @@ const PatientDashboard = () => {
 
   return (
     <ErrorBoundary>
-      <div className="premium-dashboard patient-dashboard">
-        <ToastContainer position="top-right" autoClose={3000} />
-        <div className="dashboard-header animate-slide-up">
-          <button
-            className="btn-premium btn-outline-primary"
-            onClick={handleBack}
-            onKeyDown={(e) => handleKeyDown(e, handleBack)}
-            aria-label="Go back"
-          >
-            <FaArrowLeft /> Back
-          </button>
-          <h1 className="dashboard-title">
-            <FaUser className="page-icon" /> My Dashboard
-          </h1>
-        </div>
+      <div className="centered-container">
+        <div className="centered-content">
+          <ToastContainer position="top-right" autoClose={3000} />
+          <div className="page-header">
+            <h1 className="page-title">
+              <FaUser /> My Dashboard
+            </h1>
+            <p className="page-subtitle">Welcome, {patient.full_Name}</p>
+          </div>
 
-        <div className="welcome-card animate-slide-up">
-          <div className="card-body">
-            <div className="personal-header">
-              <div className="personal-avatar">
-                <FaUserCircle size={80} />
-              </div>
-              <div className="personal-details">
-                <h2>{patient.full_Name}</h2>
-                <div className="personal-meta">
-                  <span>{patient.age} years</span>
-                  <span>{patient.gender}</span>
-                  <span>ID: {patient.id}</span>
+          <div className="card">
+            <div className="card-body">
+              <div className="row">
+                <div className="col-2 text-center">
+                  <FaUserCircle style={{fontSize: '4rem', color: '#2563eb'}} />
                 </div>
-                <div className="personal-contact">
-                  <span>{patient.phone}</span>
-                  <span>{patient.email}</span>
+                <div className="col-8">
+                  <h2 style={{margin: '0 0 0.5rem 0', color: '#1e293b'}}>{patient.full_Name}</h2>
+                  <p style={{margin: '0.25rem 0', color: '#64748b'}}>{patient.age} years • {patient.gender} • ID: {patient.id}</p>
+                  <p style={{margin: '0.25rem 0', color: '#64748b'}}>{patient.phone} • {patient.email}</p>
+                </div>
+                <div className="col-2 text-center">
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleRequestAppointment}
+                    onKeyDown={(e) => handleKeyDown(e, handleRequestAppointment)}
+                    aria-label="Request a new appointment"
+                  >
+                    <FaCalendarAlt /> Request Appointment
+                  </button>
                 </div>
               </div>
-              <div className="personal-actions">
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-6">
+              <div className="card">
+                <div className="card-body text-center">
+                  <FaHeartbeat style={{fontSize: '2rem', color: '#ef4444', marginBottom: '0.5rem'}} />
+                  <h3 style={{fontSize: '2rem', fontWeight: 'bold', margin: '0.5rem 0'}}>{patient.blood_group}</h3>
+                  <p style={{color: '#64748b', margin: 0}}>Blood Group</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-6">
+              <div className="card">
+                <div className="card-body text-center">
+                  <FaRulerVertical style={{fontSize: '2rem', color: '#2563eb', marginBottom: '0.5rem'}} />
+                  <h3 style={{fontSize: '2rem', fontWeight: 'bold', margin: '0.5rem 0'}}>
+                    {parseFloat(patient.BMI).toFixed(1)}
+                    <span className={`badge badge-${bmiStatus.color === 'success' ? 'success' : bmiStatus.color === 'warning' ? 'warning' : 'danger'}`} style={{marginLeft: '0.5rem', fontSize: '0.75rem'}}>
+                      {bmiStatus.label}
+                    </span>
+                  </h3>
+                  <p style={{color: '#64748b', margin: 0}}>BMI</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">💊 Current Medications</h2>
+            </div>
+            <div className="card-body">
+              {medications.length > 0 ? (
+                <div className="table-container">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Medication</th>
+                        <th>Dosage</th>
+                        <th>Prescribed By</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {medications.map((medication) => (
+                        <tr key={medication.prescription_id}>
+                          <td>{medication.Medication || medication.medicine_name}</td>
+                          <td>{medication.dosage}</td>
+                          <td>{medication.doctor_name || medication.staff_name || 'Doctor'}</td>
+                          <td>{new Date(medication.date_issued).toLocaleDateString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-center" style={{color: '#64748b', padding: '2rem'}}>No current medications.</p>
+              )}
+              <div className="text-center mt-3">
                 <button
-                  className="btn-premium btn-primary"
-                  onClick={handleRequestAppointment}
-                  onKeyDown={(e) => handleKeyDown(e, handleRequestAppointment)}
-                  aria-label="Request a new appointment"
+                  className="btn btn-outline"
+                  onClick={handleViewAllPrescriptions}
+                  onKeyDown={(e) => handleKeyDown(e, handleViewAllPrescriptions)}
+                  aria-label="View all prescriptions"
                 >
-                  <FaCalendarAlt /> Request Appointment
+                  View All Prescriptions
                 </button>
               </div>
             </div>
           </div>
-        </div>
 
-        <h2 className="text-2xl font-semibold mb-4 text-gray-800">My Health Metrics</h2>
-        <Row className="stats-row animate-slide-up">
-          <Col md={6}>
-            <div className="stats-card premium-card">
-              <div className="card-body">
-                <FaHeartbeat className="icon-style text-danger" />
-                <div>
-                  <h5>Blood Group</h5>
-                  <p className="stat-number">{patient.blood_group}</p>
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">📅 Upcoming Appointments</h2>
+            </div>
+            <div className="card-body">
+              {appointments.length > 0 ? (
+                <div className="table-container">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Doctor</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {appointments.map((appointment) => (
+                        <tr key={appointment.appointment_id}>
+                          <td>{new Date(appointment.appointment_date).toLocaleDateString()}</td>
+                          <td>{new Date(appointment.appointment_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                          <td>{appointment.doctor_name || appointment.staff_name || 'Doctor'}</td>
+                          <td>{appointment.department_name || 'General'}</td>
+                          <td>
+                            <span className={`badge badge-${
+                              appointment.status === 'Pending' ? 'warning' : 
+                              appointment.status === 'Approved' || appointment.status === 'Scheduled' ? 'success' : 
+                              appointment.status === 'Completed' ? 'primary' :
+                              appointment.status === 'Rejected' || appointment.status === 'Cancelled' ? 'danger' : 'primary'
+                            }`}>
+                              {appointment.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-center" style={{color: '#64748b', padding: '2rem'}}>No upcoming appointments.</p>
+              )}
+              <div className="text-center mt-3">
+                <div className="row">
+                  <div className="col-6">
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleRequestAppointment}
+                      onKeyDown={(e) => handleKeyDown(e, handleRequestAppointment)}
+                      aria-label="Request a new appointment"
+                    >
+                      <FaCalendarAlt /> Request Appointment
+                    </button>
+                  </div>
+                  <div className="col-6">
+                    <button
+                      className="btn btn-outline"
+                      onClick={handleViewAllAppointments}
+                      onKeyDown={(e) => handleKeyDown(e, handleViewAllAppointments)}
+                      aria-label="View all appointments"
+                    >
+                      View All Appointments
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Col>
-          <Col md={6}>
-            <div className="stats-card premium-card">
-              <div className="card-body">
-                <FaRulerVertical className="icon-style text-blue-500" />
-                <div>
-                  <h5>BMI</h5>
-                  <p className="stat-number">
-                    {parseFloat(patient.BMI).toFixed(1)}
-                    <span className={`status-badge status-${bmiStatus.color === 'success' ? 'approved' : bmiStatus.color === 'warning' ? 'pending' : 'rejected'}`}>
-                      {bmiStatus.label}
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Col>
-        </Row>
-
-        <div className="premium-card medications-card animate-slide-up">
-          <div className="card-body">
-            <h5 className="card-title">💊 Current Medications</h5>
-          {medications.length > 0 ? (
-            <div className="medications-list" role="list">
-              {medications.map((medication) => (
-                <MedicationItem key={medication.prescription_id} medication={medication} />
-              ))}
-            </div>
-          ) : (
-            <div className="no-medications">
-              <p>No current medications.</p>
-            </div>
-          )}
-            <div className="medications-actions">
-              <button
-                className="btn-premium btn-outline-primary"
-                onClick={handleViewAllPrescriptions}
-                onKeyDown={(e) => handleKeyDown(e, handleViewAllPrescriptions)}
-                aria-label="View all prescriptions"
-              >
-                View All Prescriptions
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="premium-card appointments-card animate-slide-up">
-          <div className="card-body">
-            <h5 className="card-title">📅 Upcoming Appointments</h5>
-          {appointments.length > 0 ? (
-            <div className="appointments-list" role="list">
-              {appointments.map((appointment) => (
-                <AppointmentItem key={appointment.appointment_id} appointment={appointment} />
-              ))}
-            </div>
-          ) : (
-            <div className="no-appointments">
-              <p>No upcoming appointments.</p>
-            </div>
-          )}
-            <div className="appointments-actions">
-              <button
-                className="btn-premium btn-primary"
-                onClick={handleRequestAppointment}
-                onKeyDown={(e) => handleKeyDown(e, handleRequestAppointment)}
-                aria-label="Request a new appointment"
-              >
-                <FaCalendarAlt /> Request Appointment
-              </button>
-              <button
-                className="btn-premium btn-outline-primary"
-                onClick={handleViewAllAppointments}
-                onKeyDown={(e) => handleKeyDown(e, handleViewAllAppointments)}
-                aria-label="View all appointments"
-              >
-                View All Appointments
-              </button>
             </div>
           </div>
         </div>

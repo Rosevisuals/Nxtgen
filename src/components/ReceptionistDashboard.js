@@ -8,14 +8,13 @@ import Badge from './ui/Badge';
 import Table from './ui/Table';
 import { useNavigate } from 'react-router-dom';
 import { getTodayAppointments, updateAppointmentStatus } from '../services/receptionistService';
-import './receptionist-dashboard.css';
-import './receptionist-responsive.css';
-import './premium-dashboard.css';
+import './centered-layout.css';
 
 const ReceptionistDashboard = () => {
   const navigate = useNavigate();
   const [date] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
+  const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const receptionistName = localStorage.getItem('user_name') || 'Receptionist';
@@ -94,7 +93,7 @@ const ReceptionistDashboard = () => {
           case 'Cancelled': variant = 'danger'; break;
           default: variant = 'secondary';
         }
-        return <Badge variant={variant} pill>{row.status}</Badge>;
+        return <span className={`badge badge-${variant === 'warning' ? 'warning' : variant === 'success' ? 'success' : variant === 'info' ? 'primary' : variant === 'danger' ? 'danger' : 'primary'}`}>{row.status}</span>;
       },
     },
     {
@@ -103,7 +102,7 @@ const ReceptionistDashboard = () => {
         <div className="table-actions">
           {(row.status === 'Approved' || row.status === 'Scheduled') && (
             <button 
-              className="btn-premium btn-success"
+              className="btn btn-success btn-sm"
               onClick={() => handleCheckIn(row)}
               aria-label={`Check in ${row.patient_name}`}
             >
@@ -111,7 +110,7 @@ const ReceptionistDashboard = () => {
             </button>
           )}
           <button 
-            className="btn-premium btn-outline-primary"
+            className="btn btn-outline btn-sm"
             onClick={() => handleViewPatient(row)}
             aria-label={`View patient ${row.patient_name}`}
           >
@@ -168,125 +167,117 @@ const ReceptionistDashboard = () => {
     );
   }
 
+  const appointmentFilterOptions = [
+    {
+      key: 'status',
+      label: 'Status',
+      options: [
+        { value: 'Pending', label: 'Pending' },
+        { value: 'Approved', label: 'Approved' },
+        { value: 'Scheduled', label: 'Scheduled' },
+        { value: 'Checked In', label: 'Checked In' },
+        { value: 'Completed', label: 'Completed' },
+        { value: 'Rejected', label: 'Rejected' },
+        { value: 'Cancelled', label: 'Cancelled' }
+      ]
+    },
+    {
+      key: 'department_name',
+      label: 'Department',
+      options: [
+        { value: 'Cardiology', label: 'Cardiology' },
+        { value: 'Neurology', label: 'Neurology' },
+        { value: 'Orthopedics', label: 'Orthopedics' },
+        { value: 'Pediatrics', label: 'Pediatrics' },
+        { value: 'General Medicine', label: 'General Medicine' }
+      ]
+    }
+  ];
+
+  const appointmentSortOptions = [
+    { key: 'appointment_date', label: 'Time' },
+    { key: 'patient_name', label: 'Patient Name' },
+    { key: 'staff_name', label: 'Doctor Name' },
+    { key: 'status', label: 'Status' }
+  ];
+
   return (
-    <div className="premium-dashboard receptionist-dashboard">
-      <ToastContainer position="top-right" autoClose={3000} />
-      <div className="dashboard-header animate-slide-up">
-        <button
-          className="btn-premium btn-outline-primary"
-          onClick={handleBack}
-          onKeyDown={(e) => handleKeyDown(e, handleBack)}
-          aria-label="Go back"
-        >
-          <FaArrowLeft /> Back
-        </button>
-        <h1 className="dashboard-title">
-          <FaClipboardList className="page-icon" /> Receptionist Dashboard
-        </h1>
-      </div>
-      <div className="welcome-card animate-slide-up">
-        <div className="card-body">
-          <h3>Welcome Back, {receptionistName}</h3>
-          <p>Manage appointments and patient information efficiently.</p>
+    <div className="centered-container">
+      <div className="centered-content">
+        <ToastContainer position="top-right" autoClose={3000} />
+        <div className="page-header">
+          <h1 className="page-title">
+            <FaClipboardList /> Receptionist Dashboard
+          </h1>
+          <p className="page-subtitle">Welcome Back, {receptionistName}</p>
         </div>
-      </div>
-      <div className="date-display">
-        <h2>
-          <FaCalendarAlt className="calendar-icon" />
-          {date.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}
-        </h2>
-      </div>
-      <div className="premium-card quick-actions-card animate-slide-up">
-        <div className="card-body">
-          <h5 className="card-title">⚡ Quick Actions</h5>
-          <div className="quick-actions">
-            <button className="btn-premium btn-primary" onClick={handleNewPatient} aria-label="Register new patient">
-              <FaUserPlus /> Register Patient
-            </button>
-            <button className="btn-premium btn-primary" onClick={handleNewAppointment} aria-label="Schedule new appointment">
-              <FaCalendarAlt /> New Appointment
-            </button>
-            <button className="btn-premium btn-primary" onClick={handlePatientSearch} aria-label="Search patients">
-              <FaSearch /> Find Patient
-            </button>
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">
+              <FaCalendarAlt /> {date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </h2>
+          </div>
+          <div className="card-body">
+            <div className="row">
+              <div className="col-4">
+                <button className="btn btn-primary" onClick={handleNewPatient}>
+                  <FaUserPlus /> Register Patient
+                </button>
+              </div>
+              <div className="col-4">
+                <button className="btn btn-primary" onClick={handleNewAppointment}>
+                  <FaCalendarAlt /> New Appointment
+                </button>
+              </div>
+              <div className="col-4">
+                <button className="btn btn-primary" onClick={handlePatientSearch}>
+                  <FaSearch /> Find Patient
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="stats-row animate-slide-up">
         <div className="row">
-          <div className="col-md-4">
-            <div className="stats-card premium-card">
-              <div className="card-body">
-                <FaCalendarAlt className="icon-style text-blue-500" />
-                <div>
-                  <h5>Today's Appointments</h5>
-                  <p className="stat-number">{todayAppointments.length}</p>
-                </div>
+          <div className="col-4">
+            <div className="card">
+              <div className="card-body text-center">
+                <FaCalendarAlt style={{fontSize: '2rem', color: '#2563eb', marginBottom: '0.5rem'}} />
+                <h3 style={{fontSize: '2rem', fontWeight: 'bold', margin: '0.5rem 0'}}>{todayAppointments.length}</h3>
+                <p style={{color: '#64748b', margin: 0}}>Today's Appointments</p>
               </div>
             </div>
           </div>
-          <div className="col-md-4">
-            <div className="stats-card premium-card">
-              <div className="card-body">
-                <FaUserCheck className="icon-style text-green-500" />
-                <div>
-                  <h5>Checked In</h5>
-                  <p className="stat-number">{checkedInPatients.length}</p>
-                </div>
+          <div className="col-4">
+            <div className="card">
+              <div className="card-body text-center">
+                <FaUserCheck style={{fontSize: '2rem', color: '#10b981', marginBottom: '0.5rem'}} />
+                <h3 style={{fontSize: '2rem', fontWeight: 'bold', margin: '0.5rem 0'}}>{checkedInPatients.length}</h3>
+                <p style={{color: '#64748b', margin: 0}}>Checked In</p>
               </div>
             </div>
           </div>
-          <div className="col-md-4">
-            <div className="stats-card premium-card">
-              <div className="card-body">
-                <FaClock className="icon-style text-yellow-500" />
-                <div>
-                  <h5>Upcoming (Next 3 Hours)</h5>
-                  <p className="stat-number">{upcomingAppointments.length}</p>
-                </div>
+          <div className="col-4">
+            <div className="card">
+              <div className="card-body text-center">
+                <FaClock style={{fontSize: '2rem', color: '#f59e0b', marginBottom: '0.5rem'}} />
+                <h3 style={{fontSize: '2rem', fontWeight: 'bold', margin: '0.5rem 0'}}>{upcomingAppointments.length}</h3>
+                <p style={{color: '#64748b', margin: 0}}>Upcoming (3 Hours)</p>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="premium-card appointments-card animate-slide-up">
-        <div className="card-body">
-          <h5 className="card-title">📅 Today's Appointments</h5>
-          <div className="table-responsive">
-            <table className="premium-table">
-              <thead>
-                <tr>
-                  {appointmentColumns.map((col, index) => (
-                    <th key={index}>{col.header}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {todayAppointments.map((row, index) => (
-                  <tr key={index}>
-                    {appointmentColumns.map((col, colIndex) => (
-                      <td key={colIndex}>
-                        {col.cell ? col.cell(row) : row[col.accessor]}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">📅 Today's Appointments</h2>
           </div>
-        </div>
-      </div>
-      <div className="premium-card upcoming-appointments-card animate-slide-up">
-        <div className="card-body">
-          <h5 className="card-title">🕰️ Upcoming Appointments (Next 3 Hours)</h5>
-          <div className="table-responsive">
-            {upcomingAppointments.length > 0 ? (
-              <table className="premium-table">
+          <div className="card-body">
+            <div className="table-container">
+              <table className="table">
                 <thead>
                   <tr>
                     {appointmentColumns.map((col, index) => (
@@ -295,7 +286,7 @@ const ReceptionistDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {upcomingAppointments.map((row, index) => (
+                  {todayAppointments.map((row, index) => (
                     <tr key={index}>
                       {appointmentColumns.map((col, colIndex) => (
                         <td key={colIndex}>
@@ -306,13 +297,40 @@ const ReceptionistDashboard = () => {
                   ))}
                 </tbody>
               </table>
-            ) : (
-              <div className="no-appointments">
-                <p>No upcoming appointments in the next 3 hours.</p>
-              </div>
-            )}
+            </div>
           </div>
         </div>
+        {upcomingAppointments.length > 0 && (
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">🕰️ Upcoming Appointments (Next 3 Hours)</h2>
+            </div>
+            <div className="card-body">
+              <div className="table-container">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      {appointmentColumns.map((col, index) => (
+                        <th key={index}>{col.header}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {upcomingAppointments.map((row, index) => (
+                      <tr key={index}>
+                        {appointmentColumns.map((col, colIndex) => (
+                          <td key={colIndex}>
+                            {col.cell ? col.cell(row) : row[col.accessor]}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

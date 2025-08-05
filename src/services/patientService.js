@@ -10,7 +10,8 @@ export const getPatientByUserId = async (userId) => {
 };
 
 export const getPatientAppointments = async (patientId) => {
-  return await apiFetch(`/patients/${patientId}/appointments`);
+  // return await apiFetch(`/patients/${patientId}/appointments`);
+  return await apiFetch(`/appointments`);
 };
 
 export const getPatientPrescriptions = async (patientId) => {

@@ -8,10 +8,7 @@ import 'react-calendar/dist/Calendar.css';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { useNavigate } from 'react-router-dom';
-import './doctors-dashboard.css';
-import './doctors-responsive.css';
-import './premium-dashboard.css';
-import './chart-enhancements.css';
+import './centered-layout.css';
 import { apiFetch } from '../utils/api';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -22,6 +19,7 @@ const DoctorDashboard = () => {
   const [view, setView] = useState('day');
   const [loading, setLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
+  const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [doctorName, setDoctorName] = useState('Doctor');
   const [stats, setStats] = useState({
     totalAppointments: 0,
@@ -46,6 +44,8 @@ const DoctorDashboard = () => {
 
         // Fetch appointments
         const appointmentsData = await apiFetch('/appointments');
+        console.log('Fetched appointments:', appointmentsData);
+        toast.info(`Loaded ${appointmentsData?.length || 0} appointments`);
         setAppointments(appointmentsData || []);
 
         // Fetch patients for stats
@@ -87,7 +87,7 @@ const DoctorDashboard = () => {
     return date.toISOString().split('T')[0];
   };
 
-  const filteredAppointments = appointments.filter((appointment) => {
+  const calendarFilteredAppointments = appointments.filter((appointment) => {
     const appointmentDate = new Date(appointment.appointment_date);
     const selected = new Date(date);
     if (view === 'day') {
@@ -114,7 +114,7 @@ const DoctorDashboard = () => {
   const pendingAppointments = appointments.filter(apt => apt.status === 'Pending');
   const approvedAppointments = appointments.filter(apt => apt.status === 'Approved' || apt.status === 'Scheduled');
 
-  const sortedAppointments = [...filteredAppointments].sort((a, b) => {
+  const sortedAppointments = [...calendarFilteredAppointments].sort((a, b) => {
     const dateA = new Date(a.appointment_date);
     const dateB = new Date(b.appointment_date);
     return dateA - dateB;
@@ -221,7 +221,7 @@ const DoctorDashboard = () => {
             variant = 'primary';
         }
         return (
-          <span className={`status-badge status-${variant}`}>
+          <span className={`badge badge-${variant === 'warning' ? 'warning' : variant === 'success' ? 'success' : variant === 'info' ? 'primary' : variant === 'danger' ? 'danger' : 'primary'}`}>
             {row.status}
           </span>
         );
@@ -234,51 +234,49 @@ const DoctorDashboard = () => {
         <div className="table-actions">
           {row.status === 'Pending' ? (
             <>
-              <Button
-                variant="success"
-                size="sm"
+              <button
+                className="btn btn-success btn-sm"
                 onClick={() => handleApproveAppointment(row)}
                 aria-label={`Approve appointment for ${row.patient_name}`}
+                style={{marginRight: '0.5rem'}}
               >
                 Approve
-              </Button>
-              <Button
-                variant="danger"
-                size="sm"
+              </button>
+              <button
+                className="btn btn-secondary btn-sm"
                 onClick={() => handleRejectAppointment(row)}
                 aria-label={`Reject appointment for ${row.patient_name}`}
               >
                 Reject
-              </Button>
+              </button>
             </>
           ) : (
             <>
-              <Button
-                variant="primary"
-                size="sm"
+              <button
+                className="btn btn-primary btn-sm"
                 onClick={() => handleStartConsultation(row)}
                 aria-label={`Start consultation for ${row.patient_name}`}
                 disabled={row.status === 'Rejected'}
+                style={{marginRight: '0.5rem'}}
               >
                 Start
-              </Button>
-              <Button
-                variant="outline-primary"
-                size="sm"
+              </button>
+              <button
+                className="btn btn-outline btn-sm"
                 onClick={() => handleViewPatient(row)}
                 aria-label={`View patient ${row.patient_name}`}
+                style={{marginRight: '0.5rem'}}
               >
                 View
-              </Button>
-              <Button
-                variant="outline-success"
-                size="sm"
+              </button>
+              <button
+                className="btn btn-success btn-sm"
                 onClick={() => handleCreatePrescription(row)}
                 aria-label={`Create prescription for ${row.patient_name}`}
                 disabled={row.status === 'Rejected'}
               >
                 Prescribe
-              </Button>
+              </button>
             </>
           )}
         </div>
@@ -351,310 +349,156 @@ const DoctorDashboard = () => {
     );
   }
 
+  const appointmentFilterOptions = [
+    {
+      key: 'status',
+      label: 'Status',
+      options: [
+        { value: 'Pending', label: 'Pending' },
+        { value: 'Approved', label: 'Approved' },
+        { value: 'Scheduled', label: 'Scheduled' },
+        { value: 'Checked In', label: 'Checked In' },
+        { value: 'In Progress', label: 'In Progress' },
+        { value: 'Completed', label: 'Completed' },
+        { value: 'Rejected', label: 'Rejected' },
+        { value: 'Cancelled', label: 'Cancelled' }
+      ]
+    },
+    {
+      key: 'department_name',
+      label: 'Department',
+      options: [
+        { value: 'Cardiology', label: 'Cardiology' },
+        { value: 'Neurology', label: 'Neurology' },
+        { value: 'Orthopedics', label: 'Orthopedics' },
+        { value: 'Pediatrics', label: 'Pediatrics' },
+        { value: 'General Medicine', label: 'General Medicine' }
+      ]
+    }
+  ];
+
+  const appointmentSortOptions = [
+    { key: 'appointment_date', label: 'Date' },
+    { key: 'patient_name', label: 'Patient Name' },
+    { key: 'status', label: 'Status' }
+  ];
+
   return (
-    <div className="premium-dashboard doctors-dashboard">
-      <ToastContainer position="top-right" autoClose={3000} />
-      <div className="dashboard-header animate-slide-up">
-        <h1 className="dashboard-title">
-          <FaStethoscope className="page-icon" /> Doctor's Dashboard
-        </h1>
-      </div>
-      
-      {/* Welcome Card */}
-      <div className="welcome-card animate-slide-up">
-        <div className="card-body">
-          <h3>Welcome Dr. {doctorName}</h3>
-          <p>Here's your dashboard overview for today. You have {todayAppointments.length} appointments scheduled.</p>
+    <div className="centered-container">
+      <div className="centered-content">
+        <ToastContainer position="top-right" autoClose={3000} />
+        <div className="page-header">
+          <h1 className="page-title">
+            <FaStethoscope /> Doctor's Dashboard
+          </h1>
+          <p className="page-subtitle">Welcome Dr. {doctorName}</p>
         </div>
-      </div>
       
-      <Row className="stats-row animate-slide-up mb-4">
-        <Col xl={3} lg={4} md={6} sm={6} className="mb-3">
-          <div className="stats-card premium-card h-100">
-            <div className="card-body">
-              <FaCalendarCheck className="icon-style text-blue-500" />
-              <div>
-                <h5>Total Appointments</h5>
-                <p className="stat-number">{stats.totalAppointments}</p>
+
+      
+        <div className="row">
+          <div className="col-3">
+            <div className="card">
+              <div className="card-body text-center">
+                <FaCalendarCheck style={{fontSize: '2rem', color: '#2563eb', marginBottom: '0.5rem'}} />
+                <h3 style={{fontSize: '2rem', fontWeight: 'bold', margin: '0.5rem 0'}}>{stats.totalAppointments}</h3>
+                <p style={{color: '#64748b', margin: 0}}>Total Appointments</p>
               </div>
             </div>
           </div>
-        </Col>
-        <Col xl={3} lg={4} md={6} sm={6} className="mb-3">
-          <div className="stats-card premium-card h-100">
-            <div className="card-body">
-              <FaNotesMedical className="icon-style text-green-500" />
-              <div>
-                <h5>Total Consultations</h5>
-                <p className="stat-number">{stats.totalConsultations}</p>
+          <div className="col-3">
+            <div className="card">
+              <div className="card-body text-center">
+                <FaNotesMedical style={{fontSize: '2rem', color: '#10b981', marginBottom: '0.5rem'}} />
+                <h3 style={{fontSize: '2rem', fontWeight: 'bold', margin: '0.5rem 0'}}>{stats.totalConsultations}</h3>
+                <p style={{color: '#64748b', margin: 0}}>Consultations</p>
               </div>
             </div>
           </div>
-        </Col>
-        <Col xl={3} lg={4} md={6} sm={6} className="mb-3">
-          <div className="stats-card premium-card h-100">
-            <div className="card-body">
-              <FaUserFriends className="icon-style text-purple-500" />
-              <div>
-                <h5>Total Patients</h5>
-                <p className="stat-number">{stats.totalPatients}</p>
+          <div className="col-3">
+            <div className="card">
+              <div className="card-body text-center">
+                <FaUserFriends style={{fontSize: '2rem', color: '#8b5cf6', marginBottom: '0.5rem'}} />
+                <h3 style={{fontSize: '2rem', fontWeight: 'bold', margin: '0.5rem 0'}}>{stats.totalPatients}</h3>
+                <p style={{color: '#64748b', margin: 0}}>Total Patients</p>
               </div>
             </div>
           </div>
-        </Col>
-        <Col xl={3} lg={4} md={6} sm={6} className="mb-3">
-          <div className="stats-card premium-card h-100">
-            <div className="card-body">
-              <FaFilePrescription className="icon-style text-teal-500" />
-              <div>
-                <h5>Total Prescriptions</h5>
-                <p className="stat-number">{stats.totalPrescriptions}</p>
+          <div className="col-3">
+            <div className="card">
+              <div className="card-body text-center">
+                <FaFilePrescription style={{fontSize: '2rem', color: '#0d9488', marginBottom: '0.5rem'}} />
+                <h3 style={{fontSize: '2rem', fontWeight: 'bold', margin: '0.5rem 0'}}>{stats.totalPrescriptions}</h3>
+                <p style={{color: '#64748b', margin: 0}}>Prescriptions</p>
               </div>
             </div>
           </div>
-        </Col>
-        <Col xl={3} lg={4} md={6} sm={6} className="mb-3">
-          <div className="stats-card premium-card h-100">
-            <div className="card-body">
-              <FaCalendarCheck className="icon-style text-blue-500" />
-              <div>
-                <h5>Today's Appointments</h5>
-                <p className="stat-number">{todayAppointments.length}</p>
-              </div>
+        </div>
+
+
+        {pendingAppointments.length > 0 && (
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">🔔 Pending Appointments (Require Approval)</h2>
             </div>
-          </div>
-        </Col>
-        <Col xl={3} lg={4} md={6} sm={6} className="mb-3">
-          <div className="stats-card premium-card h-100">
             <div className="card-body">
-              <FaNotesMedical className="icon-style text-green-500" />
-              <div>
-                <h5>Completed Today</h5>
-                <p className="stat-number">{completedAppointments}</p>
-              </div>
-            </div>
-          </div>
-        </Col>
-        <Col xl={3} lg={4} md={6} sm={6} className="mb-3">
-          <div className="stats-card premium-card h-100">
-            <div className="card-body">
-              <FaUserInjured className="icon-style text-yellow-500" />
-              <div>
-                <h5>Pending Today</h5>
-                <p className="stat-number">{pendingTodayAppointments}</p>
-              </div>
-            </div>
-          </div>
-        </Col>
-      </Row>
-      <Row className="mb-4">
-        <Col lg={4} md={12} className="mb-3">
-          <div className="premium-card calendar-card">
-            <div className="card-body">
-              <h5 className="card-title">
-                <FaCalendarCheck className="mr-2 text-blue-500" /> Calendar
-              </h5>
-              <Calendar
-                onChange={handleDateChange}
-                value={date}
-                className="border-none"
-                aria-label="Select appointment date"
-              />
-              <p className="calendar-date">
-                <strong>Selected Date:</strong> {date.toDateString()}
-              </p>
-              <div className="view-toggle">
-                <button
-                  className={`btn-premium ${view === 'day' ? 'btn-primary' : 'btn-outline-primary'}`}
-                  onClick={() => handleViewChange('day')}
-                  aria-label="View appointments by day"
-                >
-                  Day
-                </button>
-                <button
-                  className={`btn-premium ${view === 'week' ? 'btn-primary' : 'btn-outline-primary'}`}
-                  onClick={() => handleViewChange('week')}
-                  aria-label="View appointments by week"
-                >
-                  Week
-                </button>
-                <button
-                  className={`btn-premium ${view === 'month' ? 'btn-primary' : 'btn-outline-primary'}`}
-                  onClick={() => handleViewChange('month')}
-                  aria-label="View appointments by month"
-                >
-                  Month
-                </button>
-              </div>
-            </div>
-          </div>
-        </Col>
-        <Col lg={4} md={6} className="mb-3">
-          <div className="premium-card chart-card">
-            <div className="card-body">
-              <h5 className="card-title">📊 Appointments by Day</h5>
-              <div className="chart-container">
-                <Pie 
-                  data={appointmentData} 
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                      legend: {
-                        position: 'bottom',
-                      },
-                    },
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        </Col>
-        <Col lg={4} md={6} className="mb-3">
-          <div className="premium-card chart-card">
-            <div className="card-body">
-              <h5 className="card-title">🧑‍🤝‍🧑 Patients by Gender</h5>
-              <div className="chart-container">
-                <Pie 
-                  data={genderData} 
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                      legend: {
-                        position: 'bottom',
-                      },
-                    },
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        </Col>
-        <Col md={12}>
-          <div className="premium-card appointment-card animate-slide-up">
-            <div className="card-body">
-              <h5 className="card-title">🔔 Pending Appointments (Require Approval)</h5>
-              {pendingAppointments.length > 0 ? (
-                <div className="table-responsive">
-                  <table className="premium-table appointment-table">
-                    <thead>
-                      <tr>
-                        {appointmentColumns.map((col, index) => (
-                          <th key={index}>{col.header}</th>
+              <div className="table-container">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      {appointmentColumns.map((col, index) => (
+                        <th key={index}>{col.header}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pendingAppointments.map((row, index) => (
+                      <tr key={index}>
+                        {appointmentColumns.map((col, colIndex) => (
+                          <td key={colIndex}>
+                            {col.cell ? col.cell(row) : row[col.accessor]}
+                          </td>
                         ))}
                       </tr>
-                    </thead>
-                    <tbody>
-                      {pendingAppointments.map((row, index) => (
-                        <tr key={index}>
-                          {appointmentColumns.map((col, colIndex) => (
-                            <td key={colIndex}>
-                              {col.cell ? col.cell(row) : row[col.accessor]}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="no-data">No pending appointments requiring approval.</p>
-              )}
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </Col>
-        <Col md={12}>
-          <div className="premium-card appointment-card animate-slide-up">
-            <div className="card-body">
-              <h5 className="card-title">📅 All Appointments</h5>
-              {filteredAppointments.length > 0 ? (
-                <div className="table-responsive">
-                  <table className="premium-table appointment-table">
-                    <thead>
-                      <tr>
-                        {appointmentColumns.map((col, index) => (
-                          <th key={index}>{col.header}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredAppointments.map((row, index) => (
-                        <tr key={index}>
-                          {appointmentColumns.map((col, colIndex) => (
-                            <td key={colIndex}>
-                              {col.cell ? col.cell(row) : row[col.accessor]}
-                            </td>
-                          ))}
-                        </tr>
+        )}
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">📅 All Appointments</h2>
+          </div>
+          <div className="card-body">
+            <div className="table-container">
+              <table className="table">
+                <thead>
+                  <tr>
+                    {appointmentColumns.map((col, index) => (
+                      <th key={index}>{col.header}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {appointments.map((row, index) => (
+                    <tr key={index}>
+                      {appointmentColumns.map((col, colIndex) => (
+                        <td key={colIndex}>
+                          {col.cell ? col.cell(row) : row[col.accessor]}
+                        </td>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="no-data">No appointments scheduled for the selected date.</p>
-              )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        </Col>
-        <Col md={12}>
-          <div className="premium-card appointment-card animate-slide-up">
-            <div className="card-body">
-              <h5 className="card-title">🕰️ Upcoming Appointments</h5>
-              {upcomingAppointments.length > 0 ? (
-                <div className="table-responsive">
-                  <table className="premium-table appointment-table">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Notes</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {upcomingAppointments.map((appt, index) => (
-                        <tr key={index}>
-                          <td>{new Date(appt.appointment_date).toLocaleDateString()}</td>
-                          <td>
-                            <span
-                              className={`status-badge ${
-                                appt.status === 'Pending'
-                                  ? 'status-pending'
-                                  : appt.status === 'Approved' || appt.status === 'Scheduled'
-                                  ? 'status-approved'
-                                  : appt.status === 'Checked In'
-                                  ? 'status-approved'
-                                  : appt.status === 'Completed'
-                                  ? 'status-completed'
-                                  : 'status-rejected'
-                              }`}
-                            >
-                              {appt.status}
-                            </span>
-                          </td>
-                          <td>{appt.notes}</td>
-                          <td>
-                            <button
-                              className="btn-premium btn-outline-primary"
-                              onClick={() => handleViewPatient(appt)}
-                              aria-label={`View patient ${appt.patientName}`}
-                            >
-                              View
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="no-data">No upcoming appointments scheduled.</p>
-              )}
-            </div>
-          </div>
-        </Col>
-      </Row>
+        </div>
+
+
+      </div>
     </div>
   );
 };

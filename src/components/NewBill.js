@@ -9,8 +9,7 @@ import Input from './ui/Input';
 import Select from './ui/Select';
 import { jsPDF } from 'jspdf';
 import { apiFetch } from '../utils/api';
-import './new-bill.css';
-import './receptionist-responsive.css';
+import './centered-layout.css';
 
 const NewBill = () => {
   const navigate = useNavigate();
@@ -146,95 +145,99 @@ const NewBill = () => {
   };
 
   return (
-    <div className="new-bill container-fluid">
+    <div className="centered-container">
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="new-bill-header">
-        <Button
-          variant="outline-secondary"
-          onClick={handleBack}
-          onKeyDown={(e) => handleKeyDown(e, handleBack)}
-          aria-label="Go back"
-          className="back-button"
-        >
-          <FaArrowLeft className="mr-1" /> Back
-        </Button>
-        <h1 className="text-3xl font-bold text-gray-800 flex items-center">
-          <FaFileInvoiceDollar className="mr-2" /> Create New Bill
-        </h1>
-      </div>
-      <Card className="bill-card">
-        <form onSubmit={handleSubmit}>
-          <div className="form-row">
-            <Select
-              label="Patient"
-              name="patient_id"
-              value={formData.patient_id}
-              onChange={handleChange}
-              options={patientOptions}
-              required
-            />
-            {errors.patient_id && <span className="error-text">{errors.patient_id}</span>}
-          </div>
-          <div className="form-row">
-            <Input
-              label="Service Name"
-              name="service_name"
-              value={formData.service_name}
-              onChange={handleChange}
-              placeholder="e.g., Consultation, Blood Test"
-              required
-            />
-            {errors.service_name && <span className="error-text">{errors.service_name}</span>}
-          </div>
-          <div className="form-row">
-            <Input
-              label="Amount (UGX)"
-              name="amount"
-              type="number"
-              value={formData.amount}
-              onChange={handleChange}
-              min="0"
-              step="0.01"
-              required
-            />
-            {errors.amount && <span className="error-text">{errors.amount}</span>}
-          </div>
-          <div className="form-row">
-            <Input
-              label="Date Issued"
-              name="date_issued"
-              type="date"
-              value={formData.date_issued}
-              onChange={handleChange}
-              required
-            />
-            {errors.date_issued && <span className="error-text">{errors.date_issued}</span>}
-          </div>
-          <div className="form-row">
-            <Input
-              label="Notes"
-              name="notes"
-              value={formData.notes}
-              onChange={handleChange}
-              placeholder="Additional notes about the bill"
-              multiline
-              rows={3}
-            />
-          </div>
-          <div className="form-actions">
-            <Button type="submit" variant="primary" aria-label="Create bill">
-              Create & Generate PDF
-            </Button>
-            <Button
-              variant="outline-secondary"
-              onClick={handleCancel}
-              aria-label="Cancel billing"
+      <div className="centered-content">
+        <div className="page-header">
+          <div className="header-actions">
+            <button
+              onClick={handleBack}
+              onKeyDown={(e) => handleKeyDown(e, handleBack)}
+              aria-label="Go back"
+              className="btn-outline"
             >
-              Cancel
-            </Button>
+              <FaArrowLeft className="mr-1" /> Back
+            </button>
           </div>
-        </form>
-      </Card>
+          <h1 className="page-title">
+            <FaFileInvoiceDollar className="mr-2" /> Create New Bill
+          </h1>
+        </div>
+        <div className="form-card">
+          <form onSubmit={handleSubmit} className="form-grid">
+            <div className="form-group">
+              <Select
+                label="Patient"
+                name="patient_id"
+                value={formData.patient_id}
+                onChange={handleChange}
+                options={patientOptions}
+                required
+              />
+              {errors.patient_id && <span className="error-text">{errors.patient_id}</span>}
+            </div>
+            <div className="form-group">
+              <Input
+                label="Service Name"
+                name="service_name"
+                value={formData.service_name}
+                onChange={handleChange}
+                placeholder="e.g., Consultation, Blood Test"
+                required
+              />
+              {errors.service_name && <span className="error-text">{errors.service_name}</span>}
+            </div>
+            <div className="form-group">
+              <Input
+                label="Amount (UGX)"
+                name="amount"
+                type="number"
+                value={formData.amount}
+                onChange={handleChange}
+                min="0"
+                step="0.01"
+                required
+              />
+              {errors.amount && <span className="error-text">{errors.amount}</span>}
+            </div>
+            <div className="form-group">
+              <Input
+                label="Date Issued"
+                name="date_issued"
+                type="date"
+                value={formData.date_issued}
+                onChange={handleChange}
+                required
+              />
+              {errors.date_issued && <span className="error-text">{errors.date_issued}</span>}
+            </div>
+            <div className="form-group full-width">
+              <Input
+                label="Notes"
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                placeholder="Additional notes about the bill"
+                multiline
+                rows={3}
+              />
+            </div>
+            <div className="form-actions full-width">
+              <button type="submit" className="btn-success" aria-label="Create bill">
+                Create & Generate PDF
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="btn-outline"
+                aria-label="Cancel billing"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

@@ -7,8 +7,7 @@ import Card from './ui/Card';
 import Button from './ui/Button';
 import Table from './ui/Table';
 import { getAllPatients } from '../services/receptionistService';
-import './patient-search.css';
-import './receptionist-responsive.css';
+import './centered-layout.css';
 
 const PatientSearch = () => {
   const navigate = useNavigate();
@@ -57,14 +56,13 @@ const PatientSearch = () => {
     {
       header: 'Actions',
       cell: (row) => (
-        <Button
-          variant="primary"
-          size="sm"
+        <button
+          className="btn btn-primary btn-sm"
           onClick={() => navigate(`/receptionist/patients/${row.patient_id}`)}
           aria-label={`View patient ${row.full_Name}`}
         >
           View
-        </Button>
+        </button>
       ),
     },
   ];
@@ -80,50 +78,80 @@ const PatientSearch = () => {
   }
 
   return (
-    <div className="patient-search">
-      <ToastContainer position="top-right" autoClose={3000} />
-      <div className="dashboard-header">
-        <Button
-          variant="outline-secondary"
-          onClick={handleBack}
-          className="back-button"
-        >
-          <FaArrowLeft className="mr-1" /> Back to Dashboard
-        </Button>
-        <h1 className="page-title">
-          <FaSearch className="page-icon" /> Find Patient
-        </h1>
-      </div>
-      <Card className="search-card">
-        <form onSubmit={handleSearch}>
-          <div className="form-group">
-            <label htmlFor="searchTerm">Search by Name or ID</label>
-            <div className="search-input">
-              <input
-                type="text"
-                id="searchTerm"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Enter name or patient ID"
-              />
-              <Button type="submit" variant="primary" aria-label="Search patients">
-                <FaSearch />
-              </Button>
-            </div>
-          </div>
-        </form>
-      </Card>
-      <Card title={`Search Results (${patients.length} patients found)`} className="results-card">
-        <div className="table-responsive">
-          {patients.length > 0 ? (
-            <Table columns={patientColumns} data={patients} striped hoverable />
-          ) : (
-            <div className="no-results">
-              <p>No patients found matching your search.</p>
-            </div>
-          )}
+    <div className="centered-container">
+      <div className="centered-content">
+        <ToastContainer position="top-right" autoClose={3000} />
+        <div className="page-header">
+          <h1 className="page-title">
+            <FaSearch /> Find Patient
+          </h1>
+          <p className="page-subtitle">Search for patients by name, ID, or email</p>
         </div>
-      </Card>
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">Patient Search</h2>
+          </div>
+          <div className="card-body">
+            <form onSubmit={handleSearch}>
+              <div className="form-group">
+                <label className="form-label" htmlFor="searchTerm">Search by Name, ID, or Email</label>
+                <div className="row">
+                  <div className="col-8">
+                    <input
+                      type="text"
+                      id="searchTerm"
+                      className="form-input"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Enter name, patient ID, or email"
+                    />
+                  </div>
+                  <div className="col-4">
+                    <button type="submit" className="btn btn-primary" aria-label="Search patients">
+                      <FaSearch /> Search
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">Search Results ({patients.length} patients found)</h2>
+          </div>
+          <div className="card-body">
+            {patients.length > 0 ? (
+              <div className="table-container">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      {patientColumns.map((col, index) => (
+                        <th key={index}>{col.header}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {patients.map((row, index) => (
+                      <tr key={index}>
+                        {patientColumns.map((col, colIndex) => (
+                          <td key={colIndex}>
+                            {col.cell ? col.cell(row) : row[col.accessor]}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center" style={{padding: '2rem', color: '#64748b'}}>
+                <p>No patients found matching your search.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
