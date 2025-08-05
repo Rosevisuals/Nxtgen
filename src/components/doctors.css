@@ -1,0 +1,246 @@
+/* Container styles */
+.container {
+  max-width: calc(100% - 250px);
+  margin-left: 250px;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f1f8ff, #ffffff);
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  font-family: 'Poppins', sans-serif;
+}
+
+@media (max-width: 768px) {
+  .container {
+    max-width: 100%;
+    margin-left: 0;
+    padding: 1rem;
+  }
+}
+
+/* Heading */
+h1 {
+  font-weight: 700;
+  color: #004085;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Stats row */
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* Stats card */
+.stats-card {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  width: 100%;
+  max-width: 250px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.stats-card:hover {
+  transform: translateY(-4px);
+}
+
+.icon-style {
+  margin-bottom: 0.5rem;
+  font-size: 2.25rem;
+}
+
+.stat-number {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-top: 0.5rem;
+}
+
+.card h5 {
+  font-weight: 600;
+  color: #004085;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+.card {
+  background-color: #ffffff;
+}
+
+canvas {
+  max-height: 300px !important;
+  width: 100% !important;
+}
+
+.calendar-card {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+}
+
+.react-calendar {
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: none !important;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Poppins', sans-serif;
+}
+
+.react-calendar__tile--active {
+  background: #007bff !important;
+  color: white !important;
+}
+
+.react-calendar__tile--now {
+  background: #e0f2fe !important;
+}
+
+.react-calendar__tile:enabled:hover {
+  background: #e6f0ff;
+  cursor: pointer;
+}
+
+.appointment-card {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 1rem 0;
+}
+
+.appointment-card .card-body {
+  padding: 1.5rem;
+}
+
+.appointment-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #004085;
+  font-family: 'Poppins', sans-serif;
+  margin-bottom: 1rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.appointment-title::before {
+  content: "📅";
+  margin-right: 0.5rem;
+  font-size: 1.3rem;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.appointment-table {
+  width: 100%;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.95rem;
+}
+
+.appointment-table th {
+  background-color: #f9fafb;
+  color: #374151;
+  font-weight: 600;
+  padding: 0.75rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.appointment-table td {
+  padding: 0.75rem;
+  vertical-align: middle;
+  text-align: center;
+  background-color: #e9f5ff;
+}
+
+.appointment-table tr:hover {
+  background-color: #f3f4f6;
+}
+
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-confirmed, .status-success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-pending, .status-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-cancelled, .status-danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-primary {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-info {
+  background-color: #e0f2fe;
+  color: #0e7490;
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.patient-info .patient-name {
+  display: block;
+  font-weight: 600;
+}
+
+.patient-id {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.Toastify__toast {
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+}
+
+button[aria-label], .react-calendar {
+  position: relative;
+}
+
+button[aria-label]:focus, .react-calendar:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}

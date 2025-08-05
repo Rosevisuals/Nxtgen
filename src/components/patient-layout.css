@@ -1,0 +1,29 @@
+.patient-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.patient-content {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  background: #f1f8ff;
+}
+
+.patient-content.collapsed {
+  margin-left: 60px;
+  width: calc(100% - 60px);
+}
+
+.patient-main {
+  padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .patient-content {
+    margin-left: 0;
+    width: 100%;
+  }
+  .patient-content.collapsed {
+    margin-left: 0;
+  }
+}

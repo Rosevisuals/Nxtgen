@@ -1,0 +1,380 @@
+/* Doctors Dashboard Responsive Styles */
+
+/* Mobile First Approach */
+@media (max-width: 768px) {
+  .doctors-dashboard {
+    padding: 1rem 0.5rem;
+  }
+
+  .dashboard-title {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .welcome-card {
+    margin-bottom: 1.5rem;
+  }
+
+  .welcome-card .card-body {
+    text-align: center;
+    padding: 1.5rem 1rem;
+  }
+
+  .welcome-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .welcome-card p {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+  }
+
+  /* Stats Cards */
+  .stats-row {
+    margin-bottom: 1.5rem;
+  }
+
+  .stats-card {
+    margin-bottom: 1rem;
+    height: auto;
+  }
+
+  .stats-card .card-body {
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .stats-card .icon-style {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .stats-card h5 {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  /* Calendar Card */
+  .calendar-card {
+    margin-bottom: 1.5rem;
+  }
+
+  .calendar-card .react-calendar {
+    width: 100%;
+    border: none;
+    font-size: 0.8rem;
+  }
+
+  .calendar-date {
+    font-size: 0.85rem;
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .view-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .view-toggle .btn {
+    flex: 1;
+    font-size: 0.8rem;
+  }
+
+  /* Chart Cards */
+  .chart-card {
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-card .card-body {
+    padding: 1rem;
+  }
+
+  .chart-card h5 {
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  /* Appointment Cards */
+  .appointment-card {
+    margin-bottom: 1.5rem;
+  }
+
+  .appointment-card .card-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Table Responsiveness */
+  .table-responsive {
+    font-size: 0.8rem;
+  }
+
+  .appointment-table th,
+  .appointment-table td {
+    padding: 0.5rem 0.25rem;
+    vertical-align: middle;
+  }
+
+  .table-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .table-actions .btn {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .patient-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .patient-name {
+    font-weight: bold;
+    font-size: 0.8rem;
+  }
+
+  .patient-id {
+    font-size: 0.7rem;
+    color: #666;
+  }
+
+  .appointment-time {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .status-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-weight: bold;
+  }
+
+  .status-primary { background-color: #007bff; color: white; }
+  .status-success { background-color: #28a745; color: white; }
+  .status-warning { background-color: #ffc107; color: black; }
+  .status-info { background-color: #17a2b8; color: white; }
+  .status-danger { background-color: #dc3545; color: white; }
+
+  .no-data {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 2rem 1rem;
+  }
+}
+
+/* Tablet Styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .doctors-dashboard {
+    padding: 1.5rem 1rem;
+  }
+
+  .dashboard-title {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .stats-row .col-md-3 {
+    margin-bottom: 1rem;
+  }
+
+  .stats-card {
+    height: 140px;
+  }
+
+  .stats-card .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .chart-card,
+  .calendar-card {
+    margin-bottom: 1.5rem;
+  }
+
+  .table-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .table-actions .btn {
+    font-size: 0.8rem;
+  }
+}
+
+/* Desktop Styles */
+@media (min-width: 1025px) {
+  .doctors-dashboard {
+    padding: 2rem;
+  }
+
+  .dashboard-title {
+    font-size: 2.5rem;
+    text-align: left;
+    margin-bottom: 2rem;
+  }
+
+  .welcome-card {
+    margin-bottom: 2rem;
+  }
+
+  .stats-row {
+    margin-bottom: 2rem;
+  }
+
+  .stats-card {
+    height: 160px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .stats-card .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .stats-card .icon-style {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+  }
+
+  .chart-card,
+  .calendar-card {
+    height: 400px;
+    margin-bottom: 2rem;
+  }
+
+  .chart-card .card-body,
+  .calendar-card .card-body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .table-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+  }
+
+  .appointment-table {
+    font-size: 0.9rem;
+  }
+}
+
+/* Common Responsive Utilities */
+.container-fluid {
+  padding: 0 1rem;
+}
+
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 0 0.5rem;
+  }
+}
+
+/* Loading States */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  font-size: 1.125rem;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .loading {
+    min-height: 200px;
+    font-size: 1rem;
+    padding: 2rem 1rem;
+  }
+}
+
+/* Card Spacing */
+.card {
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: none;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1rem;
+  }
+}
+
+/* Icon Colors */
+.text-blue-500 { color: #3b82f6; }
+.text-green-500 { color: #10b981; }
+.text-purple-500 { color: #8b5cf6; }
+.text-teal-500 { color: #14b8a6; }
+.text-yellow-500 { color: #f59e0b; }
+
+/* Responsive Grid Adjustments */
+@media (max-width: 576px) {
+  .stats-row .col-md-3 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  .stats-row .col-md-3 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+.table-actions .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.status-badge.status-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.status-badge.status-info {
+  background-color: #17a2b8;
+  color: white;
+}

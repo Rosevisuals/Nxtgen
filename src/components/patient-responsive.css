@@ -1,0 +1,255 @@
+/* Patient Dashboard Responsive Styles */
+
+.patient-dashboard {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.dashboard-header h1 {
+  font-size: 2rem;
+  color: #1f2937;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.back-button:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* Appointment and Medication Items */
+.appointment-item, .medication-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  background: white;
+  transition: all 0.2s;
+}
+
+.appointment-item:hover, .medication-item:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+.appointment-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  margin-right: 1rem;
+  padding: 0.5rem;
+  background: #f3f4f6;
+  border-radius: 0.5rem;
+}
+
+.date-day {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1f2937;
+  line-height: 1;
+}
+
+.date-month {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.appointment-details, .medication-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.appointment-details h4, .medication-details h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: #1f2937;
+}
+
+.appointment-meta, .medication-meta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.appointment-notes, .medication-prescribed {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-top: 0.5rem;
+}
+
+.appointment-status {
+  margin-left: 1rem;
+}
+
+.medication-icon {
+  margin-right: 1rem;
+  color: #3b82f6;
+  font-size: 1.5rem;
+}
+
+/* Empty States */
+.no-appointments, .no-medications {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+
+.no-appointments h3, .no-medications h3 {
+  margin: 1rem 0 0.5rem 0;
+  color: #4b5563;
+}
+
+.no-appointments p, .no-medications p {
+  margin-bottom: 1.5rem;
+}
+
+/* Error States */
+.error-card {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+}
+
+.error-message {
+  text-align: center;
+  padding: 2rem;
+}
+
+.error-message h3 {
+  color: #dc2626;
+  margin-bottom: 0.5rem;
+}
+
+.error-message p {
+  color: #7f1d1d;
+  margin-bottom: 1rem;
+}
+
+/* Settings Form */
+.settings-card .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.settings-card label {
+  display: block;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.settings-card .form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.settings-card .form-control:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.settings-card .form-control:disabled {
+  background: #f9fafb;
+  color: #6b7280;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .patient-dashboard {
+    padding: 0.5rem;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .appointment-item, .medication-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .appointment-date {
+    align-self: flex-start;
+    margin-right: 0;
+  }
+  
+  .appointment-status {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+  
+  .appointment-meta, .medication-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .settings-actions {
+    flex-direction: column;
+  }
+  
+  .settings-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header h1 {
+    font-size: 1.25rem;
+  }
+  
+  .appointment-item, .medication-item {
+    padding: 0.75rem;
+  }
+  
+  .no-appointments, .no-medications {
+    padding: 2rem 0.5rem;
+  }
+}

@@ -1,0 +1,105 @@
+/* Chart Enhancements for DoctorsDashboard */
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-card {
+  height: 100%;
+  min-height: 400px;
+}
+
+.chart-card .card-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chart-card .card-title {
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.calendar-card {
+  height: 100%;
+  min-height: 400px;
+}
+
+.calendar-card .react-calendar {
+  width: 100%;
+  border: none;
+  font-family: 'Inter', sans-serif;
+}
+
+.calendar-card .react-calendar__tile {
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.calendar-card .react-calendar__tile:hover {
+  background: var(--primary-blue-light);
+  color: var(--white);
+}
+
+.calendar-card .react-calendar__tile--active {
+  background: var(--primary-blue);
+  color: var(--white);
+}
+
+.calendar-date {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background: var(--gray-100);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.view-toggle .btn-premium {
+  flex: 1;
+  min-width: auto;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .chart-container {
+    height: 250px;
+  }
+  
+  .chart-card,
+  .calendar-card {
+    min-height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chart-container {
+    height: 200px;
+  }
+  
+  .chart-card,
+  .calendar-card {
+    min-height: 300px;
+  }
+  
+  .view-toggle {
+    flex-direction: column;
+  }
+  
+  .view-toggle .btn-premium {
+    flex: none;
+  }
+}

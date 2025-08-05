@@ -1,0 +1,360 @@
+/* Receptionist Dashboard Responsive Styles */
+
+/* Mobile First Approach */
+@media (max-width: 768px) {
+  /* Dashboard Header */
+  .dashboard-header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .back-button {
+    align-self: flex-start;
+  }
+
+  /* Quick Actions */
+  .quick-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .quick-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Dashboard Summary Cards */
+  .dashboard-summary {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .summary-card {
+    padding: 1rem;
+  }
+
+  /* Tables */
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .table-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .table-actions button {
+    width: 100%;
+    font-size: 0.875rem;
+  }
+
+  /* Patient Search */
+  .search-input {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .search-input input {
+    width: 100%;
+  }
+
+  .search-input button {
+    width: 100%;
+  }
+
+  /* Forms */
+  .form-row {
+    flex-direction: column;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+
+  /* New Appointment Form */
+  .appointment-card .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Billing */
+  .billing-controls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .search-card,
+  .actions-card {
+    width: 100%;
+  }
+
+  /* Patient Registration */
+  .register-card .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Sidebar */
+  .receptionist-sidebar {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+  }
+
+  .receptionist-sidebar.open {
+    left: 0;
+  }
+
+  .sidebar-menu {
+    padding: 1rem;
+  }
+
+  .dropdown {
+    position: static;
+    box-shadow: none;
+    border: 1px solid #e0e0e0;
+    margin-top: 0.5rem;
+  }
+
+  /* Navbar */
+  .receptionist-navbar {
+    padding: 0.75rem 1rem;
+  }
+
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+
+  .navbar-menu {
+    position: fixed;
+    top: 60px;
+    right: -100%;
+    width: 250px;
+    height: calc(100vh - 60px);
+    background: white;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    transition: right 0.3s ease;
+    z-index: 999;
+  }
+
+  .navbar-menu.open {
+    right: 0;
+  }
+
+  /* Cards */
+  .card {
+    margin-bottom: 1rem;
+    padding: 1rem;
+  }
+
+  .card-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Modals */
+  .modal-content {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+
+  /* Patient Info */
+  .patient-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .patient-name {
+    font-size: 1rem;
+  }
+
+  .patient-id {
+    font-size: 0.875rem;
+  }
+
+  /* Appointment Items */
+  .appointment-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .appointment-date {
+    align-self: center;
+  }
+
+  .appointment-details {
+    text-align: center;
+  }
+
+  .appointment-meta {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+/* Tablet Styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dashboard-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quick-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .table-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .form-row {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .form-group {
+    flex: 1;
+    min-width: 250px;
+  }
+
+  .billing-controls {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .search-card {
+    flex: 2;
+  }
+
+  .actions-card {
+    flex: 1;
+  }
+}
+
+/* Desktop Styles */
+@media (min-width: 1025px) {
+  .dashboard-summary {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .quick-actions {
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+
+  .form-group {
+    flex: 1;
+  }
+
+  .billing-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .search-card {
+    flex: 2;
+  }
+
+  .actions-card {
+    flex: 1;
+  }
+
+  .table-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+  }
+}
+
+/* Common Responsive Utilities */
+.container-fluid {
+  padding: 0 1rem;
+}
+
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 0 0.5rem;
+  }
+}
+
+.text-responsive {
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+}
+
+.btn-responsive {
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem);
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+}
+
+/* Loading States */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 1.125rem;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .loading {
+    min-height: 150px;
+    font-size: 1rem;
+    padding: 2rem 1rem;
+  }
+}
+
+/* Error States */
+.error-card {
+  text-align: center;
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  .error-card {
+    padding: 1.5rem 1rem;
+  }
+}
+
+.no-results,
+.no-appointments,
+.no-bills {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .no-results,
+  .no-appointments,
+  .no-bills {
+    padding: 1.5rem 1rem;
+  }
+}
