@@ -1,0 +1,99 @@
+/* Sidebar.css */
+.aside {
+  width: 220px;
+  background: #4169E1;
+  /* Royal Blue */
+  color: #fff;
+  min-height: 100vh;
+  padding: 30px 0;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  font-family: 'Arial', sans-serif;
+}
+
+.aside-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 32px;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 8px;
+  margin: 4px 0;
+  background: transparent;
+  transition: background 0.2s;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.menu-item:hover {
+  background: #254EDB;
+  /* Dark Royal Blue */
+}
+
+
+.menu-item.active {
+  background: #fff;
+  color: #4169E1;
+  /* Royal Blue text on white */
+}
+
+.menu-icon-label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.menu-icon {
+  font-size: 18px;
+}
+
+.submenu {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 4px;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  background: #E3EBFF;
+  /* Light Royal Blue */
+  border-radius: 8px;
+  margin-left: 16px;
+  margin-right: 16px;
+}
+
+.submenu.open {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.submenu-item {
+  display: block;
+  padding: 10px 20px;
+  color: #1e3a8a;
+  /* Royal Blue dark text */
+  background: transparent;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: normal;
+  margin-bottom: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.submenu-item:hover {
+  background: #d6e2ff;
+  /* Lighter Royal Blue */
+}
+
+.submenu-item.active {
+  color: #254EDB;
+  /* Darker Royal Blue */
+  background: #d6e2ff;
+  font-weight: bold;
+}
