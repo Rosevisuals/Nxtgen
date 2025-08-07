@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col } from 'react-bootstrap';
-import { FaUserCircle, FaRulerVertical, FaHeartbeat, FaCalendarAlt, FaFileMedical, FaArrowLeft, FaUser } from 'react-icons/fa';
+import { Container } from 'react-bootstrap';
+import { FaUserCircle, FaRulerVertical, FaHeartbeat, FaCalendarAlt, FaFileMedical, FaUser } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Card from './ui/Card';
-import Button from './ui/Button';
-import Badge from './ui/Badge';
+
 import { getPatientByUserId, getPatientAppointments, getPatientPrescriptions } from '../services/patientService';
 import './centered-layout.css';
 
@@ -31,58 +29,13 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Memoized components
-const AppointmentItem = React.memo(({ appointment }) => (
-  <div className="appointment-item" role="listitem">
-    <div className="appointment-date">
-      <div className="date-day">{new Date(appointment.appointment_date).getDate()}</div>
-      <div className="date-month">{new Date(appointment.appointment_date).toLocaleString('default', { month: 'short' })}</div>
-    </div>
-    <div className="appointment-details">
-      <h4>Check-up with {appointment.doctor_name || appointment.staff_name || 'Doctor'}</h4>
-      <div className="appointment-meta">
-        <span>{new Date(appointment.appointment_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-        <span>{appointment.department_name || 'General'}</span>
-      </div>
-    </div>
-    <div className="appointment-status">
-      <Badge variant={
-        appointment.status === 'Pending' ? 'warning' : 
-        appointment.status === 'Approved' || appointment.status === 'Scheduled' ? 'success' : 
-        appointment.status === 'Completed' ? 'info' :
-        appointment.status === 'Rejected' || appointment.status === 'Cancelled' ? 'danger' : 'secondary'
-      } pill>
-        {appointment.status}
-      </Badge>
-    </div>
-  </div>
-));
 
-const MedicationItem = React.memo(({ medication }) => (
-  <div className="medication-item" role="listitem">
-    <div className="medication-icon">
-      <FaFileMedical />
-    </div>
-    <div className="medication-details">
-      <h4>{medication.Medication || medication.medicine_name}</h4>
-      <div className="medication-meta">
-        <span>{medication.dosage}</span>
-        <span>{medication.notes || 'As prescribed'}</span>
-      </div>
-      <div className="medication-prescribed">
-        Prescribed by {medication.doctor_name || medication.staff_name || 'Doctor'} on {new Date(medication.date_issued).toLocaleDateString()}
-      </div>
-    </div>
-  </div>
-));
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
   const [patient, setPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [medications, setMedications] = useState([]);
-  const [filteredMedications, setFilteredMedications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -144,6 +97,8 @@ const PatientDashboard = () => {
 
   // Fetch data from backend API
   useEffect(() => {
+    let timeoutId;
+    
     const fetchPatientData = async () => {
       setIsLoading(true);
       setError(null);
@@ -185,8 +140,17 @@ const PatientDashboard = () => {
           getPatientPrescriptions(patientData.patient_id)
         ]);
 
-        setAppointments(appointmentsData || []);
+        // Process appointments to ensure doctor names are properly displayed
+        const processedAppointments = (appointmentsData || []).map(appointment => ({
+          ...appointment,
+          doctor_name: appointment.doctor_name || appointment.staff_name || 'Doctor',
+          department_name: appointment.department_name || 'General'
+        }));
+        
+        setAppointments(processedAppointments);
         setMedications(prescriptionsData || []);
+        
+        console.log('Processed appointments with doctor names:', processedAppointments);
 
       } catch (err) {
         console.error('Error fetching patient data:', err);
@@ -202,7 +166,10 @@ const PatientDashboard = () => {
       }
     };
 
-    fetchPatientData();
+    // Debounce the API call to prevent rate limiting
+    timeoutId = setTimeout(fetchPatientData, 500);
+    
+    return () => clearTimeout(timeoutId);
   }, [mockData]);
 
   // Calculate BMI status
@@ -215,8 +182,7 @@ const PatientDashboard = () => {
     return { label: 'Obese', color: 'danger' };
   }, [patient?.BMI]);
 
-  // Handlers
-  const handleBack = () => navigate(-1);
+
   const handleRequestAppointment = () => navigate('/AppointmentRequest');
   const handleViewAllAppointments = () => navigate('/PatientAppointments');
   const handleViewAllPrescriptions = () => navigate('/PatientPrescriptions');

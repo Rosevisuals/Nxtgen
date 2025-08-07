@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FaCalendarAlt, FaUserPlus, FaSearch, FaClock, FaUserCheck, FaArrowLeft, FaClipboardList } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserPlus, FaSearch, FaClock, FaUserCheck, FaClipboardList } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Card from './ui/Card';
-import Button from './ui/Button';
-import Badge from './ui/Badge';
-import Table from './ui/Table';
+
 import { useNavigate } from 'react-router-dom';
 import { getTodayAppointments, updateAppointmentStatus } from '../services/receptionistService';
 import './centered-layout.css';
@@ -14,7 +11,7 @@ const ReceptionistDashboard = () => {
   const navigate = useNavigate();
   const [date] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
-  const [filteredAppointments, setFilteredAppointments] = useState([]);
+
   const [isLoading, setIsLoading] = useState(true);
 
   const receptionistName = localStorage.getItem('user_name') || 'Receptionist';
@@ -76,7 +73,14 @@ const ReceptionistDashboard = () => {
         </div>
       ),
     },
-    { header: 'Doctor', accessor: 'staff_name' },
+    { 
+      header: 'Doctor', 
+      accessor: 'doctor_name',
+      cell: (row) => {
+        const doctorName = row.doctor_name || row.staff_name;
+        return doctorName ? `Dr. ${doctorName}` : 'Unassigned';
+      }
+    },
     { header: 'Department', accessor: 'department_name' },
     { 
       header: 'Status', 
@@ -135,7 +139,13 @@ const ReceptionistDashboard = () => {
   };
 
   const handleViewPatient = (appointment) => {
-    navigate(`/receptionist/patients/${appointment.patient_id}`);
+    if (!appointment.patient_id) {
+      toast.error('Invalid patient information');
+      return;
+    }
+    // For now, show patient details in a modal or navigate to patient search
+    toast.info(`Viewing details for ${appointment.patient_name}`);
+    navigate(`/PatientSearch?patientId=${appointment.patient_id}`);
   };
 
   const handleNewPatient = () => {
@@ -150,14 +160,7 @@ const ReceptionistDashboard = () => {
     navigate('/PatientSearch');
   };
 
-  const handleBack = () => navigate(-1);
 
-  const handleKeyDown = (e, handler) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handler();
-    }
-  };
 
   if (isLoading) {
     return (
@@ -167,39 +170,7 @@ const ReceptionistDashboard = () => {
     );
   }
 
-  const appointmentFilterOptions = [
-    {
-      key: 'status',
-      label: 'Status',
-      options: [
-        { value: 'Pending', label: 'Pending' },
-        { value: 'Approved', label: 'Approved' },
-        { value: 'Scheduled', label: 'Scheduled' },
-        { value: 'Checked In', label: 'Checked In' },
-        { value: 'Completed', label: 'Completed' },
-        { value: 'Rejected', label: 'Rejected' },
-        { value: 'Cancelled', label: 'Cancelled' }
-      ]
-    },
-    {
-      key: 'department_name',
-      label: 'Department',
-      options: [
-        { value: 'Cardiology', label: 'Cardiology' },
-        { value: 'Neurology', label: 'Neurology' },
-        { value: 'Orthopedics', label: 'Orthopedics' },
-        { value: 'Pediatrics', label: 'Pediatrics' },
-        { value: 'General Medicine', label: 'General Medicine' }
-      ]
-    }
-  ];
 
-  const appointmentSortOptions = [
-    { key: 'appointment_date', label: 'Time' },
-    { key: 'patient_name', label: 'Patient Name' },
-    { key: 'staff_name', label: 'Doctor Name' },
-    { key: 'status', label: 'Status' }
-  ];
 
   return (
     <div className="centered-container">

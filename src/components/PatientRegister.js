@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUserPlus } from 'react-icons/fa';
+import { FaUserPlus, FaArrowLeft } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Card from './ui/Card';
-import Button from './ui/Button';
+
 import { registerPatient } from '../services/receptionistService';
 import './centered-layout.css';
 
@@ -56,7 +55,7 @@ const PatientRegister = () => {
 
     setIsLoading(true);
     try {
-      const response = await registerPatient(formData);
+      await registerPatient(formData);
       toast.success('Patient registered successfully! Password setup email sent.');
       navigate('/ReceptionistDashboard');
     } catch (error) {
@@ -72,6 +71,15 @@ const PatientRegister = () => {
       <div className="centered-content">
         <ToastContainer position="top-right" autoClose={3000} />
         <div className="page-header">
+          <div className="header-actions">
+            <button
+              onClick={() => navigate('/ReceptionistDashboard')}
+              aria-label="Go back to dashboard"
+              className="btn btn-outline"
+            >
+              <FaArrowLeft className="mr-1" /> Back
+            </button>
+          </div>
           <h1 className="page-title">
             <FaUserPlus /> Register New Patient
           </h1>

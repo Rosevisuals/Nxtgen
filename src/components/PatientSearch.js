@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaSearch, FaArrowLeft } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Card from './ui/Card';
-import Button from './ui/Button';
-import Table from './ui/Table';
+
 import { getAllPatients } from '../services/receptionistService';
 import './centered-layout.css';
 
@@ -15,14 +13,29 @@ const PatientSearch = () => {
   const [patients, setPatients] = useState([]);
   const [allPatients, setAllPatients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Get patientId from URL params if provided
+  const urlParams = new URLSearchParams(window.location.search);
+  const patientIdFromUrl = urlParams.get('patientId');
 
   useEffect(() => {
     const fetchAllPatients = async () => {
       setIsLoading(true);
       try {
         const data = await getAllPatients();
-        setAllPatients(data);
-        setPatients(data);
+        const patientsArray = Array.isArray(data) ? data : [];
+        setAllPatients(patientsArray);
+        
+        // If patientId is provided in URL, filter to show that patient
+        if (patientIdFromUrl) {
+          const filteredPatients = patientsArray.filter(patient => 
+            patient.patient_id.toString() === patientIdFromUrl
+          );
+          setPatients(filteredPatients);
+          setSearchTerm(`ID: ${patientIdFromUrl}`);
+        } else {
+          setPatients(patientsArray);
+        }
       } catch (error) {
         console.error('Error fetching patients:', error);
         toast.error('Failed to load patients');
@@ -31,7 +44,7 @@ const PatientSearch = () => {
       }
     };
     fetchAllPatients();
-  }, []);
+  }, [patientIdFromUrl]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -39,7 +52,7 @@ const PatientSearch = () => {
       setPatients(allPatients);
       return;
     }
-    const filtered = allPatients.filter(patient =>
+    const filtered = (allPatients || []).filter(patient =>
       patient.full_Name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.patient_id?.toString().includes(searchTerm) ||
       patient.email?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -67,7 +80,7 @@ const PatientSearch = () => {
     },
   ];
 
-  const handleBack = () => navigate('/ReceptionistDashboard');
+
 
   if (isLoading) {
     return (
@@ -82,6 +95,15 @@ const PatientSearch = () => {
       <div className="centered-content">
         <ToastContainer position="top-right" autoClose={3000} />
         <div className="page-header">
+          <div className="header-actions">
+            <button
+              onClick={() => navigate(-1)}
+              aria-label="Go back to dashboard"
+              className="btn btn-outline"
+            >
+              <FaArrowLeft className="mr-1" /> Back
+            </button>
+          </div>
           <h1 className="page-title">
             <FaSearch /> Find Patient
           </h1>

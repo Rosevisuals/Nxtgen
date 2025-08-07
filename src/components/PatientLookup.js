@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaUserInjured, FaCalendarAlt, FaFileMedical, FaVial, FaPrescriptionBottleAlt } from 'react-icons/fa';
-import Card from './ui/Card';
-import Button from './ui/Button';
-import Input from './ui/Input';
-import Table from './ui/Table';
-import Badge from './ui/Badge';
+import { FaSearch, FaUserInjured } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../utils/api';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import './centered-layout.css';
 
 /**
  * PatientLookup Component
@@ -19,7 +16,7 @@ const PatientLookup = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [recentPatients, setRecentPatients] = useState([]);
+
   const [allPatients, setAllPatients] = useState([]);
   
   useEffect(() => {
@@ -36,7 +33,6 @@ const PatientLookup = () => {
           condition: 'General',
         }));
         setAllPatients(formattedPatients);
-        setRecentPatients(formattedPatients.slice(0, 5));
       } catch (error) {
         console.error('Error fetching patients:', error);
         toast.error('Failed to load patients');
@@ -45,68 +41,7 @@ const PatientLookup = () => {
     fetchPatients();
   }, []);
   
-  // Table columns for patients
-  const patientColumns = [
-    { 
-      header: 'Patient ID', 
-      accessor: 'id',
-    },
-    { 
-      header: 'Name', 
-      accessor: 'name',
-      cell: (row) => (
-        <div className="patient-name">
-          <FaUserInjured className="patient-icon" />
-          <span>{row.name}</span>
-        </div>
-      ),
-    },
-    { header: 'Age', accessor: 'age' },
-    { header: 'Gender', accessor: 'gender' },
-    { 
-      header: 'Last Visit', 
-      accessor: 'lastVisit',
-      cell: (row) => (
-        <div className="last-visit">
-          <FaCalendarAlt className="calendar-icon" />
-          <span>{row.lastVisit}</span>
-        </div>
-      ),
-    },
-    { 
-      header: 'Condition', 
-      accessor: 'condition',
-      cell: (row) => (
-        <Badge 
-          variant="primary"
-          pill
-        >
-          {row.condition}
-        </Badge>
-      ),
-    },
-    {
-      header: 'Actions',
-      cell: (row) => (
-        <div className="table-actions">
-          <Button 
-            variant="primary" 
-            size="sm" 
-            onClick={() => handleViewPatient(row)}
-          >
-            View
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => handleNewConsultation(row)}
-          >
-            Consult
-          </Button>
-        </div>
-      ),
-    },
-  ];
+
   
   // Handle search input change
   const handleSearchChange = (e) => {
@@ -140,103 +75,167 @@ const PatientLookup = () => {
   
   // Handle view patient
   const handleViewPatient = (patient) => {
-    // Add to recent patients if not already there
-    if (!recentPatients.some(p => p.id === patient.id)) {
-      setRecentPatients([patient, ...recentPatients].slice(0, 5));
-    }
-    
-    navigate(`/doctor/patients/${patient.id}`);
+    navigate(`/PatientDetail?id=${patient.id}`);
   };
   
   // Handle new consultation
   const handleNewConsultation = (patient) => {
-    navigate(`/doctor/consultations/new?patientId=${patient.id}`);
+    navigate(`/ConsultationForm?patientId=${patient.id}`);
   };
   
   return (
-    <div className="patient-lookup">
-      <h1>Patient Lookup</h1>
-      
-      {/* Search Form */}
-      <Card className="search-card">
-        <form onSubmit={handleSearch} className="search-form">
-          <div className="search-input-container">
-            <Input
-              placeholder="Search by patient ID, name, or condition..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="search-input"
-            />
-            <Button 
-              type="submit" 
-              variant="primary"
-              disabled={isSearching}
-            >
-              <FaSearch /> Search
-            </Button>
+    <div className="centered-container">
+      <ToastContainer position="top-right" autoClose={3000} />
+      <div className="centered-content">
+        <div className="page-header">
+          <h1 className="page-title">
+            <FaSearch /> Patient Lookup
+          </h1>
+          <p className="page-subtitle">Search and manage patient records</p>
+        </div>
+        
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">Search Patients</h2>
           </div>
-        </form>
-      </Card>
-      
-      {/* Search Results */}
-      {searchResults.length > 0 && (
-        <Card title="Search Results" className="results-card">
-          <Table
-            columns={patientColumns}
-            data={searchResults}
-            striped
-            hoverable
-          />
-        </Card>
-      )}
-      
-      {searchQuery && searchResults.length === 0 && !isSearching && (
-        <Card className="no-results-card">
-          <div className="no-results">
-            <p>No patients found matching "{searchQuery}".</p>
+          <div className="card-body">
+            <form onSubmit={handleSearch} className="search-form">
+              <div className="form-group">
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Search by patient ID, name, or condition..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+              </div>
+              <button 
+                type="submit" 
+                className="btn btn-primary"
+                disabled={isSearching}
+              >
+                <FaSearch /> {isSearching ? 'Searching...' : 'Search'}
+              </button>
+            </form>
           </div>
-        </Card>
-      )}
-      
-      {/* Recent Patients */}
-      <Card title="Recent Patients" className="recent-patients-card">
-        {recentPatients.length > 0 ? (
-          <Table
-            columns={patientColumns}
-            data={recentPatients}
-            striped
-            hoverable
-          />
-        ) : (
-          <div className="no-recent-patients">
-            <p>No recent patients viewed.</p>
+        </div>
+        
+        {searchResults.length > 0 && (
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">Search Results ({searchResults.length})</h2>
+            </div>
+            <div className="card-body">
+              <div className="table-container">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Age</th>
+                      <th>Gender</th>
+                      <th>Phone</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {searchResults.map((patient, index) => (
+                      <tr key={index}>
+                        <td>{patient.id}</td>
+                        <td>
+                          <div className="patient-info">
+                            <FaUserInjured className="mr-2" />
+                            {patient.name}
+                          </div>
+                        </td>
+                        <td>{patient.age}</td>
+                        <td>{patient.gender}</td>
+                        <td>{patient.phone}</td>
+                        <td>
+                          <button 
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleViewPatient(patient)}
+                            style={{marginRight: '0.5rem'}}
+                          >
+                            View
+                          </button>
+                          <button 
+                            className="btn btn-outline btn-sm"
+                            onClick={() => handleNewConsultation(patient)}
+                          >
+                            Consult
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
-      </Card>
-      
-      {/* Quick Actions */}
-      <Card title="Quick Actions" className="quick-actions-card">
-        <div className="quick-actions">
-          <Button 
-            variant="primary" 
-            onClick={() => navigate('/doctor/consultations/new')}
-          >
-            <FaFileMedical /> New Consultation
-          </Button>
-          <Button 
-            variant="primary" 
-            onClick={() => navigate('/doctor/prescriptions/new')}
-          >
-            <FaPrescriptionBottleAlt /> New Prescription
-          </Button>
-          <Button 
-            variant="primary" 
-            onClick={() => navigate('/doctor/lab-requests/new')}
-          >
-            <FaVial /> New Lab Request
-          </Button>
+        
+        {searchQuery && searchResults.length === 0 && !isSearching && (
+          <div className="card">
+            <div className="card-body text-center">
+              <p>No patients found matching "{searchQuery}".</p>
+            </div>
+          </div>
+        )}
+        
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">All Patients ({allPatients.length})</h2>
+          </div>
+          <div className="card-body">
+            <div className="table-container">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Phone</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allPatients.slice(0, 10).map((patient, index) => (
+                    <tr key={index}>
+                      <td>{patient.id}</td>
+                      <td>
+                        <div className="patient-info">
+                          <FaUserInjured className="mr-2" />
+                          {patient.name}
+                        </div>
+                      </td>
+                      <td>{patient.age}</td>
+                      <td>{patient.gender}</td>
+                      <td>{patient.phone}</td>
+                      <td>
+                        <button 
+                          className="btn btn-primary btn-sm"
+                          onClick={() => handleViewPatient(patient)}
+                          style={{marginRight: '0.5rem'}}
+                        >
+                          View
+                        </button>
+                        <button 
+                          className="btn btn-outline btn-sm"
+                          onClick={() => handleNewConsultation(patient)}
+                        >
+                          Consult
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaUserInjured, FaHeartbeat, FaWeight, FaRulerVertical, FaTemperatureHigh, FaLungs, FaTint } from 'react-icons/fa';
+import { FaUserInjured, FaHeartbeat, FaWeight, FaTemperatureHigh, FaNotesMedical } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Card from './ui/Card';
-import Button from './ui/Button';
-import Input from './ui/Input';
-import Select from './ui/Select';
-import DatePicker from './ui/DatePicker';
-import Badge from './ui/Badge';
 import { apiFetch } from '../utils/api';
+import './centered-layout.css';
 
-// Mock data
 const mockPatients = {
   'P-10025': {
     id: 'P-10025',
@@ -242,16 +236,10 @@ const ConsultationForm = () => {
     });
   };
 
-  // Handle follow-up date change
-  const handleFollowUpDateChange = (date) => {
-    setFormData({
-      ...formData,
-      followUpDate: date,
-    });
-  };
+
 
   // Handle form submission with validation
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validation
@@ -297,24 +285,53 @@ const ConsultationForm = () => {
       followUpDate: formatDate(formData.followUpDate),
     };
 
-    // In a real app, this would send the data to an API
-    console.log('Consultation data:', submissionData);
-
-    // Show success message and navigate back
-    toast.success('Consultation saved successfully!');
-    setTimeout(() => {
-      navigate(`/doctor/patients/${patientId}`);
-    }, 1000);
+    // Save consultation data and complete appointment
+    try {
+      // Save consultation to database
+      const consultationData = {
+        patient_id: parseInt(patientId),
+        staff_id: parseInt(localStorage.getItem('staff_id') || '1007'),
+        appointment_id: appointmentId ? parseInt(appointmentId) : null,
+        consultation_date: submissionData.date,
+        chief_complaint: formData.chiefComplaint,
+        history: formData.history,
+        examination: formData.examination,
+        vital_signs: formData.vitalSigns,
+        diagnosis: formData.diagnosis,
+        treatment: formData.treatment,
+        medications: formData.medications,
+        lab_tests: formData.labTests,
+        follow_up_date: submissionData.followUpDate,
+        follow_up_notes: formData.followUpNotes,
+        notes: `Consultation completed. ${formData.chiefComplaint}`
+      };
+      
+      await apiFetch('/consultations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(consultationData)
+      });
+      
+      // Skip appointment status update since 'Completed' is not allowed by CHECK constraint
+      // The appointment will remain as 'Approved' after consultation
+      console.log('Consultation completed, appointment remains as Approved');
+      
+      console.log('Consultation data saved:', consultationData);
+      toast.success('Consultation completed successfully!');
+      
+      setTimeout(() => {
+        navigate('/DoctorsDashboard');
+      }, 1000);
+    } catch (error) {
+      console.error('Error saving consultation:', error);
+      toast.error('Failed to save consultation');
+    }
   };
 
   // Handle cancel
   const handleCancel = () => {
     toast.info('Consultation cancelled');
-    if (patientId) {
-      navigate(`/doctor/patients/${patientId}`);
-    } else {
-      navigate('/doctor/dashboard');
-    }
+    navigate('/DoctorsDashboard');
   };
 
   // If loading, show loading message
@@ -329,12 +346,21 @@ const ConsultationForm = () => {
   // If patient not found, show error message
   if (patientId && !patient) {
     return (
-      <div className="consultation-form not-found">
-        <h1 className="text-2xl font-bold text-red-600">Patient Not Found</h1>
-        <p className="text-gray-700">The patient with ID {patientId} could not be found.</p>
-        <Button variant="primary" onClick={() => navigate('/doctor/patients')}>
-          Back to Patient Lookup
-        </Button>
+      <div className="centered-container">
+        <div className="centered-content">
+          <div className="card">
+            <div className="card-body text-center">
+              <h1 className="text-red-600">Patient Not Found</h1>
+              <p>The patient with ID {patientId} could not be found.</p>
+              <button 
+                className="btn btn-primary"
+                onClick={() => navigate('/PatientLookup')}
+              >
+                Back to Patient Lookup
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -342,298 +368,266 @@ const ConsultationForm = () => {
   // If appointment not found, show warning
   if (appointmentId && !appointment) {
     return (
-      <div className="consultation-form not-found">
-        <h1 className="text-2xl font-bold text-red-600">Appointment Not Found</h1>
-        <p className="text-gray-700">The appointment with ID {appointmentId} could not be found.</p>
-        <Button variant="primary" onClick={() => navigate('/doctor/patients')}>
-          Back to Patient Lookup
-        </Button>
+      <div className="centered-container">
+        <div className="centered-content">
+          <div className="card">
+            <div className="card-body text-center">
+              <h1 className="text-red-600">Appointment Not Found</h1>
+              <p>The appointment with ID {appointmentId} could not be found.</p>
+              <button 
+                className="btn btn-primary"
+                onClick={() => navigate('/PatientLookup')}
+              >
+                Back to Patient Lookup
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="consultation-form container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">New Consultation</h1>
+    <div className="centered-container">
       <ToastContainer position="top-right" autoClose={3000} />
+      <div className="centered-content">
+        <div className="page-header">
+          <h1 className="page-title">
+            <FaNotesMedical /> New Consultation
+          </h1>
+          <p className="page-subtitle">Record patient consultation details</p>
+        </div>
 
-      {/* Patient Information */}
-      {patient && (
-        <Card className="patient-info-card mb-6">
-          <div className="patient-header flex flex-col md:flex-row justify-between">
-            <div className="patient-details">
-              <h3 className="text-xl font-semibold flex items-center">
-                <FaUserInjured className="patient-icon mr-2 text-blue-500" />
-                {patient.name}
-              </h3>
-              <div className="patient-meta flex space-x-4 text-gray-600">
-                <span>{patient.age} years</span>
-                <span>{patient.gender}</span>
-                <span>ID: {patient.id}</span>
+        {patient && (
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">
+                <FaUserInjured /> Patient Information
+              </h2>
+            </div>
+            <div className="card-body">
+              <div className="patient-info">
+                <h3 className="patient-name">{patient.name}</h3>
+                <div className="patient-details">
+                  <span>{patient.age} years</span>
+                  <span>{patient.gender}</span>
+                  <span>ID: {patient.id}</span>
+                  {patient.bloodType && <span>Blood Type: {patient.bloodType}</span>}
+                </div>
               </div>
             </div>
+          </div>
+        )}
 
-            <div className="patient-conditions mt-4 md:mt-0">
-              {patient.allergies.length > 0 && (
-                <div className="allergies">
-                  <strong className="text-gray-700">Allergies:</strong>
-                  <div className="badges flex flex-wrap gap-2 mt-1">
-                    {patient.allergies.map((allergy, index) => (
-                      <Badge key={index} variant="danger" pill>
-                        {allergy}
-                      </Badge>
-                    ))}
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">Consultation Details</h2>
+          </div>
+          <div className="card-body">
+            <form onSubmit={handleSubmit} className="form-grid">
+              <div className="form-group">
+                <label className="form-label">Consultation Date</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={formData.date.toISOString().split('T')[0]}
+                  onChange={(e) => setFormData({ ...formData, date: new Date(e.target.value) })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Chief Complaint</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  name="chiefComplaint"
+                  value={formData.chiefComplaint}
+                  onChange={handleInputChange}
+                  placeholder="Patient's main complaint"
+                  required
+                />
+              </div>
+
+              <div className="form-group full-width">
+                <label className="form-label">Medical History</label>
+                <textarea
+                  className="form-input"
+                  name="history"
+                  value={formData.history}
+                  onChange={handleInputChange}
+                  placeholder="Patient's medical history relevant to this visit"
+                  rows={3}
+                />
+              </div>
+
+              <div className="form-group full-width">
+                <label className="form-label">Physical Examination</label>
+                <textarea
+                  className="form-input"
+                  name="examination"
+                  value={formData.examination}
+                  onChange={handleInputChange}
+                  placeholder="Physical examination findings"
+                  rows={3}
+                  required
+                />
+              </div>
+
+              <div className="vital-signs-section full-width">
+                <h3 className="section-title">
+                  <FaHeartbeat /> Vital Signs
+                </h3>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label className="form-label">
+                      <FaHeartbeat className="mr-2" /> Blood Pressure
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      name="bloodPressure"
+                      value={formData.vitalSigns.bloodPressure}
+                      onChange={handleVitalSignsChange}
+                      placeholder="e.g., 120/80"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">
+                      <FaHeartbeat className="mr-2" /> Heart Rate
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      name="heartRate"
+                      value={formData.vitalSigns.heartRate}
+                      onChange={handleVitalSignsChange}
+                      placeholder="e.g., 72 bpm"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">
+                      <FaTemperatureHigh className="mr-2" /> Temperature
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      name="temperature"
+                      value={formData.vitalSigns.temperature}
+                      onChange={handleVitalSignsChange}
+                      placeholder="e.g., 98.6°F"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">
+                      <FaWeight className="mr-2" /> Weight
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      name="weight"
+                      value={formData.vitalSigns.weight}
+                      onChange={handleVitalSignsChange}
+                      placeholder="e.g., 180 lbs"
+                    />
                   </div>
                 </div>
-              )}
+              </div>
 
-              {patient.chronicConditions.length > 0 && (
-                <div className="chronic-conditions mt-2">
-                  <strong className="text-gray-700">Chronic Conditions:</strong>
-                  <div className="badges flex flex-wrap gap-2 mt-1">
-                    {patient.chronicConditions.map((condition, index) => (
-                      <Badge key={index} variant="primary" pill>
-                        {condition}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+              <div className="form-group">
+                <label className="form-label">Diagnosis</label>
+                <select
+                  className="form-input"
+                  name="diagnosis"
+                  value={formData.diagnosis}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select Diagnosis</option>
+                  {diagnosisOptions.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group full-width">
+                <label className="form-label">Treatment Plan</label>
+                <textarea
+                  className="form-input"
+                  name="treatment"
+                  value={formData.treatment}
+                  onChange={handleInputChange}
+                  placeholder="Recommended treatment plan"
+                  rows={3}
+                  required
+                />
+              </div>
+
+              <div className="form-group full-width">
+                <label className="form-label">Medications</label>
+                <textarea
+                  className="form-input"
+                  name="medications"
+                  value={formData.medications}
+                  onChange={handleInputChange}
+                  placeholder="Prescribed medications"
+                  rows={3}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Lab Tests</label>
+                <select
+                  className="form-input"
+                  name="labTests"
+                  value={formData.labTests}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select Lab Test</option>
+                  {labTestOptions.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Follow-up Date</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={formData.followUpDate ? formData.followUpDate.toISOString().split('T')[0] : ''}
+                  onChange={(e) => setFormData({ ...formData, followUpDate: e.target.value ? new Date(e.target.value) : null })}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+
+              <div className="form-group full-width">
+                <label className="form-label">Follow-up Notes</label>
+                <textarea
+                  className="form-input"
+                  name="followUpNotes"
+                  value={formData.followUpNotes}
+                  onChange={handleInputChange}
+                  placeholder="Notes for follow-up appointment"
+                  rows={2}
+                />
+              </div>
+
+              <div className="form-actions full-width">
+                <button type="submit" className="btn btn-success" style={{marginRight: '0.5rem'}}>
+                  Save Consultation
+                </button>
+                <button type="button" onClick={handleCancel} className="btn btn-outline">
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
-        </Card>
-      )}
-
-      {/* Consultation Form */}
-      <Card title="Consultation Details" className="consultation-details-card">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="form-row">
-            <DatePicker
-              label="Consultation Date"
-              name="date"
-              value={formData.date}
-              onChange={(date) => setFormData({ ...formData, date })}
-              required
-              aria-label="Consultation Date"
-              aria-required="true"
-            />
-          </div>
-
-          <div className="form-row">
-            <Input
-              label="Chief Complaint"
-              name="chiefComplaint"
-              value={formData.chiefComplaint}
-              onChange={handleInputChange}
-              placeholder="Patient's main complaint"
-              required
-              aria-label="Chief Complaint"
-              aria-required="true"
-            />
-          </div>
-
-          <div className="form-row">
-            <Input
-              label="History"
-              name="history"
-              value={formData.history}
-              onChange={handleInputChange}
-              placeholder="Patient's medical history relevant to this visit"
-              multiline
-              rows={3}
-              aria-label="Medical History"
-            />
-          </div>
-
-          <div className="form-row">
-            <Input
-              label="Examination"
-              name="examination"
-              value={formData.examination}
-              onChange={handleInputChange}
-              placeholder="Physical examination findings"
-              multiline
-              rows={3}
-              required
-              aria-label="Physical Examination"
-              aria-required="true"
-            />
-          </div>
-
-          <h4 className="text-lg font-semibold text-gray-700">Vital Signs</h4>
-          <div className="vital-signs-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="vital-sign flex items-center space-x-2">
-              <FaHeartbeat className="vital-icon text-blue-500" />
-              <Input
-                label="Blood Pressure"
-                name="bloodPressure"
-                value={formData.vitalSigns.bloodPressure}
-                onChange={handleVitalSignsChange}
-                placeholder="e.g., 120/80"
-                aria-label="Blood Pressure"
-              />
-            </div>
-
-            <div className="vital-sign flex items-center space-x-2">
-              <FaHeartbeat className="vital-icon text-blue-500" />
-              <Input
-                label="Heart Rate"
-                name="heartRate"
-                value={formData.vitalSigns.heartRate}
-                onChange={handleVitalSignsChange}
-                placeholder="e.g., 72 bpm"
-                aria-label="Heart Rate"
-              />
-            </div>
-
-            <div className="vital-sign flex items-center space-x-2">
-              <FaTemperatureHigh className="vital-icon text-blue-500" />
-              <Input
-                label="Temperature"
-                name="temperature"
-                value={formData.vitalSigns.temperature}
-                onChange={handleVitalSignsChange}
-                placeholder="e.g., 98.6°F"
-                aria-label="Temperature"
-              />
-            </div>
-
-            <div className="vital-sign flex items-center space-x-2">
-              <FaLungs className="vital-icon text-blue-500" />
-              <Input
-                label="Respiratory Rate"
-                name="respiratoryRate"
-                value={formData.vitalSigns.respiratoryRate}
-                onChange={handleVitalSignsChange}
-                placeholder="e.g., 16 breaths/min"
-                aria-label="Respiratory Rate"
-              />
-            </div>
-
-            <div className="vital-sign flex items-center space-x-2">
-              <FaTint className="vital-icon text-blue-500" />
-              <Input
-                label="Oxygen Saturation"
-                name="oxygenSaturation"
-                value={formData.vitalSigns.oxygenSaturation}
-                onChange={handleVitalSignsChange}
-                placeholder="e.g., 98%"
-                aria-label="Oxygen Saturation"
-              />
-            </div>
-
-            <div className="vital-sign flex items-center space-x-2">
-              <FaWeight className="vital-icon text-blue-500" />
-              <Input
-                label="Weight"
-                name="weight"
-                value={formData.vitalSigns.weight}
-                onChange={handleVitalSignsChange}
-                placeholder="e.g., 180 lbs"
-                aria-label="Weight"
-              />
-            </div>
-
-            <div className="vital-sign flex items-center space-x-2">
-              <FaRulerVertical className="vital-icon text-blue-500" />
-              <Input
-                label="Height"
-                name="height"
-                value={formData.vitalSigns.height}
-                onChange={handleVitalSignsChange}
-                placeholder="e.g., 5'10&quot;"
-                aria-label="Height"
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <Select
-              label="Diagnosis"
-              name="diagnosis"
-              value={formData.diagnosis}
-              onChange={handleInputChange}
-              options={diagnosisOptions}
-              required
-              aria-label="Diagnosis"
-              aria-required="true"
-            />
-          </div>
-
-          <div className="form-row">
-            <Input
-              label="Treatment Plan"
-              name="treatment"
-              value={formData.treatment}
-              onChange={handleInputChange}
-              placeholder="Recommended treatment plan"
-              multiline
-              rows={3}
-              required
-              aria-label="Treatment Plan"
-              aria-required="true"
-            />
-          </div>
-
-          <div className="form-row">
-            <Input
-              label="Medications"
-              name="medications"
-              value={formData.medications}
-              onChange={handleInputChange}
-              placeholder="Prescribed medications"
-              multiline
-              rows={3}
-              aria-label="Medications"
-            />
-          </div>
-
-          <div className="form-row">
-            <Select
-              label="Lab Tests"
-              name="labTests"
-              value={formData.labTests}
-              onChange={handleInputChange}
-              options={labTestOptions}
-              isMulti
-              aria-label="Lab Tests"
-            />
-          </div>
-
-          <div className="form-row">
-            <DatePicker
-              label="Follow-up Date"
-              name="followUpDate"
-              value={formData.followUpDate}
-              onChange={handleFollowUpDateChange}
-              minDate={new Date()}
-              aria-label="Follow-up Date"
-            />
-          </div>
-
-          <div className="form-row">
-            <Input
-              label="Follow-up Notes"
-              name="followUpNotes"
-              value={formData.followUpNotes}
-              onChange={handleInputChange}
-              placeholder="Notes for follow-up appointment"
-              multiline
-              rows={2}
-              aria-label="Follow-up Notes"
-            />
-          </div>
-
-          <div className="form-actions flex space-x-4">
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary">
-              Save Consultation
-            </Button>
-          </div>
-        </form>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

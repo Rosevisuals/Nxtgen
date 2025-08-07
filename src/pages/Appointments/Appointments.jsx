@@ -36,6 +36,32 @@ export default function Appointments() {
     return matchesSearch && matchesStatus && matchesDate;
   });
 
+  const handleViewAppointment = (appointment) => {
+    alert(`Appointment Details:\nPatient: ${appointment.patient}\nDoctor: ${appointment.doctor}\nDate: ${appointment.date}\nTime: ${appointment.time}\nDepartment: ${appointment.department}\nStatus: ${appointment.status}`);
+  };
+
+  const handleApproveAppointment = (appointment) => {
+    setAppointments(prev => prev.map(apt => 
+      apt.id === appointment.id ? { ...apt, status: 'Approved' } : apt
+    ));
+    alert(`Appointment for ${appointment.patient} has been approved!`);
+  };
+
+  const handleDeclineAppointment = (appointment) => {
+    prompt('Please provide a reason for declining (optional):');
+    setAppointments(prev => prev.map(apt => 
+      apt.id === appointment.id ? { ...apt, status: 'Declined' } : apt
+    ));
+    alert(`Appointment for ${appointment.patient} has been declined.`);
+  };
+
+  const handleCancelAppointment = (appointment) => {
+    if (window.confirm(`Are you sure you want to cancel the appointment for ${appointment.patient}?`)) {
+      setAppointments(prev => prev.filter(apt => apt.id !== appointment.id));
+      alert('Appointment cancelled successfully!');
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'Approved': return { bg: '#dcfce7', text: '#166534', icon: <FaCheck style={{ marginRight: '6px' }} /> };
@@ -155,6 +181,7 @@ export default function Appointments() {
                 <th style={{ padding: '16px 24px', textAlign: 'left' }}>Date & Time</th>
                 <th style={{ padding: '16px 24px', textAlign: 'left' }}>Department</th>
                 <th style={{ padding: '16px 24px', textAlign: 'left' }}>Status</th>
+                <th style={{ padding: '16px 24px', textAlign: 'left' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -205,6 +232,72 @@ export default function Appointments() {
                         {statusColor.icon}
                         {appointment.status}
                       </span>
+                    </td>
+                    <td style={{ padding: '16px 24px' }}>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={() => handleViewAppointment(appointment)}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#3f51b5',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          View
+                        </button>
+                        {appointment.status === 'Pending' && (
+                          <>
+                            <button
+                              onClick={() => handleApproveAppointment(appointment)}
+                              style={{
+                                padding: '6px 12px',
+                                backgroundColor: '#4CAF50',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => handleDeclineAppointment(appointment)}
+                              style={{
+                                padding: '6px 12px',
+                                backgroundColor: '#F44336',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Decline
+                            </button>
+                          </>
+                        )}
+                        {appointment.status !== 'Declined' && (
+                          <button
+                            onClick={() => handleCancelAppointment(appointment)}
+                            style={{
+                              padding: '6px 12px',
+                              backgroundColor: '#FF9800',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );

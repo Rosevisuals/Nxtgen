@@ -29,6 +29,27 @@ export default function Patients() {
     return matchesSearch && matchesStatus;
   });
 
+  const handleViewPatient = (patient) => {
+    alert(`Viewing patient: ${patient.name}\nAge: ${patient.age}\nContact: ${patient.contact}\nStatus: ${patient.status}`);
+  };
+
+  const handleEditPatient = (patient) => {
+    const newName = prompt('Edit patient name:', patient.name);
+    if (newName && newName !== patient.name) {
+      setPatients(prev => prev.map(p => 
+        p.id === patient.id ? { ...p, name: newName } : p
+      ));
+      alert('Patient updated successfully!');
+    }
+  };
+
+  const handleDeletePatient = (patient) => {
+    if (window.confirm(`Are you sure you want to delete patient ${patient.name}?`)) {
+      setPatients(prev => prev.filter(p => p.id !== patient.id));
+      alert('Patient deleted successfully!');
+    }
+  };
+
   // Styles
   const containerStyle = {
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -193,6 +214,7 @@ export default function Patients() {
                   <th style={thStyle}>Contact</th>
                   <th style={thStyle}>Last Visit</th>
                   <th style={thStyle}>Status</th>
+                  <th style={thStyle}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -214,6 +236,52 @@ export default function Patients() {
                       <span style={statusBadgeStyle(patient.status)}>
                         {patient.status}
                       </span>
+                    </td>
+                    <td style={tdStyle}>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={() => handleViewPatient(patient)}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#3f51b5',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleEditPatient(patient)}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#4CAF50',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeletePatient(patient)}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#F44336',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

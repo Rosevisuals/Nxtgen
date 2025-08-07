@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaFileInvoiceDollar, FaArrowLeft } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Card from './ui/Card';
-import Button from './ui/Button';
+
 import Input from './ui/Input';
 import Select from './ui/Select';
 import { jsPDF } from 'jspdf';
@@ -102,12 +101,15 @@ const NewBill = () => {
     }
 
     const billData = {
-      patient_id: formData.patient_id,
-      patient_name: formData.patient_name,
+      patient_id: parseInt(formData.patient_id),
       service_name: formData.service_name,
       amount: parseFloat(formData.amount),
       date_issued: formData.date_issued,
+      method_of_payment: 'Cash', // Default payment method
       status: 'Pending',
+      service_id: 1, // Default service ID
+      received_by: 'Receptionist', // Default received by
+      paid_by: formData.patient_name,
       notes: formData.notes,
     };
 
@@ -117,8 +119,8 @@ const NewBill = () => {
         body: JSON.stringify(billData)
       });
       
-      generatePDF({ ...billData, bill_id: createdBill.bill_id });
-      toast.success('Bill created successfully!');
+      generatePDF({ ...billData, bill_id: createdBill.bill_id || Date.now() });
+      toast.success('Transaction created successfully!');
       setTimeout(() => {
         navigate('/Billing');
       }, 1500);
@@ -129,7 +131,7 @@ const NewBill = () => {
   };
 
   const handleCancel = () => {
-    toast.info('Bill creation cancelled');
+    toast.info('Transaction creation cancelled');
     navigate('/Billing');
   };
 
@@ -154,13 +156,13 @@ const NewBill = () => {
               onClick={handleBack}
               onKeyDown={(e) => handleKeyDown(e, handleBack)}
               aria-label="Go back"
-              className="btn-outline"
+              className="btn btn-outline"
             >
               <FaArrowLeft className="mr-1" /> Back
             </button>
           </div>
           <h1 className="page-title">
-            <FaFileInvoiceDollar className="mr-2" /> Create New Bill
+            <FaFileInvoiceDollar className="mr-2" /> Create New Transaction
           </h1>
         </div>
         <div className="form-card">
@@ -217,20 +219,20 @@ const NewBill = () => {
                 name="notes"
                 value={formData.notes}
                 onChange={handleChange}
-                placeholder="Additional notes about the bill"
+                placeholder="Additional notes about the transaction"
                 multiline
                 rows={3}
               />
             </div>
             <div className="form-actions full-width">
-              <button type="submit" className="btn-success" aria-label="Create bill">
-                Create & Generate PDF
+              <button type="submit" className="btn btn-success" aria-label="Create transaction" style={{marginRight: '0.5rem'}}>
+                Create Transaction & Generate PDF
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                className="btn-outline"
-                aria-label="Cancel billing"
+                className="btn btn-outline"
+                aria-label="Cancel transaction"
               >
                 Cancel
               </button>

@@ -123,13 +123,22 @@ const ReceptionistSidebar = ({ isOpen, toggleSidebar }) => {
           </NavLink>
         </li>
         <li>
-          <NavLink
-            to="/logout"
-            className={({ isActive }) => (isActive ? 'active' : '')}
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              localStorage.removeItem('token');
+              localStorage.removeItem('user_id');
+              localStorage.removeItem('user_email');
+              localStorage.removeItem('user_name');
+              localStorage.removeItem('user_role');
+              window.location.href = '/login';
+            }}
+            className="sidebar-menu-link"
             aria-label="Logout"
           >
             <FaSignOutAlt /> Logout
-          </NavLink>
+          </a>
         </li>
       </ul>
       </div>

@@ -87,6 +87,25 @@ const Sidebar = ({
                 </li>
               );
             })}
+            <li className="sidebar-menu-item">
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  localStorage.removeItem('token');
+                  localStorage.removeItem('user_id');
+                  localStorage.removeItem('user_email');
+                  localStorage.removeItem('user_name');
+                  localStorage.removeItem('user_role');
+                  window.location.href = '/login';
+                }}
+                className="sidebar-menu-link"
+                aria-label="Logout"
+              >
+                <span className="sidebar-menu-icon"><i className="fas fa-sign-out-alt"></i></span>
+                {!collapsed && <span className="sidebar-menu-text">Logout</span>}
+              </a>
+            </li>
           </ul>
         </nav>
       </div>

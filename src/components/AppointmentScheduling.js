@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Table, Button, Form, Modal } from 'react-bootstrap';
-import { FaCalendarAlt, FaUserMd, FaClock, FaSearch, FaPlus, FaEdit, FaTrash, FaCheck, FaFileExport, FaBell } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserMd, FaClock, FaSearch, FaCheck, FaEdit, FaTrash } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import './appointment-scheduling.css';
 import { apiFetch } from '../utils/api';
+import './centered-layout.css';
 /**
  * AppointmentScheduling Component
  * Page for doctors to schedule, reschedule, cancel, approve, and manage appointments.
@@ -421,481 +418,142 @@ const AppointmentScheduling = () => {
     toast.success('Appointments exported successfully!');
   };
 
-  // Handle send reminder
-  const handleSendReminder = (appointment) => {
-    // TODO: POST to /api/doctor/appointments/:id/reminder
-    /*
-    try {
-      const response = await fetch(`/api/doctor/appointments/${appointment.id}/reminder`, {
-        method: 'POST',
-        headers: { 'X-API-Key': process.env.REACT_APP_API_KEY },
-      });
-      if (!response.ok) throw new Error('Failed to send reminder');
-      toast.success(`Reminder sent to ${appointment.patientName}`);
-    } catch (error) {
-      toast.error(`Error sending reminder: ${error.message}`);
-    }
-    */
 
-    toast.success(`Reminder sent to ${appointment.patientName}`);
-  };
 
   // Handle view patient
   const handleViewPatient = (appointment) => {
-    navigate(`/doctor/patients/${appointment.patientId}`);
+    navigate(`/PatientDetail?id=${appointment.patient_id}`);
   };
-
-  // Handle checkbox selection
-  const handleSelectAppointment = (id) => {
-    setSelectedAppointments(prev =>
-      prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
-    );
-  };
-
-  // Table columns
-  const appointmentColumns = [
-    {
-      header: 'Select',
-      cell: (row) => (
-        <Form.Check
-          type="checkbox"
-          checked={selectedAppointments.includes(row.id)}
-          onChange={() => handleSelectAppointment(row.id)}
-          aria-label={`Select appointment for ${row.patientName}`}
-        />
-      ),
-    },
-    {
-      header: 'Time',
-      accessor: 'time',
-      cell: (row) => (
-        <div className="flex items-center">
-          <FaClock className="mr-2 text-blue-500" />
-          <span>{row.time}</span>
-          <span className="ml-2 text-gray-500">({row.duration} min)</span>
-        </div>
-      ),
-    },
-    {
-      header: 'Patient',
-      accessor: 'patientName',
-      cell: (row) => (
-        <div>
-          <span className="font-semibold">{row.patient_name}</span>
-          <span className="block text-gray-500">{row.patient_id}</span>
-        </div>
-      ),
-    },
-    {
-      header: 'Doctor',
-      accessor: 'doctorName',
-      cell: (row) => (
-        <div className="flex items-center">
-          <FaUserMd className="mr-2 text-blue-500" />
-          <span>{row.doctor_name}</span>
-        </div>
-      ),
-    },
-    { header: 'Department', accessor: 'department_name' },
-    { header: 'Notes', accessor: 'notes' },
-    {
-      header: 'Status',
-      accessor: 'status',
-      cell: (row) => (
-        <span className={`status-badge status-${row.status.toLowerCase().replace(' ', '-')}`}>
-          {row.status}
-        </span>
-      ),
-    },
-    {
-      header: 'Actions',
-      cell: (row) => (
-        <div className="table-actions flex space-x-2">
-          {row.status === 'Pending' && (
-            <Button
-              variant="success"
-              size="sm"
-              onClick={() => handleApproveAppointment(row)}
-              aria-label={`Approve appointment for ${row.patient_name}`}
-            >
-              <FaCheck />
-            </Button>
-          )}
-          {['Scheduled', 'Pending', 'Approved'].includes(row.status) && (
-            <>
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={() => handleEditAppointment(row)}
-                aria-label={`Edit appointment for ${row.patientName}`}
-              >
-                <FaEdit />
-              </Button>
-              <Button
-                variant="outline-danger"
-                size="sm"
-                onClick={() => handleDeleteAppointment(row)}
-                aria-label={`Cancel appointment for ${row.patientName}`}
-              >
-                <FaTrash />
-              </Button>
-            </>
-          )}
-          <Button
-            variant="outline-primary"
-            size="sm"
-            onClick={() => handleViewPatient(row)}
-            aria-label={`View patient ${row.patientName}`}
-          >
-            View
-          </Button>
-          <Button
-            variant="outline-info"
-            size="sm"
-            onClick={() => handleSendReminder(row)}
-            aria-label={`Send reminder to ${row.patientName}`}
-          >
-            <FaBell />
-          </Button>
-        </div>
-      ),
-    },
-  ];
 
   return (
-    <Container className="appointment-scheduling mt-5">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800 flex items-center">
-        <FaCalendarAlt className="mr-2" /> Appointment Scheduling
-      </h1>
+    <div className="centered-container">
       <ToastContainer position="top-right" autoClose={3000} />
+      <div className="centered-content">
+        <div className="page-header">
+          <h1 className="page-title">
+            <FaCalendarAlt /> Appointment Scheduling
+          </h1>
+          <p className="page-subtitle">Manage and schedule patient appointments</p>
+        </div>
 
-      <Row className="scheduling-controls mb-4">
-        <Col md={3}>
-          <Card className="p-3">
-            <Form.Group>
-              <Form.Label>Select Date</Form.Label>
-              <DatePicker
-                selected={selectedDate}
-                onChange={setSelectedDate}
-                minDate={new Date()}
-                className="form-control"
-                dateFormat="MM/dd/yyyy"
-                aria-label="Select appointment date"
-              />
-            </Form.Group>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="p-3">
-            <Form.Group>
-              <Form.Label>Search</Form.Label>
-              <div className="flex items-center">
-                <FaSearch className="mr-2 text-gray-500" />
-                <Form.Control
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">Search & Filter</h2>
+          </div>
+          <div className="card-body">
+            <div className="form-grid">
+              <div className="form-group">
+                <label className="form-label">Search Appointments</label>
+                <input
                   type="text"
-                  placeholder="Search appointments..."
+                  className="form-input"
+                  placeholder="Search by patient, doctor, or notes..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  aria-label="Search appointments"
                 />
               </div>
-            </Form.Group>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="p-3">
-            <Form.Group>
-              <Form.Label>Filter by Doctor</Form.Label>
-              <Form.Select
-                value={filterDoctor}
-                onChange={(e) => setFilterDoctor(e.target.value)}
-                aria-label="Filter by doctor"
-              >
-                <option value="">All Doctors</option>
-                {doctorOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="p-3">
-            <Form.Group>
-              <Form.Label>Filter by Department</Form.Label>
-              <Form.Select
-                value={filterDepartment}
-                onChange={(e) => setFilterDepartment(e.target.value)}
-                aria-label="Filter by department"
-              >
-                {departmentOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Card>
-        </Col>
-      </Row>
-
-      <Row className="mb-4">
-        <Col md={12}>
-          <Card className="p-3">
-            <div className="flex justify-between items-center mb-3">
-              <h5>Actions</h5>
-              <div className="flex space-x-2">
-                <Button variant="primary" onClick={handleNewAppointment}>
-                  <FaPlus className="mr-1" /> New Appointment
-                </Button>
-                <Button variant="outline-secondary" onClick={handleExportAppointments}>
-                  <FaFileExport className="mr-1" /> Export to CSV
-                </Button>
-                {selectedAppointments.length > 0 && (
-                  <Form.Select
-                    style={{ width: 'auto' }}
-                    onChange={(e) => handleBulkStatusUpdate(e.target.value)}
-                    aria-label="Bulk update status"
-                  >
-                    <option value="">Bulk Update Status</option>
-                    {statusOptions.map(option => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </Form.Select>
-                )}
+              <div className="form-group">
+                <label className="form-label">Select Date</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={selectedDate.toISOString().split('T')[0]}
+                  onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                />
               </div>
             </div>
-          </Card>
-        </Col>
-      </Row>
+          </div>
+        </div>
 
-      <Card className="appointment-card">
-        <Card.Body>
-          <h5 className="mb-3">Appointments for {selectedDate.toLocaleDateString()}</h5>
-          {isLoading ? (
-            <p className="text-center text-gray-500">Loading appointments...</p>
-          ) : filteredAppointments.length > 0 ? (
-            <div className="table-responsive">
-              <Table striped hover>
-                <thead>
-                  <tr>
-                    {appointmentColumns.map((col, index) => (
-                      <th key={index}>{col.header}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredAppointments.map((row) => (
-                    <tr key={row.id}>
-                      {appointmentColumns.map((col, colIndex) => (
-                        <td key={colIndex}>{col.cell ? col.cell(row) : row[col.accessor]}</td>
-                      ))}
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">Appointments for {selectedDate.toLocaleDateString()} ({filteredAppointments.length})</h2>
+          </div>
+          <div className="card-body">
+            {isLoading ? (
+              <p className="text-center">Loading appointments...</p>
+            ) : filteredAppointments.length > 0 ? (
+              <div className="table-container">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>Patient</th>
+                      <th>Doctor</th>
+                      <th>Department</th>
+                      <th>Status</th>
+                      <th>Notes</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
-          ) : (
-            <p className="text-center text-gray-500">No appointments scheduled for the selected date.</p>
-          )}
-        </Card.Body>
-      </Card>
+                  </thead>
+                  <tbody>
+                    {filteredAppointments.map((appointment, index) => (
+                      <tr key={index}>
+                        <td>
+                          <div className="appointment-time">
+                            <FaClock className="mr-2" />
+                            {new Date(appointment.appointment_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="patient-info">
+                            <span className="patient-name">{appointment.patient_name}</span>
+                            <span className="patient-id">ID: {appointment.patient_id}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="doctor-info">
+                            <FaUserMd className="mr-2" />
+                            {appointment.doctor_name}
+                          </div>
+                        </td>
+                        <td>{appointment.department_name}</td>
+                        <td>
+                          <span className={`badge badge-${appointment.status === 'Pending' ? 'warning' : appointment.status === 'Approved' ? 'success' : 'primary'}`}>
+                            {appointment.status}
+                          </span>
+                        </td>
+                        <td>{appointment.notes}</td>
+                        <td>
+                          <div className="table-actions">
+                            {appointment.status === 'Pending' && (
+                              <button
+                                className="btn btn-success btn-sm"
+                                onClick={() => handleApproveAppointment(appointment)}
+                                style={{marginRight: '0.5rem'}}
+                              >
+                                <FaCheck /> Approve
+                              </button>
+                            )}
+                            <button
+                              className="btn btn-outline btn-sm"
+                              onClick={() => handleEditAppointment(appointment)}
+                              style={{marginRight: '0.5rem'}}
+                            >
+                              <FaEdit /> Edit
+                            </button>
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleDeleteAppointment(appointment)}
+                            >
+                              <FaTrash /> Cancel
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-center">No appointments scheduled for the selected date.</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
 
-      {/* Modals */}
-      <Modal show={isNewAppointmentModalOpen} onHide={() => setIsNewAppointmentModalOpen(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Schedule New Appointment</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={handleNewAppointmentSubmit}>
-            <Form.Group className="mb-3">
-              <Form.Label>Patient</Form.Label>
-              <Form.Select value={formData.patientId} onChange={handlePatientChange} required>
-                <option value="">Select Patient</option>
-                {patientOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Doctor</Form.Label>
-              <Form.Select value={formData.doctorId} onChange={handleDoctorChange} required>
-                <option value="">Select Doctor</option>
-                {doctorOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Department</Form.Label>
-              <Form.Control value={formData.department} readOnly />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Appointment Date</Form.Label>
-              <DatePicker
-                selected={formData.date}
-                onChange={(date) => setFormData({ ...formData, date })}
-                minDate={new Date()}
-                className="form-control"
-                dateFormat="MM/dd/yyyy"
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Time Slot</Form.Label>
-              <Form.Select value={formData.time} name="time" onChange={handleInputChange} required>
-                <option value="">Select Time</option>
-                {timeSlotOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Duration</Form.Label>
-              <Form.Select value={formData.duration} name="duration" onChange={handleInputChange} required>
-                {durationOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Appointment Type</Form.Label>
-              <Form.Select value={formData.type} name="type" onChange={handleInputChange} required>
-                <option value="">Select Type</option>
-                {appointmentTypeOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Notes</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                placeholder="Additional notes about the appointment"
-              />
-            </Form.Group>
-            <Button variant="primary" type="submit">Schedule Appointment</Button>
-            <Button variant="secondary" onClick={() => setIsNewAppointmentModalOpen(false)} className="ml-2">Cancel</Button>
-          </Form>
-        </Modal.Body>
-      </Modal>
 
-      <Modal show={isEditAppointmentModalOpen} onHide={() => setIsEditAppointmentModalOpen(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Appointment</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={handleEditAppointmentSubmit}>
-            <Form.Group className="mb-3">
-              <Form.Label>Patient</Form.Label>
-              <Form.Select value={formData.patientId} onChange={handlePatientChange} required>
-                <option value="">Select Patient</option>
-                {patientOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Doctor</Form.Label>
-              <Form.Select value={formData.doctorId} onChange={handleDoctorChange} required>
-                <option value="">Select Doctor</option>
-                {doctorOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Department</Form.Label>
-              <Form.Control value={formData.department} readOnly />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Appointment Date</Form.Label>
-              <DatePicker
-                selected={formData.date}
-                onChange={(date) => setFormData({ ...formData, date })}
-                minDate={new Date()}
-                className="form-control"
-                dateFormat="MM/dd/yyyy"
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Time Slot</Form.Label>
-              <Form.Select value={formData.time} name="time" onChange={handleInputChange} required>
-                <option value="">Select Time</option>
-                {timeSlotOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Duration</Form.Label>
-              <Form.Select value={formData.duration} name="duration" onChange={handleInputChange} required>
-                {durationOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Appointment Type</Form.Label>
-              <Form.Select value={formData.type} name="type" onChange={handleInputChange} required>
-                <option value="">Select Type</option>
-                {appointmentTypeOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Notes</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                placeholder="Additional notes about the appointment"
-              />
-            </Form.Group>
-            <Button variant="primary" type="submit">Update Appointment</Button>
-            <Button variant="secondary" onClick={() => setIsEditAppointmentModalOpen(false)} className="ml-2">Cancel</Button>
-          </Form>
-        </Modal.Body>
-      </Modal>
-
-      <Modal show={isApproveAppointmentModalOpen} onHide={() => setIsApproveAppointmentModalOpen(false)} size="sm">
-        <Modal.Header closeButton>
-          <Modal.Title>Approve Appointment</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Approve appointment for {currentAppointment?.patientName}?</p>
-          <p>
-            <strong>Date:</strong> {currentAppointment?.date.toLocaleDateString()}<br />
-            <strong>Time:</strong> {currentAppointment?.time}<br />
-            <strong>Doctor:</strong> {currentAppointment?.doctorName}
-          </p>
-          <Button variant="success" onClick={handleApproveAppointmentConfirm}>Approve</Button>
-          <Button variant="secondary" onClick={() => setIsApproveAppointmentModalOpen(false)} className="ml-2">Cancel</Button>
-        </Modal.Body>
-      </Modal>
-
-      <Modal show={isDeleteAppointmentModalOpen} onHide={() => setIsDeleteAppointmentModalOpen(false)} size="sm">
-        <Modal.Header closeButton>
-          <Modal.Title>Cancel Appointment</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Are you sure you want to cancel the appointment for {currentAppointment?.patientName}?</p>
-          <p>
-            <strong>Date:</strong> {currentAppointment?.date.toLocaleDateString()}<br />
-            <strong>Time:</strong> {currentAppointment?.time}<br />
-            <strong>Doctor:</strong> {currentAppointment?.doctorName}
-          </p>
-          <Button variant="danger" onClick={handleDeleteAppointmentConfirm}>Cancel Appointment</Button>
-          <Button variant="secondary" onClick={() => setIsDeleteAppointmentModalOpen(false)} className="ml-2">Close</Button>
-        </Modal.Body>
-      </Modal>
-    </Container>
   );
 };
 

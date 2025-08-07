@@ -26,9 +26,45 @@ const AppointmentRequest = () => {
   const [formData, setFormData] = useState({
     department_id: '',
     notes: '',
-    patient_id: '1', // Mock patient_id, replace with localStorage.getItem('patient_id') after login
+    patient_id: '', // Will be set from localStorage
     status: 'Pending', // Default status per database constraint
   });
+
+  // Set patient_id by fetching patient data based on user_id
+  useEffect(() => {
+    const fetchPatientId = async () => {
+      const userId = localStorage.getItem('user_id');
+      if (userId) {
+        try {
+          // Fetch all patients and find the one with matching user_id
+          const patientsData = await apiFetch('/patients');
+          const currentPatient = patientsData?.find(patient => 
+            patient.user_id == userId || patient.patient_id == userId
+          );
+          
+          if (currentPatient) {
+            setFormData(prev => ({ ...prev, patient_id: currentPatient.patient_id }));
+            console.log('Found patient_id:', currentPatient.patient_id, 'for user_id:', userId);
+          } else {
+            console.warn('No patient found for user_id:', userId);
+            // Fallback: use patient_id = 1 for testing
+            setFormData(prev => ({ ...prev, patient_id: '1' }));
+            toast.warning('Using default patient for testing');
+          }
+        } catch (error) {
+          console.error('Error fetching patient data:', error);
+          // Fallback: use patient_id = 1 for testing
+          setFormData(prev => ({ ...prev, patient_id: '1' }));
+          toast.warning('Using default patient due to error');
+        }
+      } else {
+        console.warn('No user_id found in localStorage');
+        toast.error('Please log in to request an appointment');
+      }
+    };
+    
+    fetchPatientId();
+  }, []);
 
   // Mock departments based on database inserts
   const mockDepartments = [
@@ -105,6 +141,14 @@ const AppointmentRequest = () => {
     //   'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
     // };
 
+    if (!formData.patient_id) {
+      toast.error('Patient ID not found. Please try logging in again.');
+      setIsSubmitting(false);
+      return;
+    }
+    
+    console.log('Submitting appointment with patient_id:', formData.patient_id);
+    
     const appointmentData = apiFetch(`/appointments`, {
       method: 'POST',
       body: JSON.stringify({
@@ -112,8 +156,8 @@ const AppointmentRequest = () => {
         appointment_date: new Date().toISOString(),
         department_id: formData.department_id,
         status: formData.status,
-        notes: formData.notes,
-        staff_id: 1005 // Add field to form and get it from the form
+        notes: formData.notes
+        // Remove hardcoded staff_id - let backend assign or leave null
       })
     })
       .then((data) => {

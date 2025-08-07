@@ -3,20 +3,24 @@ import { apiFetch } from '../utils/api';
 
 export const registerPatient = async (patientData) => {
   console.log(patientData);
-  return await apiFetch('/patients/create', {
+  return await apiFetch('/patients/register', {
     method: 'POST',
     body: JSON.stringify(patientData),
   });
 };
 
 export const getTodayAppointments = async () => {
+  const appointments = await apiFetch('/appointments');
   const today = new Date().toISOString().split('T')[0];
-  return await apiFetch(`/appointments?date=${today}`);
+  return appointments.filter(apt => {
+    const aptDate = new Date(apt.appointment_date).toISOString().split('T')[0];
+    return aptDate === today;
+  });
 };
 
 export const updateAppointmentStatus = async (appointmentId, status) => {
   return await apiFetch(`/appointments/${appointmentId}`, {
-    method: 'PATCH',
+    method: 'PUT',
     body: JSON.stringify({ status }),
   });
 };

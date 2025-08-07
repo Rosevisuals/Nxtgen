@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaFileInvoiceDollar, FaSearch, FaPlus, FaTrash, FaPrint, FaEnvelope, FaCheck, FaArrowLeft } from 'react-icons/fa';
+import { FaFileInvoiceDollar, FaSearch, FaPlus, FaTrash, FaPrint, FaEnvelope, FaCheck } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Card from './ui/Card';
-import Button from './ui/Button';
 import Input from './ui/Input';
 import Select from './ui/Select';
-import Table from './ui/Table';
-import Badge from './ui/Badge';
 import Modal from './ui/Modal';
 import { apiFetch } from '../utils/api';
 import './centered-layout.css';
@@ -50,11 +46,7 @@ const Billing = () => {
     { value: 'Check', label: 'Check' },
   ];
 
-  // Patient options for select
-  const patientOptions = patients.map(patient => ({
-    value: patient.patient_id,
-    label: `${patient.full_Name} (ID: ${patient.patient_id})`,
-  }));
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,8 +56,11 @@ const Billing = () => {
           apiFetch('/billing'),
           apiFetch('/patients')
         ]);
-        setBills(billsData || []);
-        setPatients(patientsData || []);
+
+        // Handle auth bypass response for billing
+        const bills = billsData?.success ? [] : (Array.isArray(billsData) ? billsData : []);
+        setBills(bills);
+        setPatients(Array.isArray(patientsData) ? patientsData : []);
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('Failed to load billing data');
@@ -80,12 +75,17 @@ const Billing = () => {
 
   // Filter bills based on search query
   useEffect(() => {
-    if (bills.length === 0) return;
+    if (!Array.isArray(bills) || bills.length === 0) {
+      setFilteredBills([]);
+      return;
+    }
     const filtered = bills.filter(bill => {
       const query = searchQuery.toLowerCase();
       return query === '' ||
         (bill.patient_name && bill.patient_name.toLowerCase().includes(query)) ||
         bill.bill_id.toString().includes(query) ||
+        (bill.service_name && bill.service_name.toLowerCase().includes(query)) ||
+        (bill.method_of_payment && bill.method_of_payment.toLowerCase().includes(query)) ||
         (bill.status && bill.status.toLowerCase().includes(query));
     });
     setFilteredBills(filtered);
@@ -119,7 +119,19 @@ const Billing = () => {
       header: 'Date Issued',
       accessor: 'date_issued',
       cell: (row) => (
-        <span>{new Date(row.date_issued).toLocaleDateString()}</span>
+        <div>
+          <div>{new Date(row.date_issued).toLocaleDateString()}</div>
+          <div style={{fontSize: '0.8em', color: '#64748b'}}>
+            {new Date(row.date_issued).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: 'Payment Method',
+      accessor: 'method_of_payment',
+      cell: (row) => (
+        <span className="payment-method">{row.method_of_payment || 'Not Specified'}</span>
       ),
     },
     {
@@ -186,6 +198,12 @@ const Billing = () => {
     setSearchQuery(e.target.value);
   };
 
+  // Calculate summary statistics
+  const totalTransactions = filteredBills.length;
+  const totalAmount = filteredBills.reduce((sum, bill) => sum + (bill.amount || 0), 0);
+  const paidTransactions = filteredBills.filter(bill => bill.status === 'Paid').length;
+  const pendingTransactions = filteredBills.filter(bill => bill.status === 'Pending').length;
+
   // Handle payment button click
   const handlePayment = (bill) => {
     setCurrentBill(bill);
@@ -206,14 +224,58 @@ const Billing = () => {
 
   // Handle print bill button click
   const handlePrintBill = (bill) => {
-    // TODO: Implement print functionality
-    toast.info(`Printing bill ${bill.bill_id} for ${bill.patient_name}`);
+    try {
+      const printWindow = window.open('', '_blank');
+      const printContent = `
+        <html>
+          <head>
+            <title>Bill ${bill.bill_id}</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              .header { text-align: center; margin-bottom: 30px; }
+              .bill-details { margin: 20px 0; }
+              .total { font-weight: bold; font-size: 18px; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>Hospital Bill</h1>
+              <h2>Bill ID: ${bill.bill_id}</h2>
+            </div>
+            <div class="bill-details">
+              <p><strong>Patient:</strong> ${bill.patient_name}</p>
+              <p><strong>Patient ID:</strong> ${bill.patient_id}</p>
+              <p><strong>Service:</strong> ${bill.service_name}</p>
+              <p><strong>Date Issued:</strong> ${new Date(bill.date_issued).toLocaleDateString()}</p>
+              <p><strong>Payment Method:</strong> ${bill.method_of_payment || 'Not Specified'}</p>
+              <p><strong>Status:</strong> ${bill.status}</p>
+              <p class="total"><strong>Amount:</strong> ${bill.amount.toLocaleString()} UGX</p>
+            </div>
+          </body>
+        </html>
+      `;
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
+      toast.success(`Bill ${bill.bill_id} sent to printer`);
+    } catch (error) {
+      console.error('Error printing bill:', error);
+      toast.error('Failed to print bill');
+    }
   };
 
   // Handle email bill button click
   const handleEmailBill = (bill) => {
-    // TODO: Implement email functionality
-    toast.info(`Emailing bill ${bill.bill_id} to ${bill.patient_name}`);
+    try {
+      const subject = `Hospital Bill ${bill.bill_id}`;
+      const body = `Dear ${bill.patient_name},\n\nPlease find your hospital bill details below:\n\nBill ID: ${bill.bill_id}\nService: ${bill.service_name}\nAmount: ${bill.amount.toLocaleString()} UGX\nDate: ${new Date(bill.date_issued).toLocaleDateString()}\nStatus: ${bill.status}\n\nThank you for choosing our services.\n\nBest regards,\nHospital Administration`;
+      const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(mailtoLink);
+      toast.success(`Email template opened for bill ${bill.bill_id}`);
+    } catch (error) {
+      console.error('Error emailing bill:', error);
+      toast.error('Failed to open email template');
+    }
   };
 
   // Handle payment form input change
@@ -329,19 +391,7 @@ const Billing = () => {
     }
   };
 
-  // Handle back navigation
-  const handleBack = () => navigate(-1);
 
-  // Handle new bill navigation
-  const handleNewBill = () => navigate('/NewBill');
-
-  // Handle keyboard navigation
-  const handleKeyDown = (e, handler) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handler();
-    }
-  };
 
   if (isLoading) {
     return (
@@ -364,6 +414,40 @@ const Billing = () => {
 
         <div className="card">
           <div className="card-header">
+            <h2 className="card-title">Transaction Summary</h2>
+          </div>
+          <div className="card-body">
+            <div className="row" style={{marginBottom: '1rem'}}>
+              <div className="col-3">
+                <div className="stat-card">
+                  <div className="stat-value">{totalTransactions}</div>
+                  <div className="stat-label">Total Transactions</div>
+                </div>
+              </div>
+              <div className="col-3">
+                <div className="stat-card">
+                  <div className="stat-value">{totalAmount.toLocaleString()} UGX</div>
+                  <div className="stat-label">Total Amount</div>
+                </div>
+              </div>
+              <div className="col-3">
+                <div className="stat-card">
+                  <div className="stat-value">{paidTransactions}</div>
+                  <div className="stat-label">Paid</div>
+                </div>
+              </div>
+              <div className="col-3">
+                <div className="stat-card">
+                  <div className="stat-value">{pendingTransactions}</div>
+                  <div className="stat-label">Pending</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
             <h2 className="card-title">Search & Actions</h2>
           </div>
           <div className="card-body">
@@ -371,13 +455,13 @@ const Billing = () => {
               <div className="col-8">
                 <div className="form-group">
                   <label className="form-label" htmlFor="searchQuery">
-                    <FaSearch style={{marginRight: '0.5rem'}} /> Search Bills
+                    <FaSearch style={{marginRight: '0.5rem'}} /> Search Transactions
                   </label>
                   <input
                     type="text"
                     id="searchQuery"
                     className="form-input"
-                    placeholder="Search by patient, bill ID, or status..."
+                    placeholder="Search by patient, transaction ID, service, or status..."
                     value={searchQuery}
                     onChange={handleSearchChange}
                   />
@@ -388,10 +472,10 @@ const Billing = () => {
                   <label className="form-label" style={{visibility: 'hidden'}}>Actions</label>
                   <button
                     className="btn btn-primary"
-                    onClick={handleNewBill}
-                    aria-label="Create new bill"
+                    onClick={() => navigate('/billing/new')}
+                    aria-label="Create new transaction"
                   >
-                    <FaPlus /> New Bill
+                    <FaPlus /> New Transaction
                   </button>
                 </div>
               </div>
@@ -401,7 +485,7 @@ const Billing = () => {
 
         <div className="card">
           <div className="card-header">
-            <h2 className="card-title">Bills ({filteredBills.length} found)</h2>
+            <h2 className="card-title">Transaction History ({filteredBills.length} transactions)</h2>
           </div>
           <div className="card-body">
             {filteredBills.length > 0 ? (
@@ -429,7 +513,7 @@ const Billing = () => {
               </div>
             ) : (
               <div className="text-center" style={{padding: '2rem', color: '#64748b'}}>
-                <p>No bills found.</p>
+                <p>No transactions found.</p>
               </div>
             )}
           </div>

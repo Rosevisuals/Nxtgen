@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { FaHome, FaCalendarAlt, FaHistory, FaUserMd, FaFileMedical } from 'react-icons/fa';
+import { FaHome, FaCalendarAlt, FaHistory, FaUserMd, FaFileMedical, FaSignOutAlt } from 'react-icons/fa';
 import Sidebar from './ui/Sidebar';
 import { useNavigate } from 'react-router-dom';
 import { getPatientByUserId } from '../services/patientService';
@@ -21,6 +21,8 @@ const PatientLayout = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
+    let timeoutId;
+    
     const fetchPatientData = async () => {
       try {
         const userId = localStorage.getItem('user_id');
@@ -39,7 +41,10 @@ const PatientLayout = () => {
       }
     };
     
-    fetchPatientData();
+    // Debounce the API call
+    timeoutId = setTimeout(fetchPatientData, 300);
+    
+    return () => clearTimeout(timeoutId);
   }, []);
   
   // Sidebar navigation items
@@ -50,19 +55,10 @@ const PatientLayout = () => {
     { path: '/PatientSettings', label: 'Settings', icon: <FaUserMd /> },
     { path: '/PatientHelp', label: 'Help', icon: <FaHistory /> },
   ];
-
-
   
   // Handle sidebar toggle
   const handleToggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
-  };
-  
-  // Handle logout
-  const handleLogout = () => {
-    // TODO: Call logout function from auth service
-    // authService.logout();
-    navigate('/login');
   };
   
   return (

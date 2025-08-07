@@ -39,6 +39,15 @@ body {
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
   border-bottom: 2px solid #e2e8f0;
+  position: relative;
+}
+
+.header-actions {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
 }
 
 .page-title {
@@ -124,6 +133,54 @@ body {
 .btn-success:hover {
   background: linear-gradient(135deg, #059669 0%, #047857 100%);
   transform: translateY(-2px);
+}
+
+.btn-info {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px 0 rgba(14, 165, 233, 0.3);
+}
+
+.btn-info:hover {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  transform: translateY(-2px);
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px 0 rgba(245, 158, 11, 0.3);
+}
+
+.btn-warning:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  background: #9ca3af !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background: #9ca3af !important;
 }
 
 .btn-outline {
@@ -305,6 +362,39 @@ body {
 .badge-warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
 .badge-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 
+/* Stat Card Styles */
+.stat-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  border-color: #2563eb;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 /* Utility Classes */
 .text-center { text-align: center; }
 .text-left { text-align: left; }
@@ -381,6 +471,12 @@ body {
     gap: 0.5rem;
   }
   
+  .header-actions {
+    position: static;
+    margin-bottom: 1rem;
+    justify-content: center;
+  }
+  
   .row {
     flex-direction: column;
   }
@@ -402,6 +498,15 @@ body {
   .table th,
   .table td {
     padding: 0.75rem 0.5rem;
+  }
+  
+  .stat-card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
   }
 }
 
@@ -433,4 +538,85 @@ body {
     padding: 0.75rem;
     font-size: 0.9rem;
   }
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #2563eb;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.appointment-details p {
+  margin: 0.75rem 0;
+  line-height: 1.5;
+}
+
+.appointment-details strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
 }

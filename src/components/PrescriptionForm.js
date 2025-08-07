@@ -3,35 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { FaUserInjured, FaPrescriptionBottleAlt, FaPlus, FaTrash } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Card from './ui/Card';
-import Button from './ui/Button';
-import Input from './ui/Input';
-import Select from './ui/Select';
-import DatePicker from './ui/DatePicker';
-import Badge from './ui/Badge';
 import { apiFetch } from '../utils/api';
+import './centered-layout.css';
 
-// Mock patient data (move to a separate file for production)
-const mockPatients = {
-  'P-10025': {
-    id: 'P-10025',
-    name: 'John Doe',
-    age: 45,
-    gender: 'Male',
-    dob: '1980-05-15',
-    allergies: ['Penicillin', 'Peanuts'],
-    chronicConditions: ['Hypertension', 'Type 2 Diabetes'],
-  },
-  'P-10032': {
-    id: 'P-10032',
-    name: 'Jane Smith',
-    age: 38,
-    gender: 'Female',
-    dob: '1987-08-22',
-    allergies: ['Sulfa drugs'],
-    chronicConditions: [],
-  },
-};
+
 
 // Diagnosis options
 const diagnosisOptions = [
@@ -273,11 +248,12 @@ const PrescriptionForm = () => {
       // Save prescription to database
       const prescriptionData = {
         patient_id: parseInt(patientId),
-        staff_id: parseInt(localStorage.getItem('user_id') || '1'),
-        Medication: formData.medications.map(med => med.name).join(', '),
-        dosage: formData.medications.map(med => med.dosage).join(', '),
-        notes: formData.notes,
-        date_issued: submissionData.date
+        staff_id: parseInt(localStorage.getItem('staff_id') || '1007'),
+        DiagnosisID: null, // No diagnosis required
+        medication: formData.medications.map(med => med.name).join(', '),
+        dosage: formData.medications.map(med => `${med.name}: ${med.dosage} ${med.frequency} for ${med.duration}`).join('; '),
+        date_issued: submissionData.date,
+        notes: formData.notes
       };
       
       await apiFetch('/prescriptions', {
@@ -288,7 +264,7 @@ const PrescriptionForm = () => {
       
       toast.success('Prescription saved successfully!');
       setTimeout(() => {
-        navigate(`/doctor/patients/${patientId}`);
+        navigate('/DoctorsDashboard');
       }, 1000);
     } catch (error) {
       console.error('Error saving prescription:', error);
@@ -299,11 +275,7 @@ const PrescriptionForm = () => {
   // Handle cancel
   const handleCancel = () => {
     toast.info('Prescription cancelled');
-    if (patientId) {
-      navigate(`/doctor/patients/${patientId}`);
-    } else {
-      navigate('/doctor/dashboard');
-    }
+    navigate('/DoctorsDashboard');
   };
 
   if (loading) {
@@ -316,203 +288,213 @@ const PrescriptionForm = () => {
 
   if (patientId && !patient) {
     return (
-      <div className="prescription-form not-found">
-        <h1 className="text-2xl font-bold text-red-600">Patient Not Found</h1>
-        <p className="text-gray-700">The patient with ID {patientId} could not be found.</p>
-        <Button variant="primary" onClick={() => navigate('/doctor/patients')}>
-          Back to Patient Lookup
-        </Button>
+      <div className="centered-container">
+        <div className="centered-content">
+          <div className="card">
+            <div className="card-body text-center">
+              <h1 className="text-red-600">Patient Not Found</h1>
+              <p>The patient with ID {patientId} could not be found.</p>
+              <button 
+                className="btn btn-primary"
+                onClick={() => navigate('/PatientLookup')}
+              >
+                Back to Patient Lookup
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="prescription-form container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">New Prescription</h1>
+    <div className="centered-container">
       <ToastContainer position="top-right" autoClose={3000} />
+      <div className="centered-content">
+        <div className="page-header">
+          <h1 className="page-title">
+            <FaPrescriptionBottleAlt /> New Prescription
+          </h1>
+          <p className="page-subtitle">Create prescription for patient</p>
+        </div>
 
-      {/* Patient Information */}
-      {patient && (
-        <Card className="patient-info-card mb-6">
-          <div className="patient-header flex flex-col md:flex-row justify-between">
-            <div className="patient-details">
-              <h3 className="text-xl font-semibold flex items-center">
-                <FaUserInjured className="patient-icon mr-2 text-blue-500" />
-                {patient.name}
-              </h3>
-              <div className="patient-meta flex space-x-4 text-gray-600">
-                <span>{patient.age} years</span>
-                <span>{patient.gender}</span>
-                <span>ID: {patient.id}</span>
+        {patient && (
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">
+                <FaUserInjured /> Patient Information
+              </h2>
+            </div>
+            <div className="card-body">
+              <div className="patient-info">
+                <h3 className="patient-name">{patient.name}</h3>
+                <div className="patient-details">
+                  <span>{patient.age} years</span>
+                  <span>{patient.gender}</span>
+                  <span>ID: {patient.id}</span>
+                </div>
               </div>
             </div>
-
-            <div className="patient-conditions mt-4 md:mt-0">
-              {patient.allergies.length > 0 && (
-                <div className="allergies">
-                  <strong className="text-gray-700">Allergies:</strong>
-                  <div className="badges flex flex-wrap gap-2 mt-1">
-                    {patient.allergies.map((allergy, index) => (
-                      <Badge key={index} variant="danger" pill>
-                        {allergy}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {patient.chronicConditions.length > 0 && (
-                <div className="chronic-conditions mt-2">
-                  <strong className="text-gray-700">Chronic Conditions:</strong>
-                  <div className="badges flex flex-wrap gap-2 mt-1">
-                    {patient.chronicConditions.map((condition, index) => (
-                      <Badge key={index} variant="primary" pill>
-                        {condition}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
-        </Card>
-      )}
+        )}
 
-      {/* Prescription Form */}
-      <Card title="Prescription Details" className="prescription-details-card">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="form-row">
-            <DatePicker
-              label="Prescription Date"
-              name="date"
-              value={formData.date}
-              onChange={(date) => setFormData({ ...formData, date })}
-              required
-              aria-label="Prescription Date"
-              aria-required="true"
-            />
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">Prescription Details</h2>
           </div>
+          <div className="card-body">
+            <form onSubmit={handleSubmit} className="form-grid">
+              <div className="form-group">
+                <label className="form-label">Prescription Date</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={formData.date.toISOString().split('T')[0]}
+                  onChange={(e) => setFormData({ ...formData, date: new Date(e.target.value) })}
+                  required
+                />
+              </div>
 
-          <div className="form-row">
-            <Select
-              label="Diagnosis"
-              name="diagnosis"
-              value={formData.diagnosis}
-              onChange={handleInputChange}
-              options={diagnosisOptions}
-              required
-              aria-label="Diagnosis"
-              aria-required="true"
-            />
-          </div>
-
-          <div className="form-row">
-            <Input
-              label="Notes"
-              name="notes"
-              value={formData.notes}
-              onChange={handleInputChange}
-              placeholder="Additional notes about the prescription"
-              multiline
-              rows={2}
-              aria-label="Notes"
-            />
-          </div>
-
-          <h4 className="text-lg font-semibold text-gray-700 flex items-center">
-            <FaPrescriptionBottleAlt className="section-icon mr-2 text-blue-500" />
-            Medications
-          </h4>
-
-          {formData.medications.map((medication, index) => (
-            <div key={index} className="medication-item border-b pb-4 mb-4">
-              <div className="medication-header flex justify-between items-center">
-                <h5 className="text-md font-semibold">Medication {index + 1}</h5>
-                <Button
-                  variant="text"
-                  size="sm"
-                  onClick={() => handleRemoveMedication(index)}
-                  disabled={formData.medications.length === 1}
-                  aria-label={`Remove medication ${index + 1}`}
+              <div className="form-group">
+                <label className="form-label">Diagnosis</label>
+                <select
+                  className="form-input"
+                  name="diagnosis"
+                  value={formData.diagnosis}
+                  onChange={handleInputChange}
+                  required
                 >
-                  <FaTrash className="text-red-500" />
-                </Button>
+                  <option value="">Select Diagnosis</option>
+                  {diagnosisOptions.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
               </div>
 
-              <div className="medication-grid grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
-                  label="Medication Name"
-                  value={medication.name}
-                  onChange={(e) => handleMedicationChange(index, 'name', e.target.value)}
-                  options={medicationOptions}
-                  required
-                  aria-label={`Medication ${index + 1} Name`}
-                  aria-required="true"
-                />
-
-                <Input
-                  label="Dosage"
-                  value={medication.dosage}
-                  onChange={(e) => handleMedicationChange(index, 'dosage', e.target.value)}
-                  placeholder="e.g., 10mg"
-                  required
-                  aria-label={`Medication ${index + 1} Dosage`}
-                  aria-required="true"
-                />
-
-                <Select
-                  label="Frequency"
-                  value={medication.frequency}
-                  onChange={(e) => handleMedicationChange(index, 'frequency', e.target.value)}
-                  options={frequencyOptions}
-                  required
-                  aria-label={`Medication ${index + 1} Frequency`}
-                  aria-required="true"
-                />
-
-                <Select
-                  label="Duration"
-                  value={medication.duration}
-                  onChange={(e) => handleMedicationChange(index, 'duration', e.target.value)}
-                  options={durationOptions}
-                  required
-                  aria-label={`Medication ${index + 1} Duration`}
-                  aria-required="true"
-                />
-
-                <Input
-                  label="Special Instructions"
-                  value={medication.instructions}
-                  onChange={(e) => handleMedicationChange(index, 'instructions', e.target.value)}
-                  placeholder="e.g., Take with food"
-                  className="col-span-1 md:col-span-2"
-                  aria-label={`Medication ${index + 1} Instructions`}
+              <div className="form-group full-width">
+                <label className="form-label">Notes</label>
+                <textarea
+                  className="form-input"
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  placeholder="Additional notes about the prescription"
+                  rows={3}
                 />
               </div>
-            </div>
-          ))}
 
-          <div className="add-medication">
-            <Button
-              variant="outline"
-              onClick={handleAddMedication}
-              type="button"
-              className="flex items-center"
-            >
-              <FaPlus className="mr-2" /> Add Another Medication
-            </Button>
-          </div>
+              <div className="medications-section full-width">
+                <h3 className="section-title">
+                  <FaPrescriptionBottleAlt /> Medications
+                </h3>
+                
+                {formData.medications.map((medication, index) => (
+                  <div key={index} className="medication-card">
+                    <div className="medication-header">
+                      <h4>Medication {index + 1}</h4>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveMedication(index)}
+                        disabled={formData.medications.length === 1}
+                        className="btn btn-secondary btn-sm"
+                      >
+                        <FaTrash /> Remove
+                      </button>
+                    </div>
+                    
+                    <div className="form-grid">
+                      <div className="form-group">
+                        <label className="form-label">Medication Name</label>
+                        <select
+                          className="form-input"
+                          value={medication.name}
+                          onChange={(e) => handleMedicationChange(index, 'name', e.target.value)}
+                          required
+                        >
+                          <option value="">Select Medication</option>
+                          {medicationOptions.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div className="form-group">
+                        <label className="form-label">Dosage</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={medication.dosage}
+                          onChange={(e) => handleMedicationChange(index, 'dosage', e.target.value)}
+                          placeholder="e.g., 10mg"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label className="form-label">Frequency</label>
+                        <select
+                          className="form-input"
+                          value={medication.frequency}
+                          onChange={(e) => handleMedicationChange(index, 'frequency', e.target.value)}
+                          required
+                        >
+                          <option value="">Select Frequency</option>
+                          {frequencyOptions.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div className="form-group">
+                        <label className="form-label">Duration</label>
+                        <select
+                          className="form-input"
+                          value={medication.duration}
+                          onChange={(e) => handleMedicationChange(index, 'duration', e.target.value)}
+                          required
+                        >
+                          <option value="">Select Duration</option>
+                          {durationOptions.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div className="form-group full-width">
+                        <label className="form-label">Special Instructions</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={medication.instructions}
+                          onChange={(e) => handleMedicationChange(index, 'instructions', e.target.value)}
+                          placeholder="e.g., Take with food"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                <button
+                  type="button"
+                  onClick={handleAddMedication}
+                  className="btn btn-outline"
+                >
+                  <FaPlus /> Add Another Medication
+                </button>
+              </div>
 
-          <div className="form-actions flex space-x-4 justify-end">
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary">
-              Save Prescription
-            </Button>
+              <div className="form-actions full-width">
+                <button type="submit" className="btn btn-success" style={{marginRight: '0.5rem'}}>
+                  Save Prescription
+                </button>
+                <button type="button" onClick={handleCancel} className="btn btn-outline">
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

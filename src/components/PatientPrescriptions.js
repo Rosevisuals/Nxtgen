@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
-import { FaFileMedical, FaArrowLeft } from 'react-icons/fa';
+import { FaFileMedical, FaArrowLeft, FaUserMd, FaCalendarAlt } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import Card from './ui/Card';
 import Button from './ui/Button';
 import { getPatientByUserId, getPatientPrescriptions } from '../services/patientService';
+import { useUser } from '../contexts/UserContext';
 import './patient-dashboard.css';
 import './patient-responsive.css';
 
@@ -16,20 +17,27 @@ const MedicationItem = React.memo(({ medication }) => (
       <FaFileMedical />
     </div>
     <div className="medication-details">
-      <h4>{medication.Medication || medication.medicine_name}</h4>
+      <h4>{medication.Medication || medication.medicine_name || 'Prescription'}</h4>
       <div className="medication-meta">
-        <span>{medication.dosage}</span>
-        <span>{medication.notes || 'As prescribed'}</span>
+        <span><strong>Dosage:</strong> {medication.dosage || 'As prescribed'}</span>
+        <span><strong>Instructions:</strong> {medication.notes || medication.instructions || 'Follow doctor\'s advice'}</span>
       </div>
       <div className="medication-prescribed">
-        Prescribed by {medication.doctor_name || 'Doctor'} on {new Date(medication.date_issued).toLocaleDateString()}
+        <FaUserMd style={{marginRight: '5px'}} />
+        Prescribed by <strong>{medication.staff_name || medication.doctor_name || 'Doctor'}</strong> on {new Date(medication.date_issued).toLocaleDateString()}
       </div>
+      {medication.condition_name && (
+        <div className="medication-condition">
+          <strong>For:</strong> {medication.condition_name}
+        </div>
+      )}
     </div>
   </div>
 ));
 
 const PatientPrescriptions = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
   const [medications, setMedications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,7 +47,7 @@ const PatientPrescriptions = () => {
     const fetchPrescriptions = async () => {
       setIsLoading(true);
       try {
-        const userId = localStorage.getItem('user_id');
+        const userId = user?.id || localStorage.getItem('user_id');
         if (!userId) {
           throw new Error('Please login to view prescriptions');
         }
@@ -66,7 +74,7 @@ const PatientPrescriptions = () => {
     };
 
     fetchPrescriptions();
-  }, []);
+  }, [user]);
 
   if (isLoading) {
     return (
@@ -101,20 +109,25 @@ const PatientPrescriptions = () => {
           </div>
         </Card>
       ) : (
-        <Card title="Current Prescriptions" className="medications-card">
-          {medications.length > 0 ? (
-            <div className="medications-list" role="list">
-              {medications.map((medication) => (
-                <MedicationItem key={medication.prescription_id} medication={medication} />
-              ))}
-            </div>
-          ) : (
-            <div className="no-medications">
-              <FaFileMedical size={48} className="text-gray-400 mb-3" />
-              <h3>No Prescriptions Found</h3>
-              <p>You don't have any active prescriptions.</p>
-            </div>
-          )}
+        <Card className="medications-card">
+          <div className="card-header">
+            <h3 className="card-title">Current Prescriptions ({medications.length})</h3>
+          </div>
+          <div className="card-body">
+            {medications.length > 0 ? (
+              <div className="medications-list" role="list">
+                {medications.map((medication) => (
+                  <MedicationItem key={medication.prescription_id} medication={medication} />
+                ))}
+              </div>
+            ) : (
+              <div className="no-medications">
+                <FaFileMedical size={48} className="text-gray-400 mb-3" />
+                <h3>No Prescriptions Found</h3>
+                <p>You don't have any active prescriptions.</p>
+              </div>
+            )}
+          </div>
         </Card>
       )}
     </Container>

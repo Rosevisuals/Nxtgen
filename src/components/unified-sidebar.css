@@ -410,6 +410,21 @@
   }
 }
 
+/* Logout Button Styles */
+.logout-button {
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.logout-button:hover {
+  background: rgba(220, 38, 38, 0.1) !important;
+  color: #fca5a5 !important;
+}
+
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
   .sidebar,

@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaCalendarAlt, FaArrowLeft } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Card from './ui/Card';
-import Button from './ui/Button';
+
 import { apiFetch } from '../utils/api';
 import './centered-layout.css';
 
@@ -39,9 +38,9 @@ const NewAppointment = () => {
           apiFetch('/staff'),
           apiFetch('/patients')
         ]);
-        setDepartments(departmentsData || []);
-        setStaff(staffData || []);
-        setPatients(patientsData || []);
+        setDepartments(Array.isArray(departmentsData) ? departmentsData : []);
+        setStaff(Array.isArray(staffData) ? staffData : []);
+        setPatients(Array.isArray(patientsData) ? patientsData : []);
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('Failed to load form data');
@@ -105,6 +104,15 @@ const NewAppointment = () => {
       <div className="centered-content">
         <ToastContainer position="top-right" autoClose={3000} />
         <div className="page-header">
+          <div className="header-actions">
+            <button
+              onClick={() => navigate('/ReceptionistDashboard')}
+              aria-label="Go back to dashboard"
+              className="btn btn-outline"
+            >
+              <FaArrowLeft className="mr-1" /> Back
+            </button>
+          </div>
           <h1 className="page-title">
             <FaCalendarAlt /> Schedule New Appointment
           </h1>
@@ -123,11 +131,11 @@ const NewAppointment = () => {
                   className={`form-select ${errors.patient_id ? 'error' : ''}`}
                 >
                   <option value="">Select Patient</option>
-                  {patients.map(patient => (
+                  {Array.isArray(patients) ? patients.map(patient => (
                     <option key={patient.patient_id} value={patient.patient_id}>
                       {patient.full_Name} (ID: {patient.patient_id})
                     </option>
-                  ))}
+                  )) : null}
                 </select>
                 {errors.patient_id && <span style={{color: '#ef4444', fontSize: '0.875rem'}}>{errors.patient_id}</span>}
               </div>
@@ -143,11 +151,11 @@ const NewAppointment = () => {
                       className={`form-select ${errors.department_id ? 'error' : ''}`}
                     >
                       <option value="">Select Department</option>
-                      {departments.map(dept => (
+                      {Array.isArray(departments) ? departments.map(dept => (
                         <option key={dept.department_id} value={dept.department_id}>
                           {dept.name}
                         </option>
-                      ))}
+                      )) : null}
                     </select>
                     {errors.department_id && <span style={{color: '#ef4444', fontSize: '0.875rem'}}>{errors.department_id}</span>}
                   </div>
@@ -163,11 +171,11 @@ const NewAppointment = () => {
                       className={`form-select ${errors.staff_id ? 'error' : ''}`}
                     >
                       <option value="">Select Doctor</option>
-                      {staff.filter(s => formData.department_id ? s.department_id == formData.department_id : true).map(doctor => (
+                      {Array.isArray(staff) ? staff.filter(s => formData.department_id ? s.department_id === parseInt(formData.department_id) : true).map(doctor => (
                         <option key={doctor.staff_id} value={doctor.staff_id}>
                           Dr. {doctor.full_Name} - {doctor.specialization}
                         </option>
-                      ))}
+                      )) : null}
                     </select>
                     {errors.staff_id && <span style={{color: '#ef4444', fontSize: '0.875rem'}}>{errors.staff_id}</span>}
                   </div>

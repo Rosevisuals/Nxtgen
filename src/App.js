@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import ProtectedRoute from './components/ProtectedRoute';
+import { UserProvider } from './contexts/UserContext';
 
 import Landing from './components/landing';
 import Login from './components/login';
@@ -9,7 +11,6 @@ import DoctorsLayout from './components/DoctorsLayout'; // Import Doctors Layout
 import DoctorsDashboard from './components/DoctorsDashboard'; // Import Doctors component
 import AppointmentScheduling from './components/AppointmentScheduling';
 import PrescriptionForm from './components/PrescriptionForm';
-import PatientDetail from './components/PatientDetail'; // Import PatientDetail component
 import PatientLookup from './components/PatientLookup'; // Import PatientLookup component
 import ConsultationForm from './components/ConsultationForm'; // Import ConsultationForm component
 import PatientDashboard from './components/PatientDashboard'; // Import PatientDashboard component
@@ -73,15 +74,17 @@ import StaffRoles from './pages/Staff/StaffRoles';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Landing />} />        {/* Only Landing */}
+    <UserProvider>
+      <Router>
+        <Routes>
+        <Route path="/" element={<ProtectedRoute><Landing /></ProtectedRoute>} />        {/* Only Landing */}
         <Route path="/login" element={<Login />} />     {/* Only Login */}
         <Route path="/setup-password" element={<SetupPassword />} /> {/* Password Setup */}
 
-        <Route element={<AdminDashboardLayout />} >
+        <Route element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboardLayout /></ProtectedRoute>} >
           {/* Dashboards */}
           <Route path="/dashboard/admin" element={<AdminDashboard />} />
+          <Route path="/AdminDashboard" element={<AdminDashboard />} />
 
           {/* Patients */}
           <Route path="/patients" element={<Patients />} />
@@ -125,7 +128,7 @@ function App() {
           <Route path="/reports/monthly" element={<MonthlyReports />} />
         </Route>
 
-        <Route element={<PatientLayout />} >
+        <Route element={<ProtectedRoute allowedRoles={['patient']}><PatientLayout /></ProtectedRoute>} >
           <Route path="/PatientDashboard" element={<PatientDashboard />} /> {/* Only Patient Dashboard */}
           <Route path="/PatientAppointments" element={<PatientAppointments />} />
           <Route path="/AppointmentRequest" element={<AppointmentRequest />} />
@@ -134,10 +137,9 @@ function App() {
           <Route path="/PatientHelp" element={<PatientHelp />} />
         </Route>
 
-        <Route element={<DoctorsLayout />} >
+        <Route element={<ProtectedRoute allowedRoles={['doctor']}><DoctorsLayout /></ProtectedRoute>} >
           <Route path="/doctor" element={<Doctor />} />
           <Route path="/DoctorsDashboard" element={<DoctorsDashboard />} />   {/* Only Dashboard */}
-          <Route path="/PatientDetail" element={<PatientDetail />} /> {/* Only Patient Detail */}
           <Route path="/PatientLookup" element={<PatientLookup />} /> {/* Only Patient Lookup */}
           <Route path="/AppointmentScheduling" element={<AppointmentScheduling />} /> {/* Only Appointment Scheduling */}
           <Route path="/PatientLayout" element={<PatientLayout />} /> {/* Only Patient Layout */}
@@ -145,17 +147,19 @@ function App() {
           <Route path="/ConsultationForm" element={<ConsultationForm />} /> {/* Only Consultation Form */}
         </Route>{/* Only Doctors Layout */}
 
-        <Route element={<ReceptionistLayout />} > {/* Only Receptionist Layout */}
+        <Route element={<ProtectedRoute allowedRoles={['receptionist']}><ReceptionistLayout /></ProtectedRoute>} > {/* Only Receptionist Layout */}
           <Route path="/ReceptionistDashboard" element={<ReceptionistDashboard />} /> {/* Only Receptionist Dashboard */}
           <Route path="/PatientRegister" element={<PatientRegister />} />
           <Route path="/NewAppointment" element={<NewAppointment />} />
           <Route path="/PatientSearch" element={<PatientSearch />} />
           <Route path="/NewBill" element={<NewBill />} />
           <Route path="/Billing" element={<Billing />} />
+          <Route path="/receptionist/patients/:id" element={<PatientSearch />} />
         </Route>
 
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </UserProvider>
   );
 }
 

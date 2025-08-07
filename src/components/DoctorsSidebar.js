@@ -29,7 +29,6 @@ const DoctorSidebar = ({ isOpen, toggleSidebar }) => {
     { path: '/DoctorsDashboard', label: 'Dashboard', icon: <FaUserMd />, end: true },
     { path: '/AppointmentScheduling', label: 'Appointments', icon: <FaCalendarAlt /> },
     { path: '/PatientLookup', label: 'Patient Lookup', icon: <FaSearch />, parent: 'Patients' },
-    { path: '/PatientDetail', label: 'Patient Detail', icon: <FaClipboardList />, parent: 'Patients' },
     { path: '/PrescriptionForm', label: 'Prescriptions', icon: <FaFilePrescription /> },
     { path: '/ConsultationForm', label: 'Consultations', icon: <FaUserMd /> },
     { path: '/logout', label: 'Logout', icon: <FaSignOutAlt /> }
@@ -105,15 +104,6 @@ const DoctorSidebar = ({ isOpen, toggleSidebar }) => {
                     <FaSearch /> Patient Lookup
                   </NavLink>
                 </li>
-                <li>
-                  <NavLink
-                    to="/PatientDetail"
-                    className={({ isActive }) => (isActive ? 'active' : '')}
-                    aria-label="Patient Detail"
-                  >
-                    <FaClipboardList /> Patient Detail
-                  </NavLink>
-                </li>
               </ul>
             )}
           </li>
@@ -136,13 +126,22 @@ const DoctorSidebar = ({ isOpen, toggleSidebar }) => {
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="/logout"
-              className={({ isActive }) => (isActive ? 'active' : '')}
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('user_id');
+                localStorage.removeItem('user_email');
+                localStorage.removeItem('user_name');
+                localStorage.removeItem('user_role');
+                window.location.href = '/login';
+              }}
+              className="sidebar-menu-link"
               aria-label="Logout"
             >
               <FaSignOutAlt /> Logout
-            </NavLink>
+            </a>
           </li>
         </ul>
       </div>
