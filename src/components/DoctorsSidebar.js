@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaUserMd, FaCalendarAlt, FaChevronDown, FaChevronUp, FaClipboardList, FaSignOutAlt, FaFilePrescription, FaSearch } from 'react-icons/fa';
+import { FaUserMd, FaCalendarAlt, FaChevronDown, FaChevronUp, FaClipboardList, FaSignOutAlt, FaFilePrescription, FaSearch, FaFlask } from 'react-icons/fa';
 import './unified-sidebar.css';
 
 const DoctorSidebar = ({ isOpen, toggleSidebar }) => {
@@ -31,6 +31,7 @@ const DoctorSidebar = ({ isOpen, toggleSidebar }) => {
     { path: '/PatientLookup', label: 'Patient Lookup', icon: <FaSearch />, parent: 'Patients' },
     { path: '/PrescriptionForm', label: 'Prescriptions', icon: <FaFilePrescription /> },
     { path: '/ConsultationForm', label: 'Consultations', icon: <FaUserMd /> },
+    { path: '/LabRequestsDashboard', label: 'Lab Requests', icon: <FaFlask /> },
     { path: '/logout', label: 'Logout', icon: <FaSignOutAlt /> }
   ];
   
@@ -123,6 +124,16 @@ const DoctorSidebar = ({ isOpen, toggleSidebar }) => {
               aria-label="Consultations"
             >
               <FaUserMd /> Consultations
+            </NavLink>
+          </li>
+          <li style={{backgroundColor: '#ff0000', color: 'white'}}>
+            <NavLink
+              to="/LabRequestsDashboard"
+              className={({ isActive }) => (isActive ? 'active' : '')}
+              aria-label="Lab Requests"
+              style={{color: 'white', fontWeight: 'bold'}}
+            >
+              <FaFlask /> 🧪 LAB REQUESTS (NEW!)
             </NavLink>
           </li>
           <li>

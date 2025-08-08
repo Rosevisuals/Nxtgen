@@ -291,19 +291,14 @@ const ConsultationForm = () => {
       const consultationData = {
         patient_id: parseInt(patientId),
         staff_id: parseInt(localStorage.getItem('staff_id') || '1007'),
+        department_id: parseInt(localStorage.getItem('department_id') || '1'),
         appointment_id: appointmentId ? parseInt(appointmentId) : null,
         consultation_date: submissionData.date,
-        chief_complaint: formData.chiefComplaint,
-        history: formData.history,
-        examination: formData.examination,
-        vital_signs: formData.vitalSigns,
         diagnosis: formData.diagnosis,
-        treatment: formData.treatment,
-        medications: formData.medications,
-        lab_tests: formData.labTests,
-        follow_up_date: submissionData.followUpDate,
-        follow_up_notes: formData.followUpNotes,
-        notes: `Consultation completed. ${formData.chiefComplaint}`
+        treatment_plan: formData.treatment,
+        notes: `Chief Complaint: ${formData.chiefComplaint}\nHistory: ${formData.history}\nExamination: ${formData.examination}\nMedications: ${formData.medications}\nLab Tests: ${formData.labTests}`,
+        follow_up_required: formData.followUpDate ? 1 : 0,
+        follow_up_date: submissionData.followUpDate
       };
       
       await apiFetch('/consultations', {

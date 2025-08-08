@@ -32,7 +32,8 @@ const Login = () => {
                     email: email,
                     full_Name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
                     role: email.includes('doctor') || email.includes('dr') ? 'doctor' : 
-                          email.includes('receptionist') ? 'receptionist' : 'patient'
+                          email.includes('receptionist') ? 'receptionist' : 
+                          email.includes('tech') || email.includes('lab') ? 'lab_technician' : 'patient'
                 };
                 response.user = mockUser;
                 console.log('Created mock user:', mockUser);
@@ -66,6 +67,9 @@ const Login = () => {
                     break;
                 case 'receptionist':
                     navigate('/ReceptionistDashboard');
+                    break;
+                case 'lab_technician':
+                    navigate('/LabTechnicianDashboard');
                     break;
                 case 'admin':
                     navigate('/AdminDashboard');

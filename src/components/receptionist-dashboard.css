@@ -294,3 +294,68 @@
     font-size: 0.9rem;
   }
 }
+/* Enhanced styles for billing integration */
+.table-row-highlight {
+  background-color: #fef3c7 !important;
+  border-left: 4px solid #f59e0b;
+}
+
+.bill-amount {
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.card-header .btn {
+  margin-left: auto;
+}
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.badge-success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-primary {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+/* Mobile responsive enhancements */
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .card-header .btn {
+    margin-left: 0;
+    align-self: stretch;
+  }
+}

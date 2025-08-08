@@ -779,6 +779,23 @@ const DoctorDashboard = () => {
             </div>
           </div>
         )}
+        
+        {/* Lab Results Ready for Review */}
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">🧪 Lab Results Ready for Review</h2>
+            <p style={{margin: '0.5rem 0', fontSize: '0.9rem', color: '#64748b'}}>
+              Completed lab tests requiring prescription
+            </p>
+          </div>
+          <div className="card-body">
+            <div className="text-center" style={{padding: '1rem'}}>
+              <p style={{color: '#64748b', marginBottom: '0.5rem'}}>Check appointments with notes containing "lab test results" for completed tests.</p>
+              <p style={{fontSize: '0.85rem', color: '#94a3b8'}}>Lab technicians will create follow-up appointments when tests are completed.</p>
+            </div>
+          </div>
+        </div>
+        
         <div className="card">
           <div className="card-header">
             <h2 className="card-title">📅 All Appointments ({doctorAppointments.length})</h2>

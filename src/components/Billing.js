@@ -29,7 +29,6 @@ const Billing = () => {
   const [paymentData, setPaymentData] = useState({
     amount: 0,
     method_of_payment: 'Cash',
-    notes: '',
     date_issued: new Date().toISOString().split('T')[0],
   });
 
@@ -210,7 +209,6 @@ const Billing = () => {
     setPaymentData({
       amount: bill.amount,
       method_of_payment: 'Cash',
-      notes: '',
       date_issued: new Date().toISOString().split('T')[0],
     });
     setIsPaymentModalOpen(true);
@@ -267,11 +265,11 @@ const Billing = () => {
   // Handle email bill button click
   const handleEmailBill = (bill) => {
     try {
-      const subject = `Hospital Bill ${bill.bill_id}`;
-      const body = `Dear ${bill.patient_name},\n\nPlease find your hospital bill details below:\n\nBill ID: ${bill.bill_id}\nService: ${bill.service_name}\nAmount: ${bill.amount.toLocaleString()} UGX\nDate: ${new Date(bill.date_issued).toLocaleDateString()}\nStatus: ${bill.status}\n\nThank you for choosing our services.\n\nBest regards,\nHospital Administration`;
-      const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const subject = `Hospital Bill #${bill.bill_id} - ${bill.patient_name}`;
+      const body = `Dear ${bill.patient_name},\n\nYour hospital bill is ready for payment:\n\n📋 Bill ID: ${bill.bill_id}\n🏥 Service: ${bill.service_name}\n💰 Amount: ${bill.amount.toLocaleString()} UGX\n📅 Date: ${new Date(bill.date_issued).toLocaleDateString()}\n📊 Status: ${bill.status.toUpperCase()}\n\nPlease visit the reception desk to complete your payment.\n\nThank you for choosing our services.\n\nBest regards,\nHospital Administration`;
+      const mailtoLink = `mailto:${bill.patient_email || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       window.open(mailtoLink);
-      toast.success(`Email template opened for bill ${bill.bill_id}`);
+      toast.success(`Email template opened for ${bill.patient_name}`);
     } catch (error) {
       console.error('Error emailing bill:', error);
       toast.error('Failed to open email template');
@@ -330,24 +328,20 @@ const Billing = () => {
 
     try {
       await apiFetch(`/billing/${currentBill.bill_id}`, {
-        method: 'PATCH',
+        method: 'PUT',
         body: JSON.stringify({
-          amount: currentBill.amount - parseFloat(paymentData.amount),
           method_of_payment: paymentData.method_of_payment,
-          status: parseFloat(paymentData.amount) >= currentBill.amount ? 'Paid' : 'Partially Paid',
-          notes: currentBill.notes + (currentBill.notes ? '\n' : '') + paymentData.notes,
+          status: parseFloat(paymentData.amount) >= currentBill.amount ? 'paid' : 'partial',
         })
       });
       
       const updatedBills = bills.map(bill => {
         if (bill.bill_id === currentBill.bill_id) {
-          const newStatus = parseFloat(paymentData.amount) >= bill.amount ? 'Paid' : 'Partially Paid';
+          const newStatus = parseFloat(paymentData.amount) >= bill.amount ? 'paid' : 'partial';
           return {
             ...bill,
-            amount: bill.amount - parseFloat(paymentData.amount),
             method_of_payment: paymentData.method_of_payment,
             status: newStatus,
-            notes: bill.notes + (bill.notes ? '\n' : '') + paymentData.notes,
           };
         }
         return bill;
@@ -565,17 +559,7 @@ const Billing = () => {
               required
             />
           </div>
-          <div className="form-row">
-            <Input
-              label="Notes"
-              name="notes"
-              value={paymentData.notes}
-              onChange={handlePaymentInputChange}
-              placeholder="Additional notes about the payment"
-              multiline
-              rows={2}
-            />
-          </div>
+
           <Modal.Footer
             onCancel={() => setIsPaymentModalOpen(false)}
             onConfirm={handlePaymentSubmit}

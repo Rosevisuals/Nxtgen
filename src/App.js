@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Container } from 'react-bootstrap';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import ProtectedRoute from './components/ProtectedRoute';
 import { UserProvider } from './contexts/UserContext';
@@ -13,6 +14,8 @@ import AppointmentScheduling from './components/AppointmentScheduling';
 import PrescriptionForm from './components/PrescriptionForm';
 import PatientLookup from './components/PatientLookup'; // Import PatientLookup component
 import ConsultationForm from './components/ConsultationForm'; // Import ConsultationForm component
+import LabRequestsDashboard from './components/LabRequestsDashboard'; // Import LabRequestsDashboard component
+import LabTechnicianDashboard from './components/LabTechnicianDashboard'; // Import LabTechnicianDashboard component
 import PatientDashboard from './components/PatientDashboard'; // Import PatientDashboard component
 import ReceptionistDashboard from './components/ReceptionistDashboard'; // Import ReceptionistDashboard component
 import PatientAppointments from './components/PatientAppointments';
@@ -145,6 +148,7 @@ function App() {
           <Route path="/PatientLayout" element={<PatientLayout />} /> {/* Only Patient Layout */}
           <Route path="/PrescriptionForm" element={<PrescriptionForm />} /> {/* Only Prescription Form */}
           <Route path="/ConsultationForm" element={<ConsultationForm />} /> {/* Only Consultation Form */}
+          <Route path="/LabRequestsDashboard" element={<LabRequestsDashboard />} /> {/* Lab Requests Dashboard */}
         </Route>{/* Only Doctors Layout */}
 
         <Route element={<ProtectedRoute allowedRoles={['receptionist']}><ReceptionistLayout /></ProtectedRoute>} > {/* Only Receptionist Layout */}
@@ -155,6 +159,10 @@ function App() {
           <Route path="/NewBill" element={<NewBill />} />
           <Route path="/Billing" element={<Billing />} />
           <Route path="/receptionist/patients/:id" element={<PatientSearch />} />
+        </Route>
+
+        <Route element={<ProtectedRoute allowedRoles={['lab_technician']}><Container fluid><LabTechnicianDashboard /></Container></ProtectedRoute>} >
+          <Route path="/LabTechnicianDashboard" element={<LabTechnicianDashboard />} /> {/* Lab Technician Dashboard */}
         </Route>
 
         </Routes>

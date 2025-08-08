@@ -1,6 +1,6 @@
 // src/utils/api.js
 
-const BASE_URL = 'http://localhost:5000/api'; // Adjust if your backend runs elsewhere
+const BASE_URL = 'http://192.168.1.19:5000/api'; // Adjust if your backend runs elsewhere
 
 
 
@@ -46,10 +46,18 @@ export const apiFetch = async (path, options = {}, retryCount = 0) => {
   // Queue the request to prevent too many simultaneous calls
   return new Promise((resolve, reject) => {
     const executeRequest = async () => {
+      // Get authentication token from localStorage
+      const token = localStorage.getItem('token');
+      
       const headers = {
         'Content-Type': 'application/json',
         ...options.headers,
       };
+      
+      // Add authorization header if token exists
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
 
       const response = await fetch(`${BASE_URL}${path}`, {
         ...options,

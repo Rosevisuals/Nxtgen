@@ -2,8 +2,8 @@
 import { apiFetch } from '../utils/api';
 
 export const registerPatient = async (patientData) => {
-  console.log(patientData);
-  return await apiFetch('/patients/register', {
+  console.log('Registering patient via staff:', patientData);
+  return await apiFetch('/patients/create', {
     method: 'POST',
     body: JSON.stringify(patientData),
   });
